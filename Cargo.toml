@@ -1,0 +1,7 @@
+[package]
+name = "mat"
+version = "0.1.0"
+authors = ["Your Name <detzold@gmail.com>"]
+
+[dependencies]
+libc = "*"
