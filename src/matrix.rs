@@ -159,9 +159,15 @@ impl <T: fmt::Display> fmt::Display for Matrix<T> {
 
         for row in 0..self.rows {
             for col in 0..self.cols {
-                write!(f, "{} ", self.data.get(row + col * self.rows).unwrap());
+                match write!(f, "{} ", self.data.get(row + col * self.rows).unwrap()) {
+                    Ok(_) => (),
+                    e => return e,
+                }
             }
-            write!(f, "\n");
+            match writeln!(f, "") {
+                Ok(_) => (),
+                e => return e,
+            }
         }
         write!(f, "")
     }
