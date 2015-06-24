@@ -1,4 +1,8 @@
 pub mod matrix;
+//pub mod lof;
+pub mod distance;
+pub mod norm;
+pub mod blas;
 
 use matrix::*;
 

@@ -2,40 +2,10 @@
 
 extern crate libc;
 
-use std::iter;
-use std::fmt;
+use std::{iter, fmt};
 use std::ops::Mul;
+use ::blas::{Order, Transpose, cblas_dgemm};
 
-
-#[repr(C)]
-pub enum Order {
-    RowMajor = 101,
-    ColMajor = 102
-}
-
-#[repr(C)]
-pub enum Transpose {
-    NoTrans = 111,
-    Trans = 112,
-    ConjTrans = 113
-}
-
-#[link(name = "blas")]
-extern {
-    fn cblas_dgemm(order: Order, transA: Transpose, transB: Transpose,
-            m: libc::c_int,
-            n: libc::c_int,
-            k: libc::c_int,
-            alpha: libc::c_double,
-            A: *const libc::c_double,
-            lda: libc::c_int,
-            B: *const libc::c_double,
-            ldb: libc::c_int,
-            beta: libc::c_double,
-            C: *mut libc::c_double,
-            ldc: libc::c_int
-    );
-}
 
 pub struct Matrix<T> {
     rows: usize,
@@ -51,14 +21,15 @@ pub trait MatrixOps<T> {
     fn lead_dim(&self) -> usize;
     fn data(&self) -> &Vec<T>;
     fn get(&self, row: usize, col: usize) -> Option<&T>;
-    fn add_row(&mut self, row: Vec<T>);
+    fn row(&self, idx: usize) -> Option<Vec<T>>;
+    fn set(&mut self, row: usize, col: usize, newval: T);
 }
 
 impl <T: Clone> MatrixOps<T> for Matrix<T> {
 
     fn rows(&self) -> usize { self.rows }
     fn cols(&self) -> usize { self.cols }
-    fn lead_dim(&self) -> usize { self.rows() }
+    fn lead_dim(&self) -> usize { self.cols() }
     fn data(&self) -> &Vec<T> { &self.data }
 
     fn get(&self, row: usize, col: usize) -> Option<&T> {
@@ -66,38 +37,36 @@ impl <T: Clone> MatrixOps<T> for Matrix<T> {
         if row >= self.rows || col >= self.cols {
             return None;
         }
-        self.data.get(row + col * self.rows)
+        self.data.get(col + row * self.cols)
     }
 
-    fn add_row(&mut self, row: Vec<T>) {
+    fn row(&self, idx: usize) -> Option<Vec<T>> {
 
-        if self.rows() == 0 && self.cols() == 0 {
-            self.cols = row.len();
-            for i in row {
-                self.data.push(i);
+        if idx >= self.rows {
+            return None;
+        }
+        let mut v = Vec::new();
+        for i in 0..self.cols {
+            v.push(self.get(idx, i).unwrap().clone());
+        }
+        Some(v)
+    }
+
+    fn set(&mut self, row:usize, col: usize, newval: T) {
+
+        if row < self.rows() && col < self.cols() {
+
+            match self.data.get_mut(col + row * self.cols) {
+                Some(ref mut val) => {
+                    **val = newval; // TODO ??
+                }
+                _ => (),
             }
-            self.rows = 1;
-        } else {
-            let mut pos = self.rows();
-            for i in row {
-                self.data.insert(pos, i);
-                pos += self.rows() + 1;
-            }
-            self.rows += 1;
         }
     }
 }
 
 impl <T: Clone> Matrix<T> {
-
-    pub fn new() -> Matrix<T> {
-
-        Matrix {
-            rows: 0,
-            cols: 0,
-            data: Vec::new()
-        }
-    }
 
     pub fn fill(value: T, rows: usize, cols: usize) -> Matrix<T> {
 
@@ -135,7 +104,7 @@ impl Mul for Matrix<f64> {
         let c: Matrix<f64> = Matrix::fill(0.0, self.rows(), rhs.cols());
 
         unsafe {
-            cblas_dgemm(Order::ColMajor, Transpose::NoTrans, Transpose::NoTrans,
+            cblas_dgemm(Order::RowMajor, Transpose::NoTrans, Transpose::NoTrans,
                 self.rows()         as libc::c_int,
                 rhs.cols()          as libc::c_int,
                 self.cols()         as libc::c_int,
@@ -159,7 +128,7 @@ impl <T: fmt::Display> fmt::Display for Matrix<T> {
 
         for row in 0..self.rows {
             for col in 0..self.cols {
-                match write!(f, "{} ", self.data.get(row + col * self.rows).unwrap()) {
+                match write!(f, "{} ", self.data.get(col + row * self.cols).unwrap()) {
                     Ok(_) => (),
                     e => return e,
                 }
@@ -177,15 +146,23 @@ impl <T: fmt::Display> fmt::Display for Matrix<T> {
 macro_rules! mat {
     ( $( $( $x:expr ),+ ) ;* ) => {
         {
-        let mut m = Matrix::new();
+        let mut v = Vec::new();
+        let mut cols;
+        let mut cols_old = 0;
+        let mut rows = 0;
         $(
-            let mut v = Vec::new();
+            rows += 1;
+            cols = 0;
             $(
+                cols += 1;
                 v.push($x);
             )+
-            m.add_row(v);
+            if rows > 1 && cols != cols_old {
+                panic!("Invalid matrix.");
+            }
+            cols_old = cols;
         )*
-        m
+        Matrix::from_vec(&v, rows, cols_old).unwrap()
         }
     };
 }
@@ -193,7 +170,7 @@ macro_rules! mat {
 
 #[cfg(test)]
 mod tests {
-    use super::{Matrix, MatrixOps};
+    use super::*;
 
     #[test]
     fn test_matrix() {
@@ -219,7 +196,7 @@ mod tests {
 
         // [ 1 2 ]
         // [ 3 4 ]
-        let va: Vec<f64> = vec![1.0, 3.0, 2.0, 4.0];
+        let va: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0];
 
         // [ 5 ]
         // [ 6 ]
@@ -241,11 +218,11 @@ mod tests {
         // [ 1 2 ]
         // [ 3 4 ]
         // [ 5 6 ]
-        let va: Vec<f64> = vec![1.0, 3.0, 5.0, 2.0, 4.0, 6.0];
+        let va: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
 
         // [ 5 7 ]
         // [ 6 2 ]
-        let vb: Vec<f64> = vec![5.0, 6.0, 7.0, 2.0];
+        let vb: Vec<f64> = vec![5.0, 7.0, 6.0, 2.0];
 
         let a: Matrix<f64> = Matrix::from_vec(&va, 3, 2).unwrap();
         let b: Matrix<f64> = Matrix::from_vec(&vb, 2, 2).unwrap();
@@ -260,7 +237,6 @@ mod tests {
         assert_eq!(*c.get(1, 1).unwrap(), 29.0);
         assert_eq!(*c.get(2, 1).unwrap(), 47.0);
 
-        println!("{}", c);
         //         [ 17 11 ]
         // a * b = [ 39 29 ]
         //         [ 61 47 ]
@@ -269,8 +245,51 @@ mod tests {
     #[test]
     fn test_macro() {
 
-        let m = mat![1, 2; 3, 4; 5, 6];
-        println!("{}", m);
+        let m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
+        assert_eq!(*m.get(0, 0).unwrap(), 1.0);
+        assert_eq!(*m.get(0, 1).unwrap(), 2.0);
+        assert_eq!(*m.get(1, 0).unwrap(), 3.0);
+        assert_eq!(*m.get(1, 1).unwrap(), 4.0);
+        assert_eq!(*m.get(2, 0).unwrap(), 5.0);
+        assert_eq!(*m.get(2, 1).unwrap(), 6.0);
+
+        let m2 = mat![1.0; 2.0];
+        assert_eq!(m2.rows(), 2);
+        assert_eq!(m2.cols(), 1);
+
+        let m3 = mat![1.0, 2.0];
+        assert_eq!(m3.rows(), 1);
+        assert_eq!(m3.cols(), 2);
+    }
+
+    #[test]
+    fn test_row() {
+
+        let m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
+        let v1 = vec![1.0, 2.0];
+        let v2 = vec![3.0, 4.0];
+        let v3 = vec![5.0, 6.0];
+        assert_eq!(m.row(0).unwrap(), v1);
+        assert_eq!(m.row(1).unwrap(), v2);
+        assert_eq!(m.row(2).unwrap(), v3);
+    }
+
+    #[test]
+    fn test_set() {
+
+        let mut m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
+        let v1 = vec![1.0, 2.0];
+        let v2 = vec![3.0, 4.0];
+        let v3 = vec![5.0, 6.0];
+        assert_eq!(m.row(0).unwrap(), v1);
+        assert_eq!(m.row(1).unwrap(), v2);
+        assert_eq!(m.row(2).unwrap(), v3);
+        m.set(0, 0, 7.0);
+        m.set(2, 1, 9.0);
+        assert_eq!(*m.get(0, 0).unwrap(), 7.0);
+        assert_eq!(m.row(0).unwrap(), vec![7.0, 2.0]);
+        assert_eq!(*m.get(2, 1).unwrap(), 9.0);
+        assert_eq!(m.row(2).unwrap(), vec![5.0, 9.0]);
     }
 }
 
