@@ -3,14 +3,14 @@ extern crate libc;
 use ::blas::cblas_dnrm2;
 
 pub trait Norm<T> {
-    fn compute(a: &Vec<T>) -> T;
+    fn compute(a: &[T]) -> T;
 }
 
 pub struct L2Norm;
 
 impl Norm<f64> for L2Norm {
 
-    fn compute(a: &Vec<f64>) -> f64 {
+    fn compute(a: &[f64]) -> f64 {
         unsafe {
             cblas_dnrm2(
                 a.len()    as libc::c_int,

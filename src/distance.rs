@@ -5,20 +5,24 @@ use ::norm::{L2Norm, Norm};
 use ::blas::cblas_daxpy;
 
 pub trait Distance<T> {
-    fn compute(a: &Vec<T>, b: &Vec<T>) -> Option<T>;
+    fn compute(a: &[T], b: &[T]) -> Option<T>;
 }
 
 pub struct Euclid;
 
 impl Distance<f64> for Euclid {
 
-    fn compute(a: &Vec<f64>, b: &Vec<f64>) -> Option<f64> {
+    fn compute(a: &[f64], b: &[f64]) -> Option<f64> {
 
         if a.len() != b.len() {
             return None;
         }
 
-        let c = b.clone();
+        // c = b.clone() does not work here because cblas_daxpy
+        // modifies the content of c and cloned() on a slice does
+        // not create a copy.
+        let c: Vec<f64> = b.iter().cloned().collect();
+
         unsafe {
             cblas_daxpy(
                 a.len()     as libc::c_int,
@@ -33,7 +37,7 @@ impl Distance<f64> for Euclid {
     }
 }
 
-pub fn all_pair_distances(m: &Matrix<f64>) -> Matrix<f64> {
+pub fn all_pair_distances<'t>(m: &Matrix<f64>) -> Matrix<f64> {
 
     let mut r = Matrix::fill(0.0, m.rows(), m.rows());
 
@@ -46,10 +50,6 @@ pub fn all_pair_distances(m: &Matrix<f64>) -> Matrix<f64> {
     }
     r
 }
-
-pub fn knn(m: &Matrix<f64>, idx: usize) -> Vec<usize> {
-}
-
 
 #[cfg(test)]
 mod tests {

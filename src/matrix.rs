@@ -8,101 +8,121 @@ use ::blas::{Order, Transpose, cblas_dgemm};
 
 
 pub struct Matrix<T> {
-    rows: usize,
-    cols: usize,
+    nrows: usize,
+    ncols: usize,
     data: Vec<T>
-}
-
-
-pub trait MatrixOps<T> {
-
-    fn rows(&self) -> usize;
-    fn cols(&self) -> usize;
-    fn lead_dim(&self) -> usize;
-    fn data(&self) -> &Vec<T>;
-    fn get(&self, row: usize, col: usize) -> Option<&T>;
-    fn row(&self, idx: usize) -> Option<Vec<T>>;
-    fn set(&mut self, row: usize, col: usize, newval: T);
-}
-
-impl <T: Clone> MatrixOps<T> for Matrix<T> {
-
-    fn rows(&self) -> usize { self.rows }
-    fn cols(&self) -> usize { self.cols }
-    fn lead_dim(&self) -> usize { self.cols() }
-    fn data(&self) -> &Vec<T> { &self.data }
-
-    fn get(&self, row: usize, col: usize) -> Option<&T> {
-
-        if row >= self.rows || col >= self.cols {
-            return None;
-        }
-        self.data.get(col + row * self.cols)
-    }
-
-    fn row(&self, idx: usize) -> Option<Vec<T>> {
-
-        if idx >= self.rows {
-            return None;
-        }
-        let mut v = Vec::new();
-        for i in 0..self.cols {
-            v.push(self.get(idx, i).unwrap().clone());
-        }
-        Some(v)
-    }
-
-    fn set(&mut self, row:usize, col: usize, newval: T) {
-
-        if row < self.rows() && col < self.cols() {
-
-            match self.data.get_mut(col + row * self.cols) {
-                Some(ref mut val) => {
-                    **val = newval; // TODO ??
-                }
-                _ => (),
-            }
-        }
-    }
 }
 
 impl <T: Clone> Matrix<T> {
 
+    // Functions for constructing a matrix.
+
     pub fn fill(value: T, rows: usize, cols: usize) -> Matrix<T> {
 
-        Matrix {
-            rows: rows,
-            cols: cols,
-            data: iter::repeat(value).take(rows * cols).collect()
+        Matrix::from_vec(
+            iter::repeat(value).take(rows * cols).collect(),
+            rows, cols
+        ).unwrap()
+    }
+
+    pub fn from_vec(vals: Vec<T>, rows: usize, cols: usize) -> Option<Matrix<T>> {
+
+        match rows * cols == vals.len() {
+            false => None,
+            true  => Some(Matrix {
+                nrows: rows,
+                ncols: cols,
+                data: vals
+            })
         }
     }
 
-    pub fn from_vec(vals: &Vec<T>, rows: usize, cols: usize) -> Option<Matrix<T>> {
+    // ------------------------------------
 
-        if rows * cols != vals.len() {
-            return None;
+    pub fn lead_dim(&self) -> usize { self.cols()  }
+    pub fn rows    (&self) -> usize { self.nrows   }
+    pub fn cols    (&self) -> usize { self.ncols   }
+
+    /// Each call of the iterator's next() method is O(n) where n is the
+    /// number of columns of this matrix.
+    pub fn row_iter(&self) -> RowIterator<T> {
+        RowIterator {
+            m: self,
+            idx: 0
         }
+    }
 
-        Some(Matrix {
-            rows: rows,
-            cols: cols,
-            data: vals.clone()
-        })
+    fn idx(&self, row: usize, col: usize) -> Option<usize> {
+        
+        match row < self.rows() && col < self.cols() {
+            false => None,
+            true  => Some(col + row * self.ncols)
+        }
+    }
+
+    pub fn get(&self, row: usize, col: usize) -> Option<&T> {
+
+        match self.idx(row, col) {
+            None => None,
+            Some(p) => self.data.get(p)
+        }
+    }
+
+    pub fn row(&self, row: usize) -> Option<&[T]> {
+
+        match self.idx(row, 0) {
+            None => None,
+            Some(p) => Some(self.data.split_at(p).1.split_at(self.ncols).0)
+        }
+    }
+
+    pub fn set(&mut self, row: usize, col: usize, newval: T) -> bool {
+
+        match self.idx(row, col) {
+            None => false,
+            Some(p) => match self.data.get_mut(p) {
+                Some(val) => {
+                    *val = newval;
+                    true
+                }
+                None => false,
+            }
+        }
     }
 
 }
 
-impl Mul for Matrix<f64> {
-    type Output = Matrix<f64>;
+// --------------- Iterator -----------------------------------------
 
-    fn mul(self, rhs: Matrix<f64>) -> Matrix<f64> {
+pub struct RowIterator<'q, T: 'q> {
+    m: &'q Matrix<T>,
+    idx: usize
+}
+
+impl <'q, T: Clone> Iterator for RowIterator<'q, T> {
+    type Item = &'q [T];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.idx += 1;
+        match self.idx > self.m.rows() {
+            true => None,
+            false => self.m.row(self.idx - 1)
+        }
+    }
+}
+
+// --------------- Matrix multiplication with BLAS ------------------
+
+impl Mul for Matrix<f64> {
+    type Output = Option<Matrix<f64>>;
+
+    fn mul(self, rhs: Matrix<f64>) -> Self::Output {
 
         if self.cols() != rhs.rows() {
-            panic!("Columns of left hand side must be equal to rows of right hand side.");
+            return None;
         }
 
-        let c: Matrix<f64> = Matrix::fill(0.0, self.rows(), rhs.cols());
-
+        let c = Matrix::fill(0.0, self.rows(), rhs.cols());
         unsafe {
             cblas_dgemm(Order::RowMajor, Transpose::NoTrans, Transpose::NoTrans,
                 self.rows()         as libc::c_int,
@@ -111,24 +131,27 @@ impl Mul for Matrix<f64> {
                 1.0                 as libc::c_double,
                 self.data.as_ptr()  as *const libc::c_double,
                 self.lead_dim()     as libc::c_int,
-                rhs.data().as_ptr() as *const libc::c_double,
+                rhs.data.as_ptr()   as *const libc::c_double,
                 rhs.lead_dim()      as libc::c_int,
                 0.0                 as libc::c_double,
-                c.data().as_ptr()   as *mut libc::c_double,
+                c.data.as_ptr()     as *mut libc::c_double,
                 c.lead_dim()        as libc::c_int
             )
         }
-        c
+        Some(c)
     }
 }
 
-impl <T: fmt::Display> fmt::Display for Matrix<T> {
+// --------------- Matrix output ------------------------------------
+
+impl <T: fmt::Display + Clone> fmt::Display for Matrix<T> {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 
-        for row in 0..self.rows {
-            for col in 0..self.cols {
-                match write!(f, "{} ", self.data.get(col + row * self.cols).unwrap()) {
+        for row in 0..self.rows() {
+            for col in 0..self.cols() {
+                // TODO use std::slice::SliceConcatExt if stable
+                match write!(f, "{} ", self.get(row, col).unwrap()) {
                     Ok(_) => (),
                     e => return e,
                 }
@@ -141,6 +164,8 @@ impl <T: fmt::Display> fmt::Display for Matrix<T> {
         write!(f, "")
     }
 }
+
+// --------------- Matrix macro mat! --------------------------------
 
 #[macro_export]
 macro_rules! mat {
@@ -162,15 +187,25 @@ macro_rules! mat {
             }
             cols_old = cols;
         )*
-        Matrix::from_vec(&v, rows, cols_old).unwrap()
+        Matrix::from_vec(v, rows, cols_old).unwrap()
         }
     };
 }
 
+// --------------- Tests --------------------------------------------
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_from_vec() {
+
+        let m = Matrix::from_vec(vec![1.0, 2.0], 2, 2);
+        assert!(m.is_none());
+        let p = Matrix::from_vec(vec![1.0, 2.0, 3.0, 4.0], 2, 2);
+        assert!(p.is_some());
+    }
 
     #[test]
     fn test_matrix() {
@@ -202,9 +237,9 @@ mod tests {
         // [ 6 ]
         let vb: Vec<f64> = vec![5.0, 6.0];
 
-        let a: Matrix<f64> = Matrix::from_vec(&va, 2, 2).unwrap();
-        let b: Matrix<f64> = Matrix::from_vec(&vb, 2, 1).unwrap();
-        let c = a * b;
+        let a: Matrix<f64> = Matrix::from_vec(va, 2, 2).unwrap();
+        let b: Matrix<f64> = Matrix::from_vec(vb, 2, 1).unwrap();
+        let c = (a * b).unwrap();
 
         assert_eq!(c.rows(), 2);
         assert_eq!(c.cols(), 1);
@@ -224,9 +259,9 @@ mod tests {
         // [ 6 2 ]
         let vb: Vec<f64> = vec![5.0, 7.0, 6.0, 2.0];
 
-        let a: Matrix<f64> = Matrix::from_vec(&va, 3, 2).unwrap();
-        let b: Matrix<f64> = Matrix::from_vec(&vb, 2, 2).unwrap();
-        let c = a * b;
+        let a: Matrix<f64> = Matrix::from_vec(va, 3, 2).unwrap();
+        let b: Matrix<f64> = Matrix::from_vec(vb, 2, 2).unwrap();
+        let c = (a * b).unwrap();
 
         assert_eq!(c.rows(), 3);
         assert_eq!(c.cols(), 2);
@@ -266,30 +301,36 @@ mod tests {
     fn test_row() {
 
         let m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
-        let v1 = vec![1.0, 2.0];
-        let v2 = vec![3.0, 4.0];
-        let v3 = vec![5.0, 6.0];
-        assert_eq!(m.row(0).unwrap(), v1);
-        assert_eq!(m.row(1).unwrap(), v2);
-        assert_eq!(m.row(2).unwrap(), v3);
+        assert_eq!(m.row(0).unwrap(), [1.0, 2.0]);
+        assert_eq!(m.row(1).unwrap(), [3.0, 4.0]);
+        assert_eq!(m.row(2).unwrap(), [5.0, 6.0]);
     }
 
     #[test]
     fn test_set() {
 
         let mut m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
-        let v1 = vec![1.0, 2.0];
-        let v2 = vec![3.0, 4.0];
-        let v3 = vec![5.0, 6.0];
-        assert_eq!(m.row(0).unwrap(), v1);
-        assert_eq!(m.row(1).unwrap(), v2);
-        assert_eq!(m.row(2).unwrap(), v3);
+        assert_eq!(m.row(0).unwrap(), [1.0, 2.0]);
+        assert_eq!(m.row(1).unwrap(), [3.0, 4.0]);
+        assert_eq!(m.row(2).unwrap(), [5.0, 6.0]);
         m.set(0, 0, 7.0);
         m.set(2, 1, 9.0);
         assert_eq!(*m.get(0, 0).unwrap(), 7.0);
-        assert_eq!(m.row(0).unwrap(), vec![7.0, 2.0]);
+        assert_eq!(m.row(0).unwrap(), [7.0, 2.0]);
         assert_eq!(*m.get(2, 1).unwrap(), 9.0);
-        assert_eq!(m.row(2).unwrap(), vec![5.0, 9.0]);
+        assert_eq!(m.row(2).unwrap(), [5.0, 9.0]);
     }
+
+    #[test]
+    fn test_row_iter() {
+
+        let m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
+
+        assert_eq!(m.row_iter().count(), 3);
+        assert_eq!(m.row_iter().nth(0).unwrap(), [1.0, 2.0]);
+        assert_eq!(m.row_iter().nth(1).unwrap(), [3.0, 4.0]);
+        assert_eq!(m.row_iter().nth(2).unwrap(), [5.0, 6.0]);
+    }
+
 }
 

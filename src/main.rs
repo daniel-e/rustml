@@ -3,6 +3,7 @@ pub mod matrix;
 pub mod distance;
 pub mod norm;
 pub mod blas;
+pub mod knn;
 
 use matrix::*;
 
@@ -12,7 +13,7 @@ fn main() {
     let b = mat![5.0, 7.0; 6.0, 2.0];
     let c = a * b;
 
-    println!("{}", c);
+    println!("{}", c.unwrap());
 }
 
 
