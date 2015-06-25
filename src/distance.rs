@@ -12,6 +12,7 @@ pub struct Euclid;
 
 impl Distance<f64> for Euclid {
 
+    // TODO handling of NaN and stuff like this
     fn compute(a: &[f64], b: &[f64]) -> Option<f64> {
 
         if a.len() != b.len() {
@@ -21,7 +22,7 @@ impl Distance<f64> for Euclid {
         // c = b.clone() does not work here because cblas_daxpy
         // modifies the content of c and cloned() on a slice does
         // not create a copy.
-        let c: Vec<f64> = b.iter().cloned().collect();
+        let c: Vec<f64> = b.to_vec();
 
         unsafe {
             cblas_daxpy(
@@ -41,11 +42,13 @@ pub fn all_pair_distances<'t>(m: &Matrix<f64>) -> Matrix<f64> {
 
     let mut r = Matrix::fill(0.0, m.rows(), m.rows());
 
-    for i in 0..m.rows() {
-        for j in (i + 1)..m.rows() {
-            let d = Euclid::compute(&m.row(i).unwrap(), &m.row(j).unwrap()).unwrap();
-            r.set(i, j, d);
-            r.set(j, i, d);
+    // TODO handling of NaN and stuff like this
+    for (i, row1) in m.row_iter().enumerate() {
+        for (j, row2) in m.row_iter_at(i + 1).enumerate() {
+            let p = j + i + 1;
+            let d = Euclid::compute(row1, row2).unwrap();
+            r.set(i, p, d);
+            r.set(p, i, d);
         }
     }
     r

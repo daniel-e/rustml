@@ -43,12 +43,16 @@ impl <T: Clone> Matrix<T> {
     pub fn rows    (&self) -> usize { self.nrows   }
     pub fn cols    (&self) -> usize { self.ncols   }
 
-    /// Each call of the iterator's next() method is O(n) where n is the
-    /// number of columns of this matrix.
+    /// Each call of the iterator's next() method is O(1).
     pub fn row_iter(&self) -> RowIterator<T> {
+        self.row_iter_at(0)
+    }
+
+    pub fn row_iter_at(&self, row: usize) -> RowIterator<T> {
+
         RowIterator {
             m: self,
-            idx: 0
+            idx: row
         }
     }
 
@@ -122,6 +126,7 @@ impl Mul for Matrix<f64> {
             return None;
         }
 
+        // TODO handling of NaN and stuff like this
         let c = Matrix::fill(0.0, self.rows(), rhs.cols());
         unsafe {
             cblas_dgemm(Order::RowMajor, Transpose::NoTrans, Transpose::NoTrans,
@@ -332,5 +337,14 @@ mod tests {
         assert_eq!(m.row_iter().nth(2).unwrap(), [5.0, 6.0]);
     }
 
+    #[test]
+    fn test_row_iter_at() {
+
+        let m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
+
+        assert_eq!(m.row_iter_at(1).count(), 2);
+        assert_eq!(m.row_iter_at(1).nth(0).unwrap(), [3.0, 4.0]);
+        assert_eq!(m.row_iter_at(1).nth(1).unwrap(), [5.0, 6.0]);
+    }
 }
 
