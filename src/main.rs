@@ -1,3 +1,4 @@
+pub mod io;
 pub mod matrix;
 //pub mod lof;
 pub mod distance;

@@ -10,19 +10,15 @@ use ::matrix::Matrix;
 pub fn knn_scan_1<D>(m: &Matrix<f64>, idx: usize, k: usize, df: D) -> Option<Vec<(usize, f64)>> 
     where D : Fn(&[f64], &[f64]) -> f64 {
 
-    let row = m.row(idx).expect("Could not fetch row.");
-
-    let mut v = Vec::new();
-
-    for i in 0..m.rows() { // O(m)
-        if i != idx {
-            let d = df(&m.row(i).unwrap(), &row); // O(n)
-            v.push((i, d));
-        }
-    }
-
     // TODO http://doc.rust-lang.org/std/cmp/trait.PartialOrd.html
     // NaN
+
+    let row = m.row(idx).expect("Could not fetch row.");
+
+    let mut v: Vec<(usize, f64)> = m.row_iter().enumerate() // O(m)
+        .map(|(i, r)| (i, df(r, row))) // O(n)
+        .collect();
+    v.swap_remove(idx);
 
     //O(m log m)
     v.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal));
