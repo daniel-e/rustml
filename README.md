@@ -1,4 +1,7 @@
-Example
+For a documentation of the interfaces have a look at the 
+[rustml documentation](http://daniel-e.github.io/rustml/mat).
+
+# Example: matrix multplication
 
 ```rust
 pub mod matrix;
