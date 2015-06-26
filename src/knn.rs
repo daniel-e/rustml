@@ -2,6 +2,8 @@
 use std::cmp::Ordering;
 use ::matrix::Matrix;
 
+// TODO refactoring
+
 /// Searches for the k nearest neighbours for a given row in all rows
 /// (except the one indexed by idx) of the given matrix.
 ///

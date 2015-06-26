@@ -3,6 +3,8 @@ use std::io::Read;
 use std::f64;
 use std::str::FromStr;
 
+// TODO refactoring
+
 use ::matrix::*;
 
 pub fn from_csv_string(s: &str, sep: &str) -> Result<Matrix<f64>, &'static str> {

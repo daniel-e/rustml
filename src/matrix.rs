@@ -1,11 +1,13 @@
 #![macro_use]
 
 extern crate libc;
+extern crate rand;
 
 use std::{iter, fmt};
 use std::ops::Mul;
 use ::blas::{Order, Transpose, cblas_dgemm};
-
+use self::rand::{thread_rng, Rng, Rand};
+use std::slice::Iter;
 
 pub struct Matrix<T> {
     nrows: usize,
@@ -16,6 +18,11 @@ pub struct Matrix<T> {
 impl <T: Clone> Matrix<T> {
 
     // Functions for constructing a matrix.
+
+    pub fn new() -> Matrix<T> {
+
+        Matrix::from_vec(Vec::new(), 0, 0).unwrap()
+    }
 
     pub fn fill(value: T, rows: usize, cols: usize) -> Matrix<T> {
 
@@ -37,11 +44,24 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    pub fn random<R: Rand + Clone>(rows: usize, cols: usize) -> Matrix<R> {
+
+        let mut rng = thread_rng();
+        Matrix::from_vec(
+            rng.gen_iter::<R>().take(rows * cols).collect::<Vec<R>>(), 
+            rows, cols
+        ).unwrap()
+    }
+
     // ------------------------------------
 
     pub fn lead_dim(&self) -> usize { self.cols()  }
     pub fn rows    (&self) -> usize { self.nrows   }
     pub fn cols    (&self) -> usize { self.ncols   }
+
+    pub fn values(&self) -> Iter<T> {
+        self.data.iter()
+    }
 
     /// Each call of the iterator's next() method is O(1).
     pub fn row_iter(&self) -> RowIterator<T> {
@@ -345,6 +365,25 @@ mod tests {
         assert_eq!(m.row_iter_at(1).count(), 2);
         assert_eq!(m.row_iter_at(1).nth(0).unwrap(), [3.0, 4.0]);
         assert_eq!(m.row_iter_at(1).nth(1).unwrap(), [5.0, 6.0]);
+    }
+
+    #[test]
+    fn test_new() {
+
+        let m: Matrix<f64> = Matrix::new();
+        assert_eq!(m.rows(), 0);
+        assert_eq!(m.cols(), 0);
+        assert!(m.get(0, 0).is_none());
+        assert_eq!(m.row_iter().count(), 0);
+    }
+
+    #[test]
+    fn test_random() {
+        let m: Matrix<f64> = Matrix::<f64>::random::<f64>(3, 2);
+        assert_eq!(m.rows(), 3);
+        assert_eq!(m.cols(), 2);
+        assert_eq!(m.values().count(), 6);
+        assert!(m.values().all(|x| *x >= 0.0 && *x <= 1.0));
     }
 }
 
