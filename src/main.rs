@@ -15,6 +15,9 @@ fn main() {
     let c = a * b;
 
     println!("{}", c.unwrap());
+
+    let m = Matrix::<f64>::random::<f64>(3, 2);
+    println!("{}", m);
 }
 
 

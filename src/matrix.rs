@@ -44,6 +44,13 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    /// Creates a matrix with random values.
+    ///
+    /// # Example
+    /// ```
+    /// let m = Matrix::<f64>::random::<f64>(3, 2);
+    /// println!("{}", m);
+    /// ```
     pub fn random<R: Rand + Clone>(rows: usize, cols: usize) -> Matrix<R> {
 
         let mut rng = thread_rng();
