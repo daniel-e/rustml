@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Matrix","A matrix with elements of type T."],["RowIterator",""]]});
