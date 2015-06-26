@@ -18,7 +18,7 @@ pub fn knn_scan<D>(m: &Matrix<f64>, idx: usize, k: usize, df: D) -> Option<Vec<(
     let row = m.row(idx).expect("Could not fetch row.");
 
     let mut v: Vec<(usize, f64)> = m.row_iter().enumerate() // O(m)
-        .filter(|&(i, r)| i != idx)
+        .filter(|&(i, _)| i != idx)
         .map(|(i, r)| (i, df(r, row))) // O(n)
         .collect();
 

@@ -2,28 +2,42 @@
 
 extern crate libc;
 extern crate rand;
+extern crate num;
 
 use std::{iter, fmt};
 use std::ops::Mul;
-use ::blas::{Order, Transpose, cblas_dgemm};
-use self::rand::{thread_rng, Rng, Rand};
 use std::slice::Iter;
+use self::rand::{thread_rng, Rng, Rand};
+use self::num::traits::Float;
 
+use ::blas::{Order, Transpose, cblas_dgemm};
+
+/// A matrix with elements of type T.
 pub struct Matrix<T> {
     nrows: usize,
     ncols: usize,
     data: Vec<T>
 }
 
+/// Returns `true` if the matrix contains at least one element that is NaN,
+/// otherwise the function returns `false`.
+pub fn has_nan<T: Float> (m: &Matrix<T>) -> bool{ 
+    m.values().any(|&x| x.is_nan()) 
+}
+
+
 impl <T: Clone> Matrix<T> {
 
     // Functions for constructing a matrix.
 
+    /// Creates a new matrix with 0 rows and 0 columns.
     pub fn new() -> Matrix<T> {
 
         Matrix::from_vec(Vec::new(), 0, 0).unwrap()
     }
 
+    /// Creates a matrix with the given number of rows and columns
+    /// where each element is set to `value`.
     pub fn fill(value: T, rows: usize, cols: usize) -> Matrix<T> {
 
         Matrix::from_vec(
@@ -32,6 +46,9 @@ impl <T: Clone> Matrix<T> {
         ).unwrap()
     }
 
+    /// Creates a matrix with the given number of rows and columns. The matrix is
+    /// initialized with the values from the vector `vals` where the elements
+    /// are arranged in row-major order in the vector.
     pub fn from_vec(vals: Vec<T>, rows: usize, cols: usize) -> Option<Matrix<T>> {
 
         match rows * cols == vals.len() {
@@ -62,24 +79,32 @@ impl <T: Clone> Matrix<T> {
 
     // ------------------------------------
 
+    /// Is equivalent with calling the method `cols`.
     pub fn lead_dim(&self) -> usize { self.cols()  }
+    /// Returns the number of rows of the matrix.
     pub fn rows    (&self) -> usize { self.nrows   }
+    /// Returns the number of columns of the matrix.
     pub fn cols    (&self) -> usize { self.ncols   }
 
+    /// Returns an iterator over all elements of the matrix in row-major order.
     pub fn values(&self) -> Iter<T> {
         self.data.iter()
     }
 
-    /// Each call of the iterator's next() method is O(1).
+    /// Returns an iterator over the rows of the matrix.
+    ///
+    /// Each call to the `next` method is done in O(1).
     pub fn row_iter(&self) -> RowIterator<T> {
         self.row_iter_at(0)
     }
 
-    pub fn row_iter_at(&self, row: usize) -> RowIterator<T> {
+    /// Returns an iterator over the rows of the matrix where the iterator
+    /// starts at the the row with index `n`.
+    pub fn row_iter_at(&self, n: usize) -> RowIterator<T> {
 
         RowIterator {
             m: self,
-            idx: row
+            idx: n
         }
     }
 
@@ -91,6 +116,8 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    /// Returns the element of the matrix at row `row` (starting at zero) and column
+    /// `col` (starting at zero) or None if row or column does not exist.
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
 
         match self.idx(row, col) {
@@ -99,14 +126,18 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
-    pub fn row(&self, row: usize) -> Option<&[T]> {
+    /// Returns the row at index `n` (starting at zero) in O(1).
+    pub fn row(&self, n: usize) -> Option<&[T]> {
 
-        match self.idx(row, 0) {
+        match self.idx(n, 0) {
             None => None,
             Some(p) => Some(self.data.split_at(p).1.split_at(self.ncols).0)
         }
     }
 
+    /// Replaces the element at row `row` (starting at zero) and column `col` 
+    /// (starting at zero) with the new value `newval`. Returns true on
+    /// success and false on failure, i.e. if the row or column does not exist.
     pub fn set(&mut self, row: usize, col: usize, newval: T) -> bool {
 
         match self.idx(row, col) {
@@ -147,6 +178,20 @@ impl <'q, T: Clone> Iterator for RowIterator<'q, T> {
 impl Mul for Matrix<f64> {
     type Output = Option<Matrix<f64>>;
 
+    /// Performs a matrix multiplication by using the BLAS implementation
+    /// that is linked with the binary.
+    ///
+    /// The complexity and performance of the operation depends on that
+    /// implemenation. On failure the function returns None.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let a = mat![1.0, 2.0; 3.0, 4.0];
+    /// let b = mat![4,0, 2.0; 5.0, 9.0];
+    /// let c = a * b;
+    /// println!("{}", c.unwrap());
+    /// ```
     fn mul(self, rhs: Matrix<f64>) -> Self::Output {
 
         if self.cols() != rhs.rows() {
@@ -178,6 +223,7 @@ impl Mul for Matrix<f64> {
 
 impl <T: fmt::Display + Clone> fmt::Display for Matrix<T> {
 
+    /// Implements `Display` so that we can print the matrix with println!.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 
         for row in 0..self.rows() {
@@ -199,6 +245,17 @@ impl <T: fmt::Display + Clone> fmt::Display for Matrix<T> {
 
 // --------------- Matrix macro mat! --------------------------------
 
+/// Macro to create a matrix.
+///
+/// # Example
+///
+/// let m = mat![1.0, 2.0, 3.0; 4.0, 5.0, 6.0];
+///
+/// This example creates the following 2x3 matrix:
+///
+/// `[ 1 2 3 ]`
+///
+/// `[ 4 5 6 ]`
 #[macro_export]
 macro_rules! mat {
     ( $( $( $x:expr ),+ ) ;* ) => {

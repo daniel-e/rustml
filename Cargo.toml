@@ -6,3 +6,4 @@ authors = ["Your Name <detzold@gmail.com>"]
 [dependencies]
 libc = "*"
 rand = "*"
+num = "*"

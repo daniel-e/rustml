@@ -1,5 +1,7 @@
 extern crate libc;
 
+use self::libc::{c_int, c_double};
+
 // documentation
 // http://www.netlib.org/blas/
 // file::///usr/include/cblas.h
@@ -19,29 +21,32 @@ pub enum Transpose {
 
 #[link(name = "blas")]
 extern {
-    // computes L2 norm of doubles
-    pub fn cblas_dnrm2(n: libc::c_int, x: *const libc::c_double, incx: libc::c_int) -> libc::c_double;
+    /// Computes the L2 norm of a vector of f64 (doubles).
+    pub fn cblas_dnrm2(n: c_int, x: *const c_double, incx: c_int) -> c_double;
 
-    // computes alpha * x + y of vectors x and y of doubles
-    pub fn cblas_daxpy(n: libc::c_int, alpha: libc::c_double, 
-                   x: *const libc::c_double, incx: libc::c_int, 
-                   y: *mut libc::c_double, incy: libc::c_int);
+    /// Computes alpha * x + y where alpha is a f64 scalar and x and y are 
+    /// vectors of f64.
+    pub fn cblas_daxpy(
+        n: c_int, 
+        alpha: c_double, 
+        x: *const c_double, 
+        incx: c_int, 
+        y: *mut c_double, 
+        incy: c_int
+    );
 
-    // computes alpha * op(A) * op(B) + beta * C
-    // where op(X) is either op(X) = X or op(X) = X^T
-    pub fn cblas_dgemm(order: Order, transA: Transpose, transB: Transpose,
-            m: libc::c_int,
-            n: libc::c_int,
-            k: libc::c_int,
-            alpha: libc::c_double,
-            A: *const libc::c_double,
-            lda: libc::c_int,
-            B: *const libc::c_double,
-            ldb: libc::c_int,
-            beta: libc::c_double,
-            C: *mut libc::c_double,
-            ldc: libc::c_int
+    /// Computes alpha * op(A) * op(B) + beta * C where op(X) is either
+    /// op(X) = X or op(X) = X^T (the transpose of the matrix X).
+    pub fn cblas_dgemm(
+        order: Order, transA: Transpose, transB: Transpose,
+        m: c_int,
+        n: c_int,
+        k: c_int,
+        alpha: c_double,
+        A: *const c_double, lda: c_int,
+        B: *const c_double, ldb: c_int,
+        beta: c_double,
+        C: *mut c_double, ldc: c_int
     );
 }
-
 
