@@ -9,7 +9,7 @@ use ::matrix::Matrix;
 ///
 /// If m is the number of rows and n is the number of columns the
 /// complexity is O(mn + m log m).
-pub fn knn_scan_1<D>(m: &Matrix<f64>, idx: usize, k: usize, df: D) -> Option<Vec<(usize, f64)>> 
+pub fn knn_scan<D>(m: &Matrix<f64>, idx: usize, k: usize, df: D) -> Option<Vec<(usize, f64)>> 
     where D : Fn(&[f64], &[f64]) -> f64 {
 
     // TODO http://doc.rust-lang.org/std/cmp/trait.PartialOrd.html
@@ -18,9 +18,9 @@ pub fn knn_scan_1<D>(m: &Matrix<f64>, idx: usize, k: usize, df: D) -> Option<Vec
     let row = m.row(idx).expect("Could not fetch row.");
 
     let mut v: Vec<(usize, f64)> = m.row_iter().enumerate() // O(m)
+        .filter(|&(i, r)| i != idx)
         .map(|(i, r)| (i, df(r, row))) // O(n)
         .collect();
-    v.swap_remove(idx);
 
     //O(m log m)
     v.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal));
@@ -29,30 +29,30 @@ pub fn knn_scan_1<D>(m: &Matrix<f64>, idx: usize, k: usize, df: D) -> Option<Vec
 
 #[cfg(test)]
 mod tests {
-    use super::knn_scan_1;
+    use super::knn_scan;
     use ::matrix::*;
     use :: distance::*;
 
     #[test]
-    fn test_knn_scan_1() {
+    fn test_knn_scan() {
 
         let m = mat![1.0, 2.0; 3.0, 3.0; 1.0, 2.0; 5.0, 6.0; 10.0, 12.0];
 
         // 1st nearest neighbours of [3.0, 3.0]
-        let mut r = knn_scan_1(&m, 1, 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        let mut r = knn_scan(&m, 1, 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(r.len(), 1);
         r.sort_by(|a, b| a.0.cmp(&b.0));
         assert_eq!(r.get(0).unwrap().0, 0);
 
         // 2-nearest neighbours of [3.0, 3.0] (= [1.0, 2.0], [1.0, 2.0])
-        r = knn_scan_1(&m, 1, 2, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        r = knn_scan(&m, 1, 2, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(r.len(), 2);
         r.sort_by(|a, b| a.0.cmp(&b.0));
         assert_eq!(r.get(0).unwrap().0, 0);
         assert_eq!(r.get(1).unwrap().0, 2);
 
         // 1-nearest neighbour of [1.0, 2.0] (= [1.0, 2.0])
-        r = knn_scan_1(&m, 0, 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        r = knn_scan(&m, 0, 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(r.len(), 1);
         r.sort_by(|a, b| a.0.cmp(&b.0));
         assert_eq!(r.get(0).unwrap().0, 2);
