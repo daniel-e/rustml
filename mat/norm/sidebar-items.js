@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["Norm",""]],"struct":[["L2Norm",""]]});
+initSidebarItems({"struct":[["L2Norm",""]],"trait":[["Norm",""]]});

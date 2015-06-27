@@ -43,9 +43,19 @@
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>mat</a>::<wbr><a href='index.html'>distance</a>::<wbr><a class='struct' href=''>Euclid</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-964' href='../../src/mat/distance.rs.html#11'>[src]</a></span></h1>
+        </span><a id='src-991' href='../../src/mat/distance.rs.html#15'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Euclid;</pre><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../mat/distance/trait.Distance.html' title='mat::distance::Distance'>Distance</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt; for <a class='struct' href='../../mat/distance/struct.Euclid.html' title='mat::distance::Euclid'>Euclid</a></code></h3><div class='impl-items'><h4 id='method.compute' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='../../mat/distance/trait.Distance.html#method.compute' class='fnname'>compute</a>(a: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, b: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;</code></h4>
-</div></section>
+<div class='docblock'><p>Computes the euclidean distance between the vector <code>a</code> and <code>b</code>.</p>
+
+<p>Returns <code>None</code> if the two vectors have a different length.</p>
+
+<h1 id="implementation-details" class='section-header'><a
+                           href="#implementation-details">Implementation details</a></h1>
+<p>First the BLAS function <code>cblas_daxpy</code> is used to compute the
+difference between the vectors. This requires O(n) additional space
+if <code>n</code> is the number of elements of each vector. Then, the result
+of the L2 norm of the difference is returned.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

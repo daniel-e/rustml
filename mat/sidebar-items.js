@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["blas",""],["distance",""],["io",""],["knn",""],["matrix",""],["norm",""]],"macro":[["mat!","Macro to create a matrix."]]});
+initSidebarItems({"mod":[["blas",""],["csv",""],["distance",""],["io",""],["knn",""],["matrix",""],["norm",""]],"macro":[["mat!","Macro to create a matrix."]]});

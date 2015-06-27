@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Matrix","A matrix with elements of type T."],["RowIterator",""]]});
+initSidebarItems({"struct":[["Matrix","A matrix with elements of type T."],["RowIterator",""]],"fn":[["has_nan","Returns `true` if the matrix contains at least one element that is NaN, otherwise the function returns `false`."]]});
