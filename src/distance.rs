@@ -1,10 +1,14 @@
 extern crate libc;
 
+use self::libc::{c_int, c_double};
 use ::matrix::*;
 use ::norm::{L2Norm, Norm};
 use ::blas::cblas_daxpy;
 
+/// Computes the distance between two vectors.
 pub trait Distance<T> {
+    /// Computes the distance between vector `a` and `b` and returns `None`
+    /// on failure.
     fn compute(a: &[T], b: &[T]) -> Option<T>;
 }
 
@@ -12,9 +16,19 @@ pub struct Euclid;
 
 impl Distance<f64> for Euclid {
 
-    // TODO handling of NaN and stuff like this
+    /// Computes the euclidean distance between the vector `a` and `b`.
+    ///
+    /// Returns `None` if the two vectors have a different length.
+    ///
+    /// # Implementation details
+    ///
+    /// First the BLAS function `cblas_daxpy` is used to compute the
+    /// difference between the vectors. This requires O(n) additional space
+    /// if `n` is the number of elements of each vector. Then, the result
+    /// of the L2 norm of the difference is returned.
     fn compute(a: &[f64], b: &[f64]) -> Option<f64> {
 
+        // TODO handling of NaN and stuff like this
         if a.len() != b.len() {
             return None;
         }
@@ -26,19 +40,19 @@ impl Distance<f64> for Euclid {
 
         unsafe {
             cblas_daxpy(
-                a.len()     as libc::c_int,
-                -1.0        as libc::c_double,
-                a.as_ptr()  as *const libc::c_double,
-                1           as libc::c_int,
-                c.as_ptr()  as *mut libc::c_double,
-                1           as libc::c_int
+                a.len()     as c_int,
+                -1.0        as c_double,
+                a.as_ptr()  as *const c_double,
+                1           as c_int,
+                c.as_ptr()  as *mut c_double,
+                1           as c_int
             );
         }
         Some(L2Norm::compute(&c))
     }
 }
 
-pub fn all_pair_distances<'t>(m: &Matrix<f64>) -> Matrix<f64> {
+pub fn all_pair_distances(m: &Matrix<f64>) -> Matrix<f64> {
 
     let mut r = Matrix::fill(0.0, m.rows(), m.rows());
 

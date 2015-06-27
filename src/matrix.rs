@@ -25,7 +25,6 @@ pub fn has_nan<T: Float> (m: &Matrix<T>) -> bool{
     m.values().any(|&x| x.is_nan()) 
 }
 
-
 impl <T: Clone> Matrix<T> {
 
     // Functions for constructing a matrix.
@@ -223,7 +222,7 @@ impl Mul for Matrix<f64> {
 
 impl <T: fmt::Display + Clone> fmt::Display for Matrix<T> {
 
-    /// Implements `Display` so that we can print the matrix with println!.
+    /// Implements `Display` so that the matrix can be printed with println!.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 
         for row in 0..self.rows() {
