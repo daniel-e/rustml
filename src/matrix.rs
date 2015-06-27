@@ -107,6 +107,15 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    pub fn row_iter_of(&self, rows: Vec<usize>) -> SelectedRowIterator<T> {
+
+        SelectedRowIterator {
+            m: self,
+            rows: rows,
+            idx: 0,
+        }
+    }
+
     fn idx(&self, row: usize, col: usize) -> Option<usize> {
         
         match row < self.rows() && col < self.cols() {
@@ -153,8 +162,9 @@ impl <T: Clone> Matrix<T> {
 
 }
 
-// --------------- Iterator -----------------------------------------
+// --------------- Iterators ----------------------------------------
 
+/// An iterator over the rows of a matrix.
 pub struct RowIterator<'q, T: 'q> {
     m: &'q Matrix<T>,
     idx: usize
@@ -168,6 +178,29 @@ impl <'q, T: Clone> Iterator for RowIterator<'q, T> {
         match self.idx > self.m.rows() {
             true => None,
             false => self.m.row(self.idx - 1)
+        }
+    }
+}
+
+/// An iterator over a set of selected rows of a matrix.
+pub struct SelectedRowIterator<'q, T: 'q> {
+    m: &'q Matrix<T>,
+    rows: Vec<usize>,
+    idx: usize
+}
+
+impl <'q, T: Clone> Iterator for SelectedRowIterator<'q, T> {
+    type Item = &'q [T];
+
+    /// Returns the next row or `None` if the iterator has reached
+    /// the end.
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.idx < self.rows.len() {
+            true => {
+                self.idx += 1;
+                self.m.row(*self.rows.get(self.idx - 1).unwrap())
+            }
+            false => None
         }
     }
 }
@@ -447,6 +480,16 @@ mod tests {
         assert_eq!(m.cols(), 2);
         assert_eq!(m.values().count(), 6);
         assert!(m.values().all(|x| *x >= 0.0 && *x <= 1.0));
+    }
+
+    #[test]
+    fn test_row_iter_of() {
+        let m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0; 7.0, 8.0];
+        let v = vec![1, 3];
+        let mut r = m.row_iter_of(v);
+        assert_eq!(r.next().unwrap(), [3.0, 4.0]);
+        assert_eq!(r.next().unwrap(), [7.0, 8.0]);
+        assert!(r.next().is_none());
     }
 }
 
