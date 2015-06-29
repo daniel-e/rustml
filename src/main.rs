@@ -8,6 +8,7 @@ pub mod norm;
 pub mod blas;
 pub mod knn;
 pub mod csv;
+pub mod datasets;
 
 use matrix::*;
 use rand::{weak_rng, Rng};
