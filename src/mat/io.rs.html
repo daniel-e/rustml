@@ -80,45 +80,129 @@
 <span id="38">38</span>
 <span id="39">39</span>
 <span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
 </pre><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>flate2</span>;
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Read</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>flate2</span>::<span class='ident'>read</span>::<span class='ident'>GzDecoder</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>min</span>;
 
-<span class='doccomment'>/// Reads gzip data from a file and returns the uncompressed data</span>
-<span class='doccomment'>/// in a vector. Returns an error message on failure.</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read_gzip</span>(<span class='ident'>fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+<span class='doccomment'>/// Struct to decompress gzip streams.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>GzipData</span> {
+    <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
+    <span class='ident'>idx</span>: <span class='ident'>usize</span>
+}
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-    <span class='macro'>try</span><span class='macro'>!</span>(
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>GzDecoder</span>::<span class='ident'>new</span>(
-                <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>File</span>::<span class='ident'>open</span>(<span class='ident'>fname</span>)
-                     .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='string'>&quot;Could not open file&quot;</span>)
+<span class='kw'>impl</span> <span class='ident'>GzipData</span> {
+
+    <span class='doccomment'>/// Reads gzip data from a file and returns the uncompressed data</span>
+    <span class='doccomment'>/// in a vector. Returns an error message on failure.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_file</span>(<span class='ident'>fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>GzipData</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+        <span class='macro'>try</span><span class='macro'>!</span>(
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>GzDecoder</span>::<span class='ident'>new</span>(
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>File</span>::<span class='ident'>open</span>(<span class='ident'>fname</span>)
+                         .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='string'>&quot;Could not open file&quot;</span>)
+                    )
                 )
+                .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='string'>&quot;Invalid gzip header.&quot;</span>)
             )
-            .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='string'>&quot;Invalid gzip header.&quot;</span>)
-        )
-        .<span class='ident'>read_to_end</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>r</span>)
-            .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='string'>&quot;Could not unzip data.&quot;</span>)
-    );
-    <span class='prelude-val'>Ok</span>(<span class='ident'>r</span>)
+            .<span class='ident'>read_to_end</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>r</span>)
+                .<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='string'>&quot;Could not unzip data.&quot;</span>)
+        );
+        <span class='prelude-val'>Ok</span>(<span class='ident'>GzipData</span> {
+            <span class='ident'>v</span>: <span class='ident'>r</span>,
+            <span class='ident'>idx</span>: <span class='number'>0</span>
+        })
+    }
+
+    <span class='doccomment'>/// Returns the uncompressed data.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>into_bytes</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>v</span>.<span class='ident'>clone</span>() }
+
+    <span class='doccomment'>/// Returns the length of the uncomressed data.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span> { <span class='self'>self</span>.<span class='ident'>v</span>.<span class='ident'>len</span>() }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Read</span> <span class='kw'>for</span> <span class='ident'>GzipData</span> {
+
+    <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
+
+        <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>min</span>(<span class='ident'>buf</span>.<span class='ident'>len</span>(), <span class='self'>self</span>.<span class='ident'>v</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>idx</span>);
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='ident'>n</span>) {
+            <span class='kw'>let</span> <span class='ident'>x</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>v</span>.<span class='ident'>get</span>(<span class='self'>self</span>.<span class='ident'>idx</span> <span class='op'>+</span> <span class='ident'>i</span>).<span class='ident'>unwrap</span>().<span class='ident'>clone</span>();
+            <span class='op'>*</span><span class='ident'>buf</span>.<span class='ident'>get_mut</span>(<span class='ident'>i</span>).<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>x</span>;
+        }
+        <span class='self'>self</span>.<span class='ident'>idx</span> <span class='op'>+=</span> <span class='ident'>n</span>;
+        <span class='prelude-val'>Ok</span>(<span class='ident'>n</span>)
+    }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Read</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_read_gzip</span>() {
 
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(
-            <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>read_gzip</span>(<span class='string'>&quot;datasets/testing/hello_world.gz&quot;</span>).<span class='ident'>unwrap</span>()).<span class='ident'>unwrap</span>(), 
+            <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(
+                <span class='ident'>GzipData</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;datasets/testing/hello_world.gz&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>into_bytes</span>()).<span class='ident'>unwrap</span>(), 
             <span class='string'>&quot;hello world&quot;</span>.<span class='ident'>to_string</span>()
         );
 
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>read_gzip</span>(<span class='string'>&quot;datasets/testing/random.data&quot;</span>).<span class='ident'>is_err</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>GzipData</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;datasets/testing/hello_world.gz&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>len</span>(), <span class='number'>11</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>GzipData</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;datasets/testing/random.data&quot;</span>).<span class='ident'>is_err</span>());
+
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>GzipData</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;datasets/testing/hello_world.gz&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>data</span>.<span class='ident'>read_to_end</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>v</span>).<span class='ident'>is_ok</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>v</span>).<span class='ident'>unwrap</span>(), <span class='string'>&quot;hello world&quot;</span>.<span class='ident'>to_string</span>());
     }
 }
 </pre>

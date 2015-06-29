@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["read_gzip","Reads gzip data from a file and returns the uncompressed data in a vector. Returns an error message on failure."]]});
+initSidebarItems({"struct":[["GzipData","Struct to decompress gzip streams."]]});
