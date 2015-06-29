@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["all_pair_distances",""]],"trait":[["Distance","Computes the distance between two vectors."]],"struct":[["Euclid",""]]});
+initSidebarItems({"fn":[["all_pair_distances",""]],"struct":[["Euclid",""]],"trait":[["Distance","Computes the distance between two vectors."]]});

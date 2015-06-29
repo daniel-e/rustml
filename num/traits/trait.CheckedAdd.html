@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>num</a>::<wbr><a href='index.html'>traits</a>::<wbr><a class='trait' href=''>CheckedAdd</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-18820' href='../../src/num/traits.rs.html#535-539'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>num</a>::<wbr><a href='index.html'>traits</a>::<wbr><a class='trait' href=''>CheckedAdd</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-18820' class='srclink' href='../../src/num/traits.rs.html#535-539' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait CheckedAdd: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;Self, Output=Self&gt; {
     fn <a href='#tymethod.checked_add' class='fnname'>checked_add</a>(&amp;self, v: &amp;Self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;;
 }</pre><div class='docblock'><p>Performs addition that returns <code>None</code> instead of wrapping around on
@@ -51,23 +53,23 @@ overflow.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.checked_add' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#tymethod.checked_add' class='fnname'>checked_add</a>(&amp;self, v: &amp;Self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h3><div class='docblock'><p>Adds two numbers, checking for overflow. If overflow happens, <code>None</code> is
+        <h3 id='tymethod.checked_add' class='method stab '><code>fn <a href='#tymethod.checked_add' class='fnname'>checked_add</a>(&amp;self, v: &amp;Self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h3><div class='docblock'><p>Adds two numbers, checking for overflow. If overflow happens, <code>None</code> is
 returned.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a class='struct' href='../../num/bigint/struct.BigUint.html' title='num::bigint::BigUint'>BigUint</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a class='struct' href='../../num/bigint/struct.BigInt.html' title='num::bigint::BigInt'>BigInt</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i16.html'>i16</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a></code></li>
-<li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a></code></li>
+    <li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a class='struct' href='../../num/bigint/struct.BigUint.html' title='num::bigint::BigUint'>BigUint</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a class='struct' href='../../num/bigint/struct.BigInt.html' title='num::bigint::BigInt'>BigInt</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i16.html'>i16</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a></code></li>
+<li><code>impl <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a></code></li>
 </ul><script type="text/javascript" async
                               src="../../implementors/num/traits/trait.CheckedAdd.js">
                       </script></section>
@@ -102,6 +104,10 @@ returned.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

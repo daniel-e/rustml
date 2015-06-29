@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'>Function <a href='../index.html'>mat</a>::<wbr><a href='index.html'>knn</a>::<wbr><a class='fn' href=''>knn_scan</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1332' href='../../src/mat/knn.rs.html#12-28'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Function <a href='../index.html'>mat</a>::<wbr><a href='index.html'>knn</a>::<wbr><a class='fn' href=''>knn_scan</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1255' class='srclink' href='../../src/mat/knn.rs.html#12-28' title='goto source code'>[src]</a></span></h1>
 <pre class='rust fn'>pub fn knn_scan&lt;D&gt;(m: &amp;<a class='struct' href='../../mat/matrix/struct.Matrix.html' title='mat::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;, idx: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, k: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, df: D) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>)</a>&gt;&gt; <span class='where'>where D: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a></span></pre><div class='docblock'><p>Searches for the k nearest neighbours for a given row in all rows
 (except the one indexed by idx) of the given matrix.</p>
 
@@ -81,6 +83,10 @@ complexity is O(mn + m log m).</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

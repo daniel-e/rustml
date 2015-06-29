@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>num</a>::<wbr><a href='index.html'>traits</a>::<wbr><a class='trait' href=''>Saturating</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-18728' href='../../src/num/traits.rs.html#497-505'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>num</a>::<wbr><a href='index.html'>traits</a>::<wbr><a class='trait' href=''>Saturating</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-18728' class='srclink' href='../../src/num/traits.rs.html#497-505' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Saturating {
     fn <a href='#tymethod.saturating_add' class='fnname'>saturating_add</a>(self, v: Self) -&gt; Self;
     fn <a href='#tymethod.saturating_sub' class='fnname'>saturating_sub</a>(self, v: Self) -&gt; Self;
@@ -51,14 +53,14 @@
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.saturating_add' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#tymethod.saturating_add' class='fnname'>saturating_add</a>(self, v: Self) -&gt; Self</code></h3><div class='docblock'><p>Saturating addition operator.
+        <h3 id='tymethod.saturating_add' class='method stab '><code>fn <a href='#tymethod.saturating_add' class='fnname'>saturating_add</a>(self, v: Self) -&gt; Self</code></h3><div class='docblock'><p>Saturating addition operator.
 Returns a+b, saturating at the numeric bounds instead of overflowing.</p>
-</div><h3 id='tymethod.saturating_sub' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#tymethod.saturating_sub' class='fnname'>saturating_sub</a>(self, v: Self) -&gt; Self</code></h3><div class='docblock'><p>Saturating subtraction operator.
+</div><h3 id='tymethod.saturating_sub' class='method stab '><code>fn <a href='#tymethod.saturating_sub' class='fnname'>saturating_sub</a>(self, v: Self) -&gt; Self</code></h3><div class='docblock'><p>Saturating subtraction operator.
 Returns a-b, saturating at the numeric bounds instead of overflowing.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><a class='stability Unmarked' title='No stability level'></a><code>impl&lt;T: <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> + <a class='trait' href='../../num/traits/trait.CheckedSub.html' title='num::traits::CheckedSub'>CheckedSub</a> + <a class='trait' href='../../num/traits/trait.Zero.html' title='num::traits::Zero'>Zero</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> + <a class='trait' href='../../num/traits/trait.Bounded.html' title='num::traits::Bounded'>Bounded</a>&gt; <a class='trait' href='../../num/traits/trait.Saturating.html' title='num::traits::Saturating'>Saturating</a> for T</code></li>
+    <li><code>impl&lt;T: <a class='trait' href='../../num/traits/trait.CheckedAdd.html' title='num::traits::CheckedAdd'>CheckedAdd</a> + <a class='trait' href='../../num/traits/trait.CheckedSub.html' title='num::traits::CheckedSub'>CheckedSub</a> + <a class='trait' href='../../num/traits/trait.Zero.html' title='num::traits::Zero'>Zero</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> + <a class='trait' href='../../num/traits/trait.Bounded.html' title='num::traits::Bounded'>Bounded</a>&gt; <a class='trait' href='../../num/traits/trait.Saturating.html' title='num::traits::Saturating'>Saturating</a> for T</code></li>
 </ul><script type="text/javascript" async
                               src="../../implementors/num/traits/trait.Saturating.js">
                       </script></section>
@@ -93,6 +95,10 @@ Returns a-b, saturating at the numeric bounds instead of overflowing.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>
