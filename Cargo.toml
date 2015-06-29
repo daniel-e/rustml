@@ -7,3 +7,4 @@ authors = ["Your Name <detzold@gmail.com>"]
 libc = "*"
 rand = "*"
 num = "*"
+flate2 = "*"

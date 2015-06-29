@@ -107,11 +107,11 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
-    pub fn row_iter_of(&self, rows: Vec<usize>) -> SelectedRowIterator<T> {
+    pub fn row_iter_of(&self, rows: &[usize]) -> SelectedRowIterator<T> {
 
         SelectedRowIterator {
             m: self,
-            rows: rows,
+            rows: rows.to_vec(),
             idx: 0,
         }
     }
@@ -485,8 +485,8 @@ mod tests {
     #[test]
     fn test_row_iter_of() {
         let m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0; 7.0, 8.0];
-        let v = vec![1, 3];
-        let mut r = m.row_iter_of(v);
+        let v = [1, 3];
+        let mut r = m.row_iter_of(&v);
         assert_eq!(r.next().unwrap(), [3.0, 4.0]);
         assert_eq!(r.next().unwrap(), [7.0, 8.0]);
         assert!(r.next().is_none());
