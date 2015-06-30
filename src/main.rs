@@ -11,26 +11,35 @@ pub mod csv;
 pub mod datasets;
 
 use matrix::*;
-use rand::{weak_rng, Rng};
 
-fn knn_classify<It: Iterator>(it: It, v: &[f64]) -> f64 {
+fn knn_classify(m: &Matrix<f64>, example: &[f64], k: usize) -> f64 {
+
+    for row in m.row_iter() {
+        let (label, r) = row.split_at(1);
+        
+    }
     1.0
 }
 
 fn main() {
 
-    let m = Matrix::<f64>::random::<f64>(100, 2);
+    let k = 3;
 
-    let mut v: Vec<usize> = (0..m.rows()).collect();
-    weak_rng().shuffle(&mut v);
-    let (training, test) = v.split_at(50);
-    let r = m.row_iter_of(test)
+    println!("Reading training data ...");
+    let training = datasets::MnistDigits::training_set().unwrap();
+
+    println!("Reading test data ...");
+    let test = datasets::MnistDigits::test_set().unwrap();
+
+    println!("Classifying ...");
+    let r = test.row_iter()
         .map(|r| {
             let (label, row) = r.split_at(1);
             (label,
-             knn_classify(m.row_iter_of(training), row)
+             knn_classify(&training, row, k)
             )
         });
+
 }
 
 

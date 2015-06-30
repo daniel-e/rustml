@@ -5,6 +5,8 @@ use std::io::Read;
 use std::io;
 use self::flate2::read::GzDecoder;
 use std::cmp::min;
+use std::iter::Skip;
+use std::slice::Iter;
 
 /// Struct to decompress gzip streams.
 pub struct GzipData {
@@ -36,11 +38,23 @@ impl GzipData {
         })
     }
 
+    // TODO test
+    pub fn from_buf(v: Vec<u8>) -> GzipData {
+
+        GzipData {
+            v: v,
+            idx: 0
+        }
+    }
+
     /// Returns the uncompressed data.
     pub fn into_bytes(&self) -> Vec<u8> { self.v.clone() }
 
     /// Returns the length of the uncomressed data.
     pub fn len(&self) -> usize { self.v.len() }
+
+    /// Returns an iterator over the uncompressed data. TODO test
+    pub fn iter(&self) -> Skip<Iter<u8>> { self.v.iter().skip(self.idx) }
 }
 
 impl Read for GzipData {

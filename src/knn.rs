@@ -1,6 +1,7 @@
 
 use std::cmp::Ordering;
-use ::matrix::Matrix;
+use std::collections::BTreeMap;
+use ::matrix::*;
 
 // TODO refactoring
 
@@ -27,11 +28,83 @@ pub fn knn_scan<D>(m: &Matrix<f64>, idx: usize, k: usize, df: D) -> Option<Vec<(
     Some(v.iter().take(k).cloned().collect())
 }
 
+// TODO move into another module
+pub fn group(v: &Vec<f64>) -> Vec<(f64, usize)> {
+
+    let mut r: Vec<(f64, usize)> = Vec::new();
+    for val in v {
+        if r.len() == 0 {
+            r.push((*val, 1));
+        } else {
+            let mut x = r.pop().unwrap();
+            if x.0 != *val {
+                r.push(x);
+                x = (*val, 0);
+            }
+            x.1 += 1;
+            r.push(x);
+        }
+    }
+    r
+}
+
+pub fn knn_search<D>(m: &Matrix<f64>, example: &[f64], k: usize, df: D) -> Option<f64>
+    where D : Fn(&[f64], &[f64]) -> f64 {
+
+    let mut labels: Vec<(f64, f64)> = Vec::new();
+
+    for row in m.row_iter() {
+        let (l, ex) = row.split_at(1);
+        let label = l.get(0).unwrap().clone();
+        let d = df(ex, example);
+
+        if labels.len() == 0 {
+            labels.push((label, d));
+        } else {
+            let mut pos = k;
+            for (idx, val) in labels.iter().enumerate() {
+                if d < val.1 {
+                    pos = idx;
+                    break;
+                }
+            }
+            if pos < k {
+                labels.insert(pos, (label, d));
+                labels.truncate(k);
+            }
+        }
+    }
+
+    let mut l: Vec<f64> = labels.iter().map(|&(label, _)| label.clone()).collect();
+
+    l.sort_by(|a, b| a.partial_cmp(&b).unwrap_or(Ordering::Equal));
+    let mut r = group(&l);
+    // TODO
+    Some(0.0) 
+}
+
+
 #[cfg(test)]
 mod tests {
-    use super::knn_scan;
+    use super::*;
     use ::matrix::*;
-    use :: distance::*;
+    use ::distance::*;
+
+    #[test]
+    fn test_group() {
+
+        let mut v = vec![1.0, 1.0, 2.0, 7.0, 7.0, 9.0, 9.0, 9.0];
+        let mut r = group(&v);
+        assert_eq!(r, vec![(1.0, 2), (2.0, 1), (7.0, 2), (9.0, 3)]);
+
+        v = vec![];
+        r = group(&v);
+        assert_eq!(r, vec![]);
+
+        v = vec![1.0, 2.0, 2.0, 2.0, 3.0, 4.0];
+        r = group(&v);
+        assert_eq!(r, vec![(1.0, 1), (2.0, 3), (3.0, 1), (4.0, 1)]);
+    }
 
     #[test]
     fn test_knn_scan() {
