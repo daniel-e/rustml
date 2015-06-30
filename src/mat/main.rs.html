@@ -76,6 +76,15 @@
 <span id="34">34</span>
 <span id="35">35</span>
 <span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
 </pre><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rand</span>;
 
@@ -90,26 +99,35 @@
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>datasets</span>;
 
 <span class='kw'>use</span> <span class='ident'>matrix</span>::<span class='op'>*</span>;
-<span class='kw'>use</span> <span class='ident'>rand</span>::{<span class='ident'>weak_rng</span>, <span class='ident'>Rng</span>};
 
-<span class='kw'>fn</span> <span class='ident'>knn_classify</span><span class='op'>&lt;</span><span class='ident'>It</span>: <span class='ident'>Iterator</span><span class='op'>&gt;</span>(<span class='ident'>it</span>: <span class='ident'>It</span>, <span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>f64</span>]) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+<span class='kw'>fn</span> <span class='ident'>knn_classify</span>(<span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>example</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>f64</span>], <span class='ident'>k</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+
+    <span class='kw'>for</span> <span class='ident'>row</span> <span class='kw'>in</span> <span class='ident'>m</span>.<span class='ident'>row_iter</span>() {
+        <span class='kw'>let</span> (<span class='ident'>label</span>, <span class='ident'>r</span>) <span class='op'>=</span> <span class='ident'>row</span>.<span class='ident'>split_at</span>(<span class='number'>1</span>);
+        
+    }
     <span class='number'>1.0</span>
 }
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
 
-    <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Matrix</span>::<span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>::<span class='ident'>random</span>::<span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>(<span class='number'>100</span>, <span class='number'>2</span>);
+    <span class='kw'>let</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='number'>3</span>;
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> <span class='op'>=</span> (<span class='number'>0</span>..<span class='ident'>m</span>.<span class='ident'>rows</span>()).<span class='ident'>collect</span>();
-    <span class='ident'>weak_rng</span>().<span class='ident'>shuffle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>v</span>);
-    <span class='kw'>let</span> (<span class='ident'>training</span>, <span class='ident'>test</span>) <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>split_at</span>(<span class='number'>50</span>);
-    <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>row_iter_of</span>(<span class='ident'>test</span>)
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Reading training data ...&quot;</span>);
+    <span class='kw'>let</span> <span class='ident'>training</span> <span class='op'>=</span> <span class='ident'>datasets</span>::<span class='ident'>MnistDigits</span>::<span class='ident'>training_set</span>().<span class='ident'>unwrap</span>();
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Reading test data ...&quot;</span>);
+    <span class='kw'>let</span> <span class='ident'>test</span> <span class='op'>=</span> <span class='ident'>datasets</span>::<span class='ident'>MnistDigits</span>::<span class='ident'>test_set</span>().<span class='ident'>unwrap</span>();
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Classifying ...&quot;</span>);
+    <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>test</span>.<span class='ident'>row_iter</span>()
         .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>r</span><span class='op'>|</span> {
             <span class='kw'>let</span> (<span class='ident'>label</span>, <span class='ident'>row</span>) <span class='op'>=</span> <span class='ident'>r</span>.<span class='ident'>split_at</span>(<span class='number'>1</span>);
             (<span class='ident'>label</span>,
-             <span class='ident'>knn_classify</span>(<span class='ident'>m</span>.<span class='ident'>row_iter_of</span>(<span class='ident'>training</span>), <span class='ident'>row</span>)
+             <span class='ident'>knn_classify</span>(<span class='kw-2'>&amp;</span><span class='ident'>training</span>, <span class='ident'>row</span>, <span class='ident'>k</span>)
             )
         });
+
 }
 
 

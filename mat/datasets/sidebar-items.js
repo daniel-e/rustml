@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["from_high_endian",""]],"struct":[["MnistDigits",""]]});
+initSidebarItems({"struct":[["MnistDigits","This structure offers access to the MNIST database of handwritten digits."]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["knn_scan","Searches for the k nearest neighbours for a given row in all rows (except the one indexed by idx) of the given matrix."]]});
+initSidebarItems({"fn":[["group",""],["knn_scan","Searches for the k nearest neighbours for a given row in all rows (except the one indexed by idx) of the given matrix."],["knn_search",""]]});

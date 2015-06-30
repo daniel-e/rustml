@@ -122,6 +122,20 @@
 <span id="80">80</span>
 <span id="81">81</span>
 <span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
 </pre><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>flate2</span>;
 
@@ -130,6 +144,8 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>flate2</span>::<span class='ident'>read</span>::<span class='ident'>GzDecoder</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>min</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>Skip</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>::<span class='ident'>Iter</span>;
 
 <span class='doccomment'>/// Struct to decompress gzip streams.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>GzipData</span> {
@@ -161,11 +177,23 @@
         })
     }
 
+    <span class='comment'>// TODO test</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_buf</span>(<span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>GzipData</span> {
+
+        <span class='ident'>GzipData</span> {
+            <span class='ident'>v</span>: <span class='ident'>v</span>,
+            <span class='ident'>idx</span>: <span class='number'>0</span>
+        }
+    }
+
     <span class='doccomment'>/// Returns the uncompressed data.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>into_bytes</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>v</span>.<span class='ident'>clone</span>() }
 
     <span class='doccomment'>/// Returns the length of the uncomressed data.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span> { <span class='self'>self</span>.<span class='ident'>v</span>.<span class='ident'>len</span>() }
+
+    <span class='doccomment'>/// Returns an iterator over the uncompressed data. TODO test</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Skip</span><span class='op'>&lt;</span><span class='ident'>Iter</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span> { <span class='self'>self</span>.<span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>skip</span>(<span class='self'>self</span>.<span class='ident'>idx</span>) }
 }
 
 <span class='kw'>impl</span> <span class='ident'>Read</span> <span class='kw'>for</span> <span class='ident'>GzipData</span> {
