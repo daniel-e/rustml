@@ -17,20 +17,28 @@ use blas::{Order, Transpose, cblas_dgemm};
 
 // ------------------------------------------------------------------
 
-/// Returns `true` if the matrix contains at least one element that is NaN,
-/// otherwise the function returns `false`.
-pub fn has_nan<T: Float> (m: &Matrix<T>) -> bool{ 
-    m.values().any(|&x| x.is_nan()) 
-}
-
-// ------------------------------------------------------------------
-
 /// A matrix with elements of type T.
 pub struct Matrix<T> {
     nrows: usize,
     ncols: usize,
     data: Vec<T>
 }
+
+/// Trait to check if a matrix contains a NaN value.
+pub trait HasNan {
+    /// Returns `true` if at least one element that is NaN exists.
+    fn has_nan(&self) -> bool;
+}
+
+impl <T: Float> HasNan for Matrix<T> {
+
+    /// Returns `true` if the matrix contains at least one element that is NaN.
+    fn has_nan(&self) -> bool {
+        self.data.iter().any(|&x| x.is_nan())
+    }
+}
+
+// ------------------------------------------------------------------
 
 impl <T: Clone> Matrix<T> {
 
@@ -325,6 +333,7 @@ macro_rules! mat {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::f64;
 
     #[test]
     fn test_from_vec() {
@@ -497,6 +506,14 @@ mod tests {
         assert_eq!(r.next().unwrap(), [3.0, 4.0]);
         assert_eq!(r.next().unwrap(), [7.0, 8.0]);
         assert!(r.next().is_none());
+    }
+
+    #[test]
+    fn test_has_nan() {
+        let mut m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0; 7.0, 8.0];
+        assert_eq!(m.has_nan(), false);
+        m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0; 7.0, f64::NAN];
+        assert!(m.has_nan());
     }
 }
 

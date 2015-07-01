@@ -51,7 +51,7 @@ impl MnistDigits {
         Ok(l)
     }
 
-    fn read_examples(fname: &str, n: u32) -> Result<Vec<u8>, &'static str> {
+    fn read_examples(fname: &str, n: u32) -> Result<Vec<f64>, &'static str> {
 
         let mut data = try!(GzipData::from_file(fname));
 
@@ -78,60 +78,35 @@ impl MnistDigits {
         if v.len() != (n * 28 * 28) as usize {
             return Err("Could not read data.");
         }
-        Ok(v)
+
+        let r: Vec<f64> = v.iter().map(|x| *x as f64).collect();
+        Ok(r)
     }
 
-    fn create_matrix(labels: Vec<u8>, examples: Vec<u8>, n: usize) -> Result<Matrix<f64>, &'static str> {
+    pub fn training_set() -> Result<(Matrix<f64>, Vec<u8>), &'static str> {
 
-        let mut v: Vec<f64> = Vec::with_capacity(labels.len() + examples.len());
-        let mut e_it        = examples.iter();
-        let mut l_it        = labels.iter();
+        // TODO location of dataset
+        let labels = try!(MnistDigits::read_labels("datasets/mnist_digits/train-labels-idx1-ubyte.gz", 60000));
+        let values = try!(MnistDigits::read_examples("datasets/mnist_digits/train-images-idx3-ubyte.gz", 60000));
 
-        if n * 784 != examples.len() {
-            return Err("Invalid number of image pixels.");
-        }
-
-        for _i in 0..n {
-            let l = l_it.next();
-            match l {
-                None => { return Err("Reached end of labels."); }
-                Some(label) => {
-                    v.push(label.clone() as f64);
-                    for _j in 0..784 {
-                        let f = e_it.next();
-                        match f {
-                            None => { return Err("Reached end of image pixels."); }
-                            Some(fval) => { v.push(fval.clone() as f64); }
-                        }
-                    }
-                }
-            }
-        }
-
-        match Matrix::<f64>::from_vec(v, n, 784 + 1) {
-            Some(m) => Ok(m),
+        let m = Matrix::from_vec(values, 60000, 784);
+        match m {
+            Some(mat) => Ok((mat, labels)),
             _ => Err("Could not create matrix.")
         }
     }
 
-    pub fn training_set() -> Result<Matrix<f64>, &'static str> {
+    pub fn test_set() -> Result<(Matrix<f64>, Vec<u8>), &'static str> {
 
         // TODO location of dataset
-        MnistDigits::create_matrix(
-            try!(MnistDigits::read_labels("datasets/mnist_digits/train-labels-idx1-ubyte.gz", 60000)),
-            try!(MnistDigits::read_examples("datasets/mnist_digits/train-images-idx3-ubyte.gz", 60000)),
-            60000
-        )
-    }
+        let labels = try!(MnistDigits::read_labels("datasets/mnist_digits/t10k-labels-idx1-ubyte.gz", 10000));
+        let values = try!(MnistDigits::read_examples("datasets/mnist_digits/t10k-images-idx3-ubyte.gz", 10000));
 
-    pub fn test_set() -> Result<Matrix<f64>, &'static str> {
-
-        // TODO location of dataset
-        MnistDigits::create_matrix(
-            try!(MnistDigits::read_labels("datasets/mnist_digits/t10k-labels-idx1-ubyte.gz", 10000)),
-            try!(MnistDigits::read_examples("datasets/mnist_digits/t10k-images-idx3-ubyte.gz", 10000)),
-            10000
-        )
+        let m = Matrix::from_vec(values, 10000, 784);
+        match m {
+            Some(mat) => Ok((mat, labels)),
+            _ => Err("Could not create matrix.")
+        }
     }
 }
 
@@ -144,14 +119,8 @@ mod tests {
     #[test]
     fn test_training_set() {
 
-        let training = MnistDigits::training_set();
-        match training {
-            Err(e) => println!("{}", e),
-            _ => ()
-        }
-        assert!(training.is_ok());
-        let test = MnistDigits::test_set();
-        assert!(test.is_ok());
+        //let (training, training_labels) = MnistDigits::training_set().unwrap();
+        //let (testing, testing_labels) = MnistDigits::test_set().unwrap();
     }
 
     #[test]
