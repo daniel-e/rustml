@@ -1,3 +1,6 @@
+//! Module that contains structs and functions useful for doing matrix
+//! operations.
+
 #![macro_use]
 
 extern crate libc;
@@ -10,19 +13,23 @@ use std::slice::Iter;
 use self::rand::{thread_rng, Rng, Rand};
 use self::num::traits::Float;
 
-use ::blas::{Order, Transpose, cblas_dgemm};
+use blas::{Order, Transpose, cblas_dgemm};
+
+// ------------------------------------------------------------------
+
+/// Returns `true` if the matrix contains at least one element that is NaN,
+/// otherwise the function returns `false`.
+pub fn has_nan<T: Float> (m: &Matrix<T>) -> bool{ 
+    m.values().any(|&x| x.is_nan()) 
+}
+
+// ------------------------------------------------------------------
 
 /// A matrix with elements of type T.
 pub struct Matrix<T> {
     nrows: usize,
     ncols: usize,
     data: Vec<T>
-}
-
-/// Returns `true` if the matrix contains at least one element that is NaN,
-/// otherwise the function returns `false`.
-pub fn has_nan<T: Float> (m: &Matrix<T>) -> bool{ 
-    m.values().any(|&x| x.is_nan()) 
 }
 
 impl <T: Clone> Matrix<T> {

@@ -2,28 +2,20 @@ extern crate rand;
 
 pub mod io;
 pub mod matrix;
-//pub mod lof;
 pub mod distance;
 pub mod norm;
 pub mod blas;
 pub mod knn;
 pub mod csv;
 pub mod datasets;
+pub mod vectors;
 
-use matrix::*;
-
-fn knn_classify(m: &Matrix<f64>, example: &[f64], k: usize) -> f64 {
-
-    for row in m.row_iter() {
-        let (label, r) = row.split_at(1);
-        
-    }
-    1.0
-}
+use distance::*;
+use knn::knn_scan;
 
 fn main() {
 
-    let k = 3;
+    let k = 5;
 
     println!("Reading training data ...");
     let training = datasets::MnistDigits::training_set().unwrap();
@@ -32,14 +24,18 @@ fn main() {
     let test = datasets::MnistDigits::test_set().unwrap();
 
     println!("Classifying ...");
-    let r = test.row_iter()
+    let r = test.row_iter().take(10)
         .map(|r| {
-            let (label, row) = r.split_at(1);
+            let (l, row) = r.split_at(1);
+            let label = l.get(0).unwrap().clone();
             (label,
-             knn_classify(&training, row, k)
+             knn_scan(&training, row, k, |x, y| Euclid::compute(x, y).unwrap()).unwrap()
             )
         });
 
+    for (x, y) in r {
+        println!("{} {}", x, y);
+    }
 }
 
 

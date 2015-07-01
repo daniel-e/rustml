@@ -1,12 +1,14 @@
 extern crate flate2;
+extern crate libc;
 
 use std::fs::File;
 use std::io::Read;
 use std::io;
 use self::flate2::read::GzDecoder;
-use std::cmp::min;
 use std::iter::Skip;
 use std::slice::Iter;
+
+use vectors::copy_memory;
 
 /// Struct to decompress gzip streams.
 pub struct GzipData {
@@ -57,17 +59,23 @@ impl GzipData {
     pub fn iter(&self) -> Skip<Iter<u8>> { self.v.iter().skip(self.idx) }
 }
 
+/// Implementation of the `Read` trait for GzipData.
 impl Read for GzipData {
 
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
 
-        let n = min(buf.len(), self.v.len() - self.idx);
-        for i in (0..n) {
-            let x: u8 = self.v.get(self.idx + i).unwrap().clone();
-            *buf.get_mut(i).unwrap() = x;
+        if self.idx >= self.v.len() {
+            return Ok(0);
         }
-        self.idx += n;
-        Ok(n)
+
+        let n = buf.len();
+        let c = copy_memory(
+            buf, 
+            self.v.split_at(self.idx).1, 
+            n
+        );
+        self.idx += c;
+        Ok(c)
     }
 }
 

@@ -34,7 +34,8 @@ impl MnistDigits {
             return Err("Invalid magic number.");
         }
 
-        if try!(MnistDigits::read_u32(&mut data)) != n {
+        let k = try!(MnistDigits::read_u32(&mut data));
+        if k != n {
             return Err("Invalid number of items.");
         }
 
@@ -82,9 +83,13 @@ impl MnistDigits {
 
     fn create_matrix(labels: Vec<u8>, examples: Vec<u8>, n: usize) -> Result<Matrix<f64>, &'static str> {
 
-        let mut v    = Vec::new();
-        let mut e_it = examples.iter();
-        let mut l_it = labels.iter();
+        let mut v: Vec<f64> = Vec::with_capacity(labels.len() + examples.len());
+        let mut e_it        = examples.iter();
+        let mut l_it        = labels.iter();
+
+        if n * 784 != examples.len() {
+            return Err("Invalid number of image pixels.");
+        }
 
         for _i in 0..n {
             let l = l_it.next();
@@ -134,11 +139,16 @@ impl MnistDigits {
 mod tests {
     use super::*;
     use ::io::GzipData;
+    use std::io::Read;
 
     #[test]
     fn test_training_set() {
 
         let training = MnistDigits::training_set();
+        match training {
+            Err(e) => println!("{}", e),
+            _ => ()
+        }
         assert!(training.is_ok());
         let test = MnistDigits::test_set();
         assert!(test.is_ok());
@@ -161,5 +171,13 @@ mod tests {
 
         gz = GzipData::from_buf(vec![1, 2, 3, 4]);
         assert_eq!(MnistDigits::read_u32(&mut gz).unwrap(), ((256 * 1 + 2) * 256 + 3) * 256 + 4);
+    }
+
+    #[test]
+    fn test_performance() {
+
+        let mut gz = GzipData::from_file("datasets/mnist_digits/train-images-idx3-ubyte.gz").unwrap();
+        let mut v: Vec<u8> = Vec::new();
+        assert_eq!(gz.read_to_end(&mut v).unwrap(), 47040016);
     }
 }
