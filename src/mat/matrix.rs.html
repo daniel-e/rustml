@@ -535,7 +535,17 @@
 <span id="493">493</span>
 <span id="494">494</span>
 <span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
 </pre><pre class='rust '>
+<span class='doccomment'>//! Module that contains structs and functions useful for doing matrix</span>
+<span class='doccomment'>//! operations.</span>
+
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>macro_use</span>]</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
@@ -548,19 +558,23 @@
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>rand</span>::{<span class='ident'>thread_rng</span>, <span class='ident'>Rng</span>, <span class='ident'>Rand</span>};
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>num</span>::<span class='ident'>traits</span>::<span class='ident'>Float</span>;
 
-<span class='kw'>use</span> ::<span class='ident'>blas</span>::{<span class='ident'>Order</span>, <span class='ident'>Transpose</span>, <span class='ident'>cblas_dgemm</span>};
+<span class='kw'>use</span> <span class='ident'>blas</span>::{<span class='ident'>Order</span>, <span class='ident'>Transpose</span>, <span class='ident'>cblas_dgemm</span>};
+
+<span class='comment'>// ------------------------------------------------------------------</span>
+
+<span class='doccomment'>/// Returns `true` if the matrix contains at least one element that is NaN,</span>
+<span class='doccomment'>/// otherwise the function returns `false`.</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>has_nan</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Float</span><span class='op'>&gt;</span> (<span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>{ 
+    <span class='ident'>m</span>.<span class='ident'>values</span>().<span class='ident'>any</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>is_nan</span>()) 
+}
+
+<span class='comment'>// ------------------------------------------------------------------</span>
 
 <span class='doccomment'>/// A matrix with elements of type T.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>nrows</span>: <span class='ident'>usize</span>,
     <span class='ident'>ncols</span>: <span class='ident'>usize</span>,
     <span class='ident'>data</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>
-}
-
-<span class='doccomment'>/// Returns `true` if the matrix contains at least one element that is NaN,</span>
-<span class='doccomment'>/// otherwise the function returns `false`.</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>has_nan</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Float</span><span class='op'>&gt;</span> (<span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>{ 
-    <span class='ident'>m</span>.<span class='ident'>values</span>().<span class='ident'>any</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>is_nan</span>()) 
 }
 
 <span class='kw'>impl</span> <span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {

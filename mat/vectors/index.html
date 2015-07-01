@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `cblas_daxpy` fn in crate `mat`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, cblas_daxpy">
+    <meta name="description" content="API documentation for the Rust `vectors` mod in crate `mat`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, vectors">
 
-    <title>mat::blas::cblas_daxpy - Rust</title>
+    <title>mat::vectors - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>mat</a>::<wbr><a href='index.html'>blas</a></p><script>window.sidebarCurrent = {name: 'cblas_daxpy', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>mat</a></p><script>window.sidebarCurrent = {name: 'vectors', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -40,15 +40,31 @@
         </form>
     </nav>
 
-    <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'><a href='../index.html'>mat</a>::<wbr><a href='index.html'>blas</a>::<wbr><a class='fn' href=''>cblas_daxpy</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>mat</a>::<wbr><a class='mod' href=''>vectors</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1302' class='srclink' href='../../src/mat/blas.rs.html#29-36' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub unsafe extern fn cblas_daxpy(n: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>, alpha: <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a>, x: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a></a>, incx: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>, y: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a></a>, incy: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>)</pre><div class='docblock'><p>Computes alpha * x + y where alpha is a f64 scalar and x and y are
-vectors of f64.</p>
-</div></section>
+        </span><a id='src-2700' class='srclink' href='../../src/mat/vectors.rs.html#1-81' title='goto source code'>[src]</a></span></h1>
+<h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.copy_memory.html'
+                               title='mat::vectors::copy_memory'>copy_memory</a></td>
+                        <td class='docblock short'>
+                             <p>Copies elements from <code>src</code> to <code>dst</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.group.html'
+                               title='mat::vectors::group'>group</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
