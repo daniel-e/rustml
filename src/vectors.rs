@@ -1,3 +1,4 @@
+//! Functions to operate on vectors.
 extern crate libc;
 
 use std::cmp::{PartialEq, min};

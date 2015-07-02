@@ -1,3 +1,6 @@
+//! Module to easily access popular datasets often used to measure the performance of
+//! machine learning algorithms.
+
 extern crate num;
 extern crate std;
 extern crate time;

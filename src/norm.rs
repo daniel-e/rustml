@@ -1,3 +1,4 @@
+//! Functions to compute norms of vectors.
 extern crate libc;
 
 use ::blas::{cblas_dnrm2, cblas_snrm2};

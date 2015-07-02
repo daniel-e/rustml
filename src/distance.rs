@@ -1,3 +1,5 @@
+//! Functions to compute the distance between vectors.
+
 extern crate libc;
 
 use self::libc::{c_int, c_double, c_float};

@@ -1,3 +1,4 @@
+//! Functions to read and write files (e.g. gzip compressed files).
 extern crate flate2;
 extern crate libc;
 

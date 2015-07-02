@@ -1,3 +1,4 @@
+//! Functions to compute the k-nearest neighbours.
 extern crate num;
 
 use self::num::traits::Float;

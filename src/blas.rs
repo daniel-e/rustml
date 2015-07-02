@@ -1,3 +1,5 @@
+//! Bindings for BLAS/ATLAS for high performance vector and matrix operations.
+
 extern crate libc;
 
 use self::libc::{c_int, c_double, c_float};

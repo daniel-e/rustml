@@ -1,3 +1,5 @@
+//! Library for doing machine learning.
+
 pub mod blas;
 pub mod csv;
 pub mod datasets;

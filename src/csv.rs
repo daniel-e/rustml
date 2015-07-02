@@ -1,3 +1,5 @@
+//! Functions to parse and create comma-separated values (CSV).
+
 use std::fs::File;
 use std::io::Read;
 use std::f64;
