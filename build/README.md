@@ -53,7 +53,6 @@ PT19.576345377S
 You can improve the performance even further by a factor of >2 if you compile ATLAS by your own optimized for your architecture.
 
 ```bash
-cd atlas
 tar xjf atlas3.10.2.tar.bz2
 mkdir ATLAS/build
 cd ATLAS/build
@@ -62,6 +61,7 @@ make build
 mkdir -p /opt/atlas/lib
 cp lib/*.so /opt/atlas/lib/
 cd ../..
+rm -rf ATLAS
 ```
 
 ```bash
