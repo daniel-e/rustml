@@ -3,7 +3,9 @@ extern crate libc;
 use std::cmp::{PartialEq, min};
 use self::libc::{c_void, size_t};
 use std::mem;
+use std::marker::Copy;
 
+/// Groups equal elements into one element and counts them.
 pub fn group<T: PartialEq + Clone>(v: &Vec<T>) -> Vec<(T, usize)> {
 
     let mut r: Vec<(T, usize)> = Vec::new();
@@ -29,7 +31,11 @@ extern {
 }
 
 /// Copies elements from `src` to `dst`.
-pub fn copy_memory<T>(dst: &mut [T], src: &[T], n: usize) -> usize {
+///
+/// # Implementation details
+///
+/// This function uses the C function call `memcpy` to copy the memory.
+pub fn copy_memory<T: Copy>(dst: &mut [T], src: &[T], n: usize) -> usize {
 
     let c = min(min(dst.len(), src.len()), n);
     unsafe {

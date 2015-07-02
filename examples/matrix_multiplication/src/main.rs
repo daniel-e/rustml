@@ -1,9 +1,7 @@
 extern crate time;
+extern crate rustml;
 
-pub mod matrix;
-pub mod blas;
-
-use matrix::*;
+use rustml::matrix::*;
 
 fn main() {
     type T = f32;

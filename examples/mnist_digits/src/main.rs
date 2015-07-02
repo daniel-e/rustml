@@ -1,20 +1,10 @@
-extern crate rand;
 extern crate time;
+extern crate rustml;
 
-pub mod io;
-pub mod matrix;
-pub mod distance;
-pub mod norm;
-pub mod blas;
-pub mod knn;
-pub mod csv;
-pub mod datasets;
-pub mod vectors;
-
-use distance::*;
-use knn::knn_scan;
-use vectors::group;
-use datasets::MnistDigits;
+use rustml::distance::*;
+use rustml::knn::knn_scan;
+use rustml::vectors::group;
+use rustml::datasets::MnistDigits;
 
 fn main() {
     type T = f32;

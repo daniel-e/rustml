@@ -1,0 +1,10 @@
+[package]
+name = "matrix_mul"
+version = "0.0.1"
+authors = ["dz <detzold@gmail.com>"]
+
+[dependencies]
+time = "*"
+
+[dependencies.rustml]
+path = "../../"
