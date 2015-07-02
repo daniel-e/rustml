@@ -10,7 +10,7 @@ sudo ./docker run -t -i ubuntu:14.04 /bin/bash
 
 ```bash
 apt-get update
-apt-get install build-essential git screen aptitude wget unzip libblas-dev 
+apt-get -y install build-essential git screen aptitude wget unzip libblas-dev 
 ```
 
 ## Install rust
@@ -33,7 +33,9 @@ wget https://github.com/daniel-e/rustml/archive/master.zip
 unzip master.zip
 cd rustml-master/
 cargo run --bin matrix_mul
-PT116.067883051S
+
+# measured time
+# PT116.067883051S
 ```
 
 # Improve performance
@@ -41,7 +43,7 @@ PT116.067883051S
 You can improve the performance by a factor of 6 by simply installing libatlas.
 
 ```bash
-apt-get install libatlas3-base
+apt-get -y install libatlas3-base
 cargo run --bin matrix_mul
 PT19.576345377S
 ```
