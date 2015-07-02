@@ -61,7 +61,7 @@ cd ATLAS/build
 make build
 mkdir -p /opt/atlas/lib
 cp lib/*.so /opt/atlas/lib/
-cd ..
+cd ../..
 ```
 
 ```bash
