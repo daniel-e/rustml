@@ -14,16 +14,18 @@ pub mod vectors;
 use distance::*;
 use knn::knn_scan;
 use vectors::group;
+use datasets::MnistDigits;
 
 fn main() {
+    type T = f32;
 
     let k = 5;
 
     println!("Reading training data ...");
-    let (training, training_labels) = datasets::MnistDigits::training_set().unwrap();
+    let (training, training_labels) = MnistDigits::training_set::<T>().unwrap();
 
     println!("Reading test data ...");
-    let (test, test_labels) = datasets::MnistDigits::test_set().unwrap();
+    let (test, test_labels) = MnistDigits::test_set::<T>().unwrap();
 
     println!("Classifying ...");
     let r = test.row_iter().zip(test_labels.iter()).take(10)

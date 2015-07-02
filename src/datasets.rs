@@ -1,6 +1,12 @@
+extern crate num;
+extern crate std;
+extern crate time;
+
 use std::io::Read;
-use ::io::GzipData;
-use ::matrix::*;
+use self::num::traits::Float;
+
+use io::GzipData;
+use matrix::*;
 
 /// This structure offers access to the MNIST database of handwritten digits.
 ///
@@ -51,7 +57,7 @@ impl MnistDigits {
         Ok(l)
     }
 
-    fn read_examples(fname: &str, n: u32) -> Result<Vec<f64>, &'static str> {
+    fn read_examples<T: Float + Cast>(fname: &str, n: u32) -> Result<Vec<T>, &'static str> {
 
         let mut data = try!(GzipData::from_file(fname));
 
@@ -69,25 +75,24 @@ impl MnistDigits {
             return Err("Invalid number of rows or columns.");
         }
 
-        let mut v: Vec<u8> = Vec::new();
-        
-        if data.read_to_end(&mut v).is_err() {
-            return Err("Could not read data.");
-        }
+        let v = data.buf();
 
         if v.len() != (n * 28 * 28) as usize {
             return Err("Could not read data.");
         }
 
-        let r: Vec<f64> = v.iter().map(|x| *x as f64).collect();
+        let mut r: Vec<T> = Vec::with_capacity(v.len());
+        for i in v {
+            r.push(T::cast(*i));
+        }
         Ok(r)
     }
 
-    pub fn training_set() -> Result<(Matrix<f64>, Vec<u8>), &'static str> {
+    pub fn training_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
 
         // TODO location of dataset
         let labels = try!(MnistDigits::read_labels("datasets/mnist_digits/train-labels-idx1-ubyte.gz", 60000));
-        let values = try!(MnistDigits::read_examples("datasets/mnist_digits/train-images-idx3-ubyte.gz", 60000));
+        let values = try!(MnistDigits::read_examples::<T>("datasets/mnist_digits/train-images-idx3-ubyte.gz", 60000));
 
         let m = Matrix::from_vec(values, 60000, 784);
         match m {
@@ -96,11 +101,10 @@ impl MnistDigits {
         }
     }
 
-    pub fn test_set() -> Result<(Matrix<f64>, Vec<u8>), &'static str> {
-
+    pub fn test_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
         // TODO location of dataset
         let labels = try!(MnistDigits::read_labels("datasets/mnist_digits/t10k-labels-idx1-ubyte.gz", 10000));
-        let values = try!(MnistDigits::read_examples("datasets/mnist_digits/t10k-images-idx3-ubyte.gz", 10000));
+        let values = try!(MnistDigits::read_examples::<T>("datasets/mnist_digits/t10k-images-idx3-ubyte.gz", 10000));
 
         let m = Matrix::from_vec(values, 10000, 784);
         match m {
@@ -108,6 +112,18 @@ impl MnistDigits {
             _ => Err("Could not create matrix.")
         }
     }
+}
+
+pub trait Cast {
+    fn cast(x: u8) -> Self;
+}
+
+impl Cast for f32 {
+    fn cast(x: u8) -> f32 { x as f32 }
+}
+
+impl Cast for f64 {
+    fn cast(x: u8) -> f64 { x as f64 }
 }
 
 #[cfg(test)]
@@ -118,6 +134,7 @@ mod tests {
 
     #[test]
     fn test_training_set() {
+
 
         //let (training, training_labels) = MnistDigits::training_set().unwrap();
         //let (testing, testing_labels) = MnistDigits::test_set().unwrap();

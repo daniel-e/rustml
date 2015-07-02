@@ -1,6 +1,6 @@
 extern crate libc;
 
-use ::blas::cblas_dnrm2;
+use ::blas::{cblas_dnrm2, cblas_snrm2};
 
 pub trait Norm<T> {
     fn compute(a: &[T]) -> T;
@@ -16,6 +16,20 @@ impl Norm<f64> for L2Norm {
             cblas_dnrm2(
                 a.len()    as libc::c_int,
                 a.as_ptr() as *const libc::c_double,
+                1          as libc::c_int
+            )
+        }
+    }
+}
+
+impl Norm<f32> for L2Norm {
+
+    // TODO handling of NaN and stuff like this
+    fn compute(a: &[f32]) -> f32 {
+        unsafe {
+            cblas_snrm2(
+                a.len()    as libc::c_int,
+                a.as_ptr() as *const libc::c_float,
                 1          as libc::c_int
             )
         }

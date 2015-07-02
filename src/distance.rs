@@ -1,9 +1,9 @@
 extern crate libc;
 
-use self::libc::{c_int, c_double};
+use self::libc::{c_int, c_double, c_float};
 use ::matrix::*;
 use ::norm::{L2Norm, Norm};
-use ::blas::cblas_daxpy;
+use ::blas::{cblas_daxpy, cblas_saxpy};
 
 /// Computes the distance between two vectors.
 pub trait Distance<T> {
@@ -45,6 +45,44 @@ impl Distance<f64> for Euclid {
                 a.as_ptr()  as *const c_double,
                 1           as c_int,
                 c.as_ptr()  as *mut c_double,
+                1           as c_int
+            );
+        }
+        Some(L2Norm::compute(&c))
+    }
+}
+
+impl Distance<f32> for Euclid {
+
+    /// Computes the euclidean distance between the vector `a` and `b`.
+    ///
+    /// Returns `None` if the two vectors have a different length.
+    ///
+    /// # Implementation details
+    ///
+    /// First the BLAS function `cblas_daxpy` is used to compute the
+    /// difference between the vectors. This requires O(n) additional space
+    /// if `n` is the number of elements of each vector. Then, the result
+    /// of the L2 norm of the difference is returned.
+    fn compute(a: &[f32], b: &[f32]) -> Option<f32> {
+
+        // TODO handling of NaN and stuff like this
+        if a.len() != b.len() {
+            return None;
+        }
+
+        // c = b.clone() does not work here because cblas_daxpy
+        // modifies the content of c and cloned() on a slice does
+        // not create a copy.
+        let c: Vec<f32> = b.to_vec();
+
+        unsafe {
+            cblas_saxpy(
+                a.len()     as c_int,
+                -1.0        as c_float,
+                a.as_ptr()  as *const c_float,
+                1           as c_int,
+                c.as_ptr()  as *mut c_float,
                 1           as c_int
             );
         }

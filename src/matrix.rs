@@ -12,8 +12,9 @@ use std::ops::Mul;
 use std::slice::Iter;
 use self::rand::{thread_rng, Rng, Rand};
 use self::num::traits::Float;
+use self::libc::{c_int, c_double, c_float};
 
-use blas::{Order, Transpose, cblas_dgemm};
+use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 
 // ------------------------------------------------------------------
 
@@ -249,17 +250,62 @@ impl Mul for Matrix<f64> {
         let c = Matrix::fill(0.0, self.rows(), rhs.cols());
         unsafe {
             cblas_dgemm(Order::RowMajor, Transpose::NoTrans, Transpose::NoTrans,
-                self.rows()         as libc::c_int,
-                rhs.cols()          as libc::c_int,
-                self.cols()         as libc::c_int,
-                1.0                 as libc::c_double,
-                self.data.as_ptr()  as *const libc::c_double,
-                self.lead_dim()     as libc::c_int,
-                rhs.data.as_ptr()   as *const libc::c_double,
-                rhs.lead_dim()      as libc::c_int,
-                0.0                 as libc::c_double,
-                c.data.as_ptr()     as *mut libc::c_double,
-                c.lead_dim()        as libc::c_int
+                self.rows()         as c_int,
+                rhs.cols()          as c_int,
+                self.cols()         as c_int,
+                1.0                 as c_double,
+                self.data.as_ptr()  as *const c_double,
+                self.lead_dim()     as c_int,
+                rhs.data.as_ptr()   as *const c_double,
+                rhs.lead_dim()      as c_int,
+                0.0                 as c_double,
+                c.data.as_ptr()     as *mut c_double,
+                c.lead_dim()        as c_int
+            )
+        }
+        Some(c)
+    }
+}
+
+// TODO test
+impl Mul for Matrix<f32> {
+    type Output = Option<Matrix<f32>>;
+
+    /// Performs a matrix multiplication by using the BLAS implementation
+    /// that is linked with the binary.
+    ///
+    /// The complexity and performance of the operation depends on that
+    /// implemenation. On failure the function returns None.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let a = mat![1.0, 2.0; 3.0, 4.0];
+    /// let b = mat![4,0, 2.0; 5.0, 9.0];
+    /// let c = a * b;
+    /// println!("{}", c.unwrap());
+    /// ```
+    fn mul(self, rhs: Matrix<f32>) -> Self::Output {
+
+        if self.cols() != rhs.rows() {
+            return None;
+        }
+
+        // TODO handling of NaN and stuff like this
+        let c = Matrix::<f32>::fill(0.0, self.rows(), rhs.cols());
+        unsafe {
+            cblas_sgemm(Order::RowMajor, Transpose::NoTrans, Transpose::NoTrans,
+                self.rows()         as c_int,
+                rhs.cols()          as c_int,
+                self.cols()         as c_int,
+                1.0                 as c_float,
+                self.data.as_ptr()  as *const c_float,
+                self.lead_dim()     as c_int,
+                rhs.data.as_ptr()   as *const c_float,
+                rhs.lead_dim()      as c_int,
+                0.0                 as c_float,
+                c.data.as_ptr()     as *mut c_float,
+                c.lead_dim()        as c_int
             )
         }
         Some(c)

@@ -1,7 +1,15 @@
 [package]
-name = "mat"
-version = "0.1.0"
-authors = ["Your Name <detzold@gmail.com>"]
+name = "rustml"
+version = "0.0.1"
+authors = ["Your Name <email@example.com>"]
+
+[[bin]]
+name = "matrix_mul"
+path = "src/matrix_mul.rs"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
 
 [dependencies]
 libc = "*"

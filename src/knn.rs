@@ -1,14 +1,17 @@
+extern crate num;
+
+use self::num::traits::Float;
 use matrix::*;
 
 /// Search the k nearest neighbours for the given example.
-pub fn knn_scan<D>(m: &Matrix<f64>, example: &[f64], k: usize, df: D) -> Option<Vec<usize>>
-    where D : Fn(&[f64], &[f64]) -> f64 {
+pub fn knn_scan<D, T: Float>(m: &Matrix<T>, example: &[T], k: usize, df: D) -> Option<Vec<usize>>
+    where D : Fn(&[T], &[T]) -> T {
 
     if example.len() != m.cols() {
         return None;
     }
 
-    let mut near: Vec<(usize, f64)> = Vec::with_capacity(k);
+    let mut near: Vec<(usize, T)> = Vec::with_capacity(k);
 
     for (idx, row) in m.row_iter().enumerate() {
         let d = df(row, example);

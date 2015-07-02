@@ -16,7 +16,7 @@ pub struct GzipData {
     idx: usize
 }
 
-impl GzipData {
+impl <'b> GzipData {
 
     /// Reads gzip data from a file and returns the uncompressed data
     /// in a vector. Returns an error message on failure.
@@ -57,6 +57,9 @@ impl GzipData {
 
     /// Returns an iterator over the uncompressed data. TODO test
     pub fn iter(&self) -> Skip<Iter<u8>> { self.v.iter().skip(self.idx) }
+
+    // TODO test
+    pub fn buf(&'b self) -> &'b [u8] { &self.v.split_at(self.idx).1 }
 }
 
 /// Implementation of the `Read` trait for GzipData.
