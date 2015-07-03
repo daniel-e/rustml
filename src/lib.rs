@@ -43,9 +43,14 @@
 //! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits/src/main.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.
 //! * [matrix
 //! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication/src/main.rs): Multiplies two 6000x6000 matrices.
+//! * [vector
+//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition/src/main.rs):
+//! Add vectors.
 
 pub use distance::{Distance, Euclid};
 pub use matrix::{HasNan, Matrix};
+pub use vectors::AddVector;
+pub use math::Mean;
 
 // ordering is important because the macro mat! is 
 // only available for modules which follow #[macro_use]
@@ -60,4 +65,5 @@ pub mod io;
 pub mod knn;
 pub mod norm;
 pub mod vectors;
+pub mod math;
 

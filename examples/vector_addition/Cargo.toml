@@ -1,0 +1,7 @@
+[package]
+name = "vector_addition"
+version = "0.1.0"
+authors = ["dz <detzold@gmail.com>"]
+
+[dependencies.rustml]
+path = "../../"

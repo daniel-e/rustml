@@ -14,7 +14,7 @@ cargo doc
 echo "Syncing ..."
 rsync --delete -r target/doc/* $DOCFOLDER/
 cd $DOCFOLDER
-git add *
+git add -A
 git commit -m "update to current version"
 echo "Pushing ..."
 git push
