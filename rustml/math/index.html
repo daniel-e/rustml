@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `vectors` mod in crate `rustml`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, vectors">
+    <meta name="description" content="API documentation for the Rust `math` mod in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, math">
 
-    <title>rustml::vectors - Rust</title>
+    <title>rustml::math - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>rustml</a></p><script>window.sidebarCurrent = {name: 'vectors', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>rustml</a></p><script>window.sidebarCurrent = {name: 'math', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,38 +41,28 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustml</a>::<wbr><a class='mod' href=''>vectors</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustml</a>::<wbr><a class='mod' href=''>math</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-3020' class='srclink' href='../../src/rustml/vectors.rs.html#1-177' title='goto source code'>[src]</a></span></h1>
-<div class='docblock'><p>Functions to operate on vectors.</p>
-</div><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+        </span><a id='src-3368' class='srclink' href='../../src/rustml/math.rs.html#1-83' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Module with a collection of different mathematical functions.</p>
+</div><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
                     <tr class=' module-item'>
-                        <td><a class='trait' href='trait.AddVector.html'
-                               title='rustml::vectors::AddVector'>AddVector</a></td>
+                        <td><a class='enum' href='enum.Dimension.html'
+                               title='rustml::math::Dimension'>Dimension</a></td>
                         <td class='docblock short'>
-                             <p>Trait to add a slice to a vector using the underlying BLAS implementation.</p>
-
+                             
                         </td>
                     </tr>
-                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
                     <tr class=' module-item'>
-                        <td><a class='fn' href='fn.copy_memory.html'
-                               title='rustml::vectors::copy_memory'>copy_memory</a></td>
+                        <td><a class='trait' href='trait.Mean.html'
+                               title='rustml::math::Mean'>Mean</a></td>
                         <td class='docblock short'>
-                             <p>Copies elements from <code>src</code> to <code>dst</code>.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.group.html'
-                               title='rustml::vectors::group'>group</a></td>
-                        <td class='docblock short'>
-                             <p>Groups equal elements into one element and counts them.</p>
+                             <p>Trait to compute the mean of values.</p>
 
                         </td>
                     </tr>

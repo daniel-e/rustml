@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `Norm` trait in crate `rustml`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, Norm">
+    <meta name="description" content="API documentation for the Rust `Mean` trait in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Mean">
 
-    <title>rustml::norm::Norm - Rust</title>
+    <title>rustml::math::Mean - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>norm</a></p><script>window.sidebarCurrent = {name: 'Norm', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>math</a></p><script>window.sidebarCurrent = {name: 'Mean', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,23 +41,24 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>norm</a>::<wbr><a class='trait' href=''>Norm</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>math</a>::<wbr><a class='trait' href=''>Mean</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-2946' class='srclink' href='../../src/rustml/norm.rs.html#6-8' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait Norm&lt;T&gt; {
-    fn <a href='#tymethod.compute' class='fnname'>compute</a>(a: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[T]</a>) -&gt; T;
-}</pre>
+        </span><a id='src-3376' class='srclink' href='../../src/rustml/math.rs.html#13-15' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Mean&lt;T&gt; {
+    fn <a href='#tymethod.mean' class='fnname'>mean</a>(&amp;self, dim: <a class='enum' href='../../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;T&gt;;
+}</pre><div class='docblock'><p>Trait to compute the mean of values.</p>
+</div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.compute' class='method stab '><code>fn <a href='#tymethod.compute' class='fnname'>compute</a>(a: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[T]</a>) -&gt; T</code></h3></div>
+        <h3 id='tymethod.mean' class='method stab '><code>fn <a href='#tymethod.mean' class='fnname'>mean</a>(&amp;self, dim: <a class='enum' href='../../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;T&gt;</code></h3></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl <a class='trait' href='../../rustml/norm/trait.Norm.html' title='rustml::norm::Norm'>Norm</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt; for <a class='struct' href='../../rustml/norm/struct.L2Norm.html' title='rustml::norm::L2Norm'>L2Norm</a></code></li>
-<li><code>impl <a class='trait' href='../../rustml/norm/trait.Norm.html' title='rustml::norm::Norm'>Norm</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; for <a class='struct' href='../../rustml/norm/struct.L2Norm.html' title='rustml::norm::L2Norm'>L2Norm</a></code></li>
+    <li><code>impl <a class='trait' href='../../rustml/math/trait.Mean.html' title='rustml::math::Mean'>Mean</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;</code></li>
+<li><code>impl <a class='trait' href='../../rustml/math/trait.Mean.html' title='rustml::math::Mean'>Mean</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; for <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;</code></li>
 </ul><script type="text/javascript" async
-                              src="../../implementors/rustml/norm/trait.Norm.js">
+                              src="../../implementors/rustml/math/trait.Mean.js">
                       </script></section>
     <section id='search' class="content hidden"></section>
 

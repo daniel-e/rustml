@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/rustml/lib.rs.html#1-62' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/rustml/lib.rs.html#1-68' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Library for doing machine learning with Rust.</p>
 
 <h1 id="performance" class='section-header'><a
@@ -92,9 +92,12 @@ the label of a vector with two features based on the examples in the matrix
 neighbor</a>: Classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.</li>
 <li><a href="https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication/src/main.rs">matrix
 multiplication</a>: Multiplies two 6000x6000 matrices.</li>
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/vector_addition/src/main.rs">vector
+addition</a>:
+Add vectors.</li>
 </ul>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub use distance::{<a class='trait' href='../rustml/distance/trait.Distance.html' title='rustml::distance::Distance'>Distance</a>, <a class='struct' href='../rustml/distance/struct.Euclid.html' title='rustml::distance::Euclid'>Euclid</a>};</code></td></tr><tr><td><code>pub use matrix::{<a class='trait' href='../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a>, <a class='struct' href='../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr><td><code>pub use distance::{<a class='trait' href='../rustml/distance/trait.Distance.html' title='rustml::distance::Distance'>Distance</a>, <a class='struct' href='../rustml/distance/struct.Euclid.html' title='rustml::distance::Euclid'>Euclid</a>};</code></td></tr><tr><td><code>pub use matrix::{<a class='trait' href='../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a>, <a class='struct' href='../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>};</code></td></tr><tr><td><code>pub use vectors::<a class='trait' href='../rustml/vectors/trait.AddVector.html' title='rustml::vectors::AddVector'>AddVector</a>;</code></td></tr><tr><td><code>pub use math::<a class='trait' href='../rustml/math/trait.Mean.html' title='rustml::math::Mean'>Mean</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                     <tr class=' module-item'>
                         <td><a class='mod' href='blas/index.html'
@@ -147,6 +150,15 @@ machine learning algorithms.</p>
                                title='rustml::knn'>knn</a></td>
                         <td class='docblock short'>
                              <p>Functions to compute the k-nearest neighbours.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='math/index.html'
+                               title='rustml::math'>math</a></td>
+                        <td class='docblock short'>
+                             <p>Module with a collection of different mathematical functions.</p>
 
                         </td>
                     </tr>
