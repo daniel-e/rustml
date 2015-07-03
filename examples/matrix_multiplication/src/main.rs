@@ -1,7 +1,7 @@
 extern crate time;
 extern crate rustml;
 
-use rustml::matrix::*;
+use rustml::Matrix;
 
 fn main() {
     type T = f32;
@@ -13,8 +13,8 @@ fn main() {
 
     println!("Computing ...");
     let t1 = time::now();
-    let c = a * b;
+    let _c = a * b;
     let t2 = time::now();
-    println!("{}", t2 - t1);
+    println!("Time to compute a*b = {}", t2 - t1);
 }
 

@@ -1,12 +1,11 @@
 //! Functions to parse and create comma-separated values (CSV).
-
 use std::fs::File;
 use std::io::Read;
 use std::f64;
 use std::str::FromStr;
 use std::fmt;
 
-use ::matrix::*;
+use matrix::*;
 
 /// Converts a vector into a comma seperated list of values.
 ///
@@ -14,7 +13,7 @@ use ::matrix::*;
 ///
 /// # Example
 ///
-/// ```
+/// ```ignore
 /// let a = &[1, 2, 3];
 /// assert_eq!(vec_to_csv(a, ","), "1,2,3");
 /// ```
@@ -37,7 +36,7 @@ pub fn vec_to_csv<T: fmt::Display>(v: &[T], sep: &str) -> String {
 ///
 /// # Example
 ///
-/// ```
+/// ```ignore
 /// let m = mat![1.0, 2.0; 3.0, 4.0];
 /// assert_eq!(matrix_to_csv(&m, ","), "1,2\n3,4\n")
 /// ```
@@ -109,7 +108,7 @@ pub fn from_csv_file(fname: &str, sep: &str) -> Result<Matrix<f64>, &'static str
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ::matrix::*;
+    use matrix::*;
 
     #[test]
     fn test_vec_to_csv() {

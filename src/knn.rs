@@ -3,9 +3,10 @@ extern crate num;
 
 use self::num::traits::Float;
 use matrix::*;
+use vectors::group;
 
 /// Search the k nearest neighbours for the given example.
-pub fn knn_scan<D, T: Float>(m: &Matrix<T>, example: &[T], k: usize, df: D) -> Option<Vec<usize>>
+pub fn scan<D, T: Float>(m: &Matrix<T>, example: &[T], k: usize, df: D) -> Option<Vec<usize>>
     where D : Fn(&[T], &[T]) -> T {
 
     if example.len() != m.cols() {
@@ -39,6 +40,19 @@ pub fn knn_scan<D, T: Float>(m: &Matrix<T>, example: &[T], k: usize, df: D) -> O
     Some(near.iter().map(|&(idx, _)| idx.clone()).collect())
 }
 
+pub fn classify<T, L, D>(m: &Matrix<T>, labels: &Vec<L>, example: &[T], k: usize, df: D) -> L
+    where T: Float, L: Clone + Ord, D: Fn(&[T], &[T]) -> T {
+
+    let idx = scan(&m, example, k, df).unwrap();
+
+    let mut targets: Vec<L> = idx.iter().map(|pos| labels.get(*pos).unwrap()).cloned().collect();
+    targets.sort_by(|a, b| a.cmp(&b));
+    let mut r = group(&targets);
+    r.sort_by(|a, b| a.1.cmp(&b.1));
+
+    r.last().unwrap().0.clone()
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -47,7 +61,23 @@ mod tests {
     use distance::*;
 
     #[test]
-    fn test_knn_scan() {
+    fn test_knn_classify() {
+
+        let m = mat![
+            1.0, 2.0;
+            1.1, 2.1;
+            2.0, 3.0;
+            0.9, 1.9;
+            2.1, 2.9
+        ];
+
+        let labels = vec![1, 2, 2, 1, 2];
+        let target = classify(&m, &labels, &[1.3, 2.0], 3, |x, y| Euclid::compute(x, y).unwrap());
+        assert_eq!(target, 1);
+    }
+
+    #[test]
+    fn test_scan() {
 
         let mut m = mat![
             1.0, 2.0;
@@ -55,19 +85,19 @@ mod tests {
             3.0, 3.0
         ];
 
-        let a = knn_scan(&m, &[1.0, 1.0, 2.0], 1, |x, y| Euclid::compute(x, y).unwrap());
+        let a = scan(&m, &[1.0, 1.0, 2.0], 1, |x, y| Euclid::compute(x, y).unwrap());
         assert!(a.is_none());
 
-        let mut label = knn_scan(&m, &[1.0, 1.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        let mut label = scan(&m, &[1.0, 1.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![0]);
 
-        label = knn_scan(&m, &[1.0, 2.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        label = scan(&m, &[1.0, 2.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![0]);
 
-        label = knn_scan(&m, &[2.0, 2.2], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        label = scan(&m, &[2.0, 2.2], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![1]);
 
-        label = knn_scan(&m, &[5.0, 6.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        label = scan(&m, &[5.0, 6.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![2]);
 
         // ---------------
@@ -79,13 +109,13 @@ mod tests {
             2.0, 2.0
         ];
 
-        label = knn_scan(&m, &[1.1, 2.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        label = scan(&m, &[1.1, 2.0], 1, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![0]);
-        label = knn_scan(&m, &[1.1, 2.0], 2, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        label = scan(&m, &[1.1, 2.0], 2, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![0, 2]);
-        label = knn_scan(&m, &[1.1, 2.0], 3, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        label = scan(&m, &[1.1, 2.0], 3, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![0, 2, 1]);
-        label = knn_scan(&m, &[1.1, 2.0], 4, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+        label = scan(&m, &[1.1, 2.0], 4, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
         assert_eq!(label, vec![0, 2, 1, 3]);
     }
 }

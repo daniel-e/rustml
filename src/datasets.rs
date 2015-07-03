@@ -35,7 +35,7 @@ impl MnistDigits {
         }
      }
 
-    fn read_labels(fname: &str, n: u32) -> Result<Vec<u8>, &'static str> {
+    fn read_labels(fname: &str) -> Result<Vec<u8>, &'static str> {
 
         let mut data = try!(GzipData::from_file(fname));
 
@@ -43,10 +43,7 @@ impl MnistDigits {
             return Err("Invalid magic number.");
         }
 
-        let k = try!(MnistDigits::read_u32(&mut data));
-        if k != n {
-            return Err("Invalid number of items.");
-        }
+        let n = try!(MnistDigits::read_u32(&mut data));
 
         let l: Vec<u8> = data.iter().cloned().collect();
         if l.len() != n as usize {
@@ -60,7 +57,7 @@ impl MnistDigits {
         Ok(l)
     }
 
-    fn read_examples<T: Float + Cast>(fname: &str, n: u32) -> Result<Vec<T>, &'static str> {
+    fn read_examples<T: Float + Cast>(fname: &str) -> Result<Vec<T>, &'static str> {
 
         let mut data = try!(GzipData::from_file(fname));
 
@@ -68,9 +65,7 @@ impl MnistDigits {
             return Err("Invalid magic number.");
         }
 
-        if try!(MnistDigits::read_u32(&mut data)) != n {
-            return Err("Invalid number of items.");
-        }
+        let n = try!(MnistDigits::read_u32(&mut data));
 
         let rows = try!(MnistDigits::read_u32(&mut data));
         let cols = try!(MnistDigits::read_u32(&mut data));
@@ -91,29 +86,38 @@ impl MnistDigits {
         Ok(r)
     }
 
-    pub fn training_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+    pub fn from<T: Float + Cast>(vectors_fname: &str, labels_fname: &str) -> Result<(Matrix<T>, Vec<u8>), &'static str> {
 
-        // TODO location of dataset
-        let labels = try!(MnistDigits::read_labels("datasets/mnist_digits/train-labels-idx1-ubyte.gz", 60000));
-        let values = try!(MnistDigits::read_examples::<T>("datasets/mnist_digits/train-images-idx3-ubyte.gz", 60000));
+        let labels = try!(MnistDigits::read_labels(labels_fname));
+        let values = try!(MnistDigits::read_examples::<T>(vectors_fname));
 
-        let m = Matrix::from_vec(values, 60000, 784);
-        match m {
-            Some(mat) => Ok((mat, labels)),
-            _ => Err("Could not create matrix.")
+        match Matrix::from_vec(values, labels.len(), 784) {
+            Some(matrix) => {
+                if matrix.rows() != labels.len() {
+                    return Err("Number of examples are different.");
+                }
+                Ok((matrix, labels))
+            }
+            _ => Err("Invalid matrix.")
         }
     }
 
-    pub fn test_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
-        // TODO location of dataset
-        let labels = try!(MnistDigits::read_labels("datasets/mnist_digits/t10k-labels-idx1-ubyte.gz", 10000));
-        let values = try!(MnistDigits::read_examples::<T>("datasets/mnist_digits/t10k-images-idx3-ubyte.gz", 10000));
+    pub fn training_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
 
-        let m = Matrix::from_vec(values, 10000, 784);
-        match m {
-            Some(mat) => Ok((mat, labels)),
-            _ => Err("Could not create matrix.")
-        }
+        // TODO location of dataset
+        MnistDigits::from(
+            "datasets/mnist_digits/train-images-idx3-ubyte.gz",
+            "datasets/mnist_digits/train-labels-idx1-ubyte.gz"
+        )
+    }
+
+    pub fn test_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+
+        // TODO location of dataset
+        MnistDigits::from(
+            "datasets/mnist_digits/t10k-images-idx3-ubyte.gz",
+            "datasets/mnist_digits/t10k-labels-idx1-ubyte.gz"
+        )
     }
 }
 

@@ -1,8 +1,6 @@
 //! Module that contains structs and functions useful for doing matrix
 //! operations.
 
-#![macro_use]
-
 extern crate libc;
 extern crate rand;
 extern crate num;
@@ -38,6 +36,45 @@ impl <T: Float> HasNan for Matrix<T> {
         self.data.iter().any(|&x| x.is_nan())
     }
 }
+
+// --------------- Matrix macro mat! --------------------------------
+
+/// Macro to create a matrix.
+///
+/// # Example
+///
+/// let m = mat![1.0, 2.0, 3.0; 4.0, 5.0, 6.0];
+///
+/// This example creates the following 2x3 matrix:
+///
+/// `[ 1 2 3 ]`
+///
+/// `[ 4 5 6 ]`
+#[macro_export]
+macro_rules! mat {
+    ( $( $( $x:expr ),+ ) ;* ) => {
+        {
+        let mut v = Vec::new();
+        let mut cols;
+        let mut cols_old = 0;
+        let mut rows = 0;
+        $(
+            rows += 1;
+            cols = 0;
+            $(
+                cols += 1;
+                v.push($x);
+            )+
+            if rows > 1 && cols != cols_old {
+                panic!("Invalid matrix.");
+            }
+            cols_old = cols;
+        )*
+        Matrix::from_vec(v, rows, cols_old).unwrap()
+        }
+    };
+}
+
 
 // ------------------------------------------------------------------
 
@@ -79,8 +116,10 @@ impl <T: Clone> Matrix<T> {
     /// Creates a matrix with random values.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let m = Matrix::<f64>::random::<f64>(3, 2);
+    /// assert_eq!(m.rows(), 3);
+    /// assert_eq!(m.cols(), 2);
     /// println!("{}", m);
     /// ```
     pub fn random<R: Rand + Clone>(rows: usize, cols: usize) -> Matrix<R> {
@@ -234,7 +273,7 @@ impl Mul for Matrix<f64> {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```ignore
     /// let a = mat![1.0, 2.0; 3.0, 4.0];
     /// let b = mat![4,0, 2.0; 5.0, 9.0];
     /// let c = a * b;
@@ -279,7 +318,7 @@ impl Mul for Matrix<f32> {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```ignore
     /// let a = mat![1.0, 2.0; 3.0, 4.0];
     /// let b = mat![4,0, 2.0; 5.0, 9.0];
     /// let c = a * b;
@@ -334,44 +373,6 @@ impl <T: fmt::Display + Clone> fmt::Display for Matrix<T> {
         }
         write!(f, "")
     }
-}
-
-// --------------- Matrix macro mat! --------------------------------
-
-/// Macro to create a matrix.
-///
-/// # Example
-///
-/// let m = mat![1.0, 2.0, 3.0; 4.0, 5.0, 6.0];
-///
-/// This example creates the following 2x3 matrix:
-///
-/// `[ 1 2 3 ]`
-///
-/// `[ 4 5 6 ]`
-#[macro_export]
-macro_rules! mat {
-    ( $( $( $x:expr ),+ ) ;* ) => {
-        {
-        let mut v = Vec::new();
-        let mut cols;
-        let mut cols_old = 0;
-        let mut rows = 0;
-        $(
-            rows += 1;
-            cols = 0;
-            $(
-                cols += 1;
-                v.push($x);
-            )+
-            if rows > 1 && cols != cols_old {
-                panic!("Invalid matrix.");
-            }
-            cols_old = cols;
-        )*
-        Matrix::from_vec(v, rows, cols_old).unwrap()
-        }
-    };
 }
 
 // --------------- Tests --------------------------------------------

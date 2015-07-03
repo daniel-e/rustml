@@ -1,9 +1,7 @@
-extern crate time;
 extern crate rustml;
 
-use rustml::distance::*;
-use rustml::knn::knn_scan;
-use rustml::vectors::group;
+use rustml::*;
+use rustml::knn::classify;
 use rustml::datasets::MnistDigits;
 
 fn main() {
@@ -12,30 +10,33 @@ fn main() {
     let k = 5;
 
     println!("Reading training data ...");
-    let (training, training_labels) = MnistDigits::training_set::<T>().unwrap();
+    let (training, training_labels) = 
+        MnistDigits::from::<T>(
+            "../../datasets/mnist_digits/train-images-idx3-ubyte.gz",
+            "../../datasets/mnist_digits/train-labels-idx1-ubyte.gz"
+        ).unwrap();
 
     println!("Reading test data ...");
-    let (test, test_labels) = MnistDigits::test_set::<T>().unwrap();
+    let (test, test_labels) = 
+        MnistDigits::from::<T>(
+            "../../datasets/mnist_digits/t10k-images-idx3-ubyte.gz",
+            "../../datasets/mnist_digits/t10k-labels-idx1-ubyte.gz"
+        ).unwrap();
 
+    // classify the first five examples from the test set
     println!("Classifying ...");
-    let r = test.row_iter().zip(test_labels.iter()).take(10)
+    let r = test.row_iter().zip(test_labels.iter()).take(5)
         .map(|(row, label)| {
-            let idx = knn_scan(&training, row, k, |x, y| Euclid::compute(x, y).unwrap()).unwrap();
+            let target = classify(
+                &training, &training_labels, row, k, |x, y| Euclid::compute(x, y).unwrap()
+            );
 
-            let mut targets: Vec<u8> = idx.iter().map(|pos| training_labels.get(*pos).unwrap()).cloned().collect();
-            targets.sort_by(|a, b| a.cmp(&b));
-            let mut r = group(&targets);
-            r.sort_by(|a, b| a.1.cmp(&b.1));
-
-            (label, r.last().unwrap().0)
+            (label, target)
         });
 
-    let t1 = time::now();
     for (x, y) in r {
-        println!("{} {}", x, y);
+        println!("label = {}, prediction = {}", x, y);
     }
-    let t2 = time::now();
-    println!("{}", t2 - t1);
 }
 
 
