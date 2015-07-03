@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["classify",""],["scan","Search the k nearest neighbours for the given example."]]});

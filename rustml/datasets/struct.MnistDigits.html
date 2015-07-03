@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `MnistDigits` struct in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, MnistDigits">
+
+    <title>rustml::datasets::MnistDigits - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>datasets</a></p><script>window.sidebarCurrent = {name: 'MnistDigits', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>datasets</a>::<wbr><a class='struct' href=''>MnistDigits</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1528' class='srclink' href='../../src/rustml/datasets.rs.html#19' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct MnistDigits;</pre><div class='docblock'><p>This structure offers access to the MNIST database of handwritten digits.</p>
+
+<p>The database that is used is available at <a href="http://yann.lecun.com/exdb/mnist/">http://yann.lecun.com/exdb/mnist/</a>
+and contains 60,000 training examples and 10,000 test examples of handwritten
+digits.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../rustml/datasets/struct.MnistDigits.html' title='rustml::datasets::MnistDigits'>MnistDigits</a></code></h3><div class='impl-items'><h4 id='method.from' class='method'><code>fn <a href='#method.from' class='fnname'>from</a>&lt;T: <a class='trait' href='../../num/traits/trait.Float.html' title='num::traits::Float'>Float</a> + <a class='trait' href='../../rustml/datasets/trait.Cast.html' title='rustml::datasets::Cast'>Cast</a>&gt;(vectors_fname: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, labels_fname: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;)</a>, &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
+<h4 id='method.training_set' class='method'><code>fn <a href='#method.training_set' class='fnname'>training_set</a>&lt;T: <a class='trait' href='../../num/traits/trait.Float.html' title='num::traits::Float'>Float</a> + <a class='trait' href='../../rustml/datasets/trait.Cast.html' title='rustml::datasets::Cast'>Cast</a>&gt;() -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;)</a>, &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
+<h4 id='method.test_set' class='method'><code>fn <a href='#method.test_set' class='fnname'>test_set</a>&lt;T: <a class='trait' href='../../num/traits/trait.Float.html' title='num::traits::Float'>Float</a> + <a class='trait' href='../../rustml/datasets/trait.Cast.html' title='rustml::datasets::Cast'>Cast</a>&gt;() -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;)</a>, &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustml";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>
