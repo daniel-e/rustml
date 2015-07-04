@@ -6,12 +6,12 @@ use std::cmp::{PartialEq, min};
 use self::libc::{c_void, size_t, c_int, c_float, c_double};
 use std::mem;
 use std::marker::Copy;
-use self::num::traits::Num;
+use self::num::traits::Float;
 
 use blas::{cblas_saxpy, cblas_daxpy};
 
 /// Trait to add a slice to a vector using the underlying BLAS implementation.
-pub trait AddVector<T: Num> {
+pub trait AddVector<T> {
 
     /// Adds the given slice `rhs` inplace.
     ///
@@ -25,47 +25,34 @@ pub trait AddVector<T: Num> {
     fn add(&mut self, rhs: &[T]);
 }
 
-impl AddVector<f32> for Vec<f32> {
+impl <T: Float> AddVector<T> for Vec<T> {
 
-    fn add(&mut self, rhs: &[f32]) {
-
-        if self.len() != rhs.len() {
-            panic!("Vectors must have the same length.");
-        }
-
-        unsafe {
-            cblas_saxpy(
-                self.len()    as c_int,
-                1.0           as c_float,
-                rhs.as_ptr()  as *const c_float,
-                1             as c_int,
-                self.as_ptr() as *mut c_float,
-                1             as c_int
-            );
-        }
-    }
-}
-
-impl AddVector<f64> for Vec<f64> {
-
-    /// Adds the given slice `rhs` to the current vector.
-    ///
-    /// Panics if vector and slice have different lengths.
-    fn add(&mut self, rhs: &[f64]) {
+    fn add(&mut self, rhs: &[T]) {
 
         if self.len() != rhs.len() {
             panic!("Vectors must have the same length.");
         }
 
         unsafe {
-            cblas_daxpy(
-                self.len()    as c_int,
-                1.0           as c_double,
-                rhs.as_ptr()  as *const c_double,
-                1             as c_int,
-                self.as_ptr() as *mut c_double,
-                1             as c_int
-            );
+            match mem::size_of::<T>() {
+                4 => cblas_saxpy(
+                    self.len()    as c_int,
+                    1.0           as c_float,
+                    rhs.as_ptr()  as *const c_float,
+                    1             as c_int,
+                    self.as_ptr() as *mut c_float,
+                    1             as c_int
+                ),
+                8 => cblas_daxpy(
+                    self.len()    as c_int,
+                    1.0           as c_double,
+                    rhs.as_ptr()  as *const c_double,
+                    1             as c_int,
+                    self.as_ptr() as *mut c_double,
+                    1             as c_int
+                ),
+                _ => panic!("size")
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ extern crate std;
 extern crate time;
 
 use std::io::Read;
-use self::num::traits::Float;
+use self::num::traits::{Float, FromPrimitive};
 
 use io::GzipData;
 use matrix::*;
@@ -57,7 +57,7 @@ impl MnistDigits {
         Ok(l)
     }
 
-    fn read_examples<T: Float + Cast>(fname: &str) -> Result<Vec<T>, &'static str> {
+    fn read_examples<T: Float + FromPrimitive>(fname: &str) -> Result<Vec<T>, &'static str> {
 
         let mut data = try!(GzipData::from_file(fname));
 
@@ -81,12 +81,12 @@ impl MnistDigits {
 
         let mut r: Vec<T> = Vec::with_capacity(v.len());
         for i in v {
-            r.push(T::cast(*i));
+            r.push(T::from_u8(*i).unwrap());
         }
         Ok(r)
     }
 
-    pub fn from<T: Float + Cast>(vectors_fname: &str, labels_fname: &str) -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+    pub fn from<T: Float + FromPrimitive>(vectors_fname: &str, labels_fname: &str) -> Result<(Matrix<T>, Vec<u8>), &'static str> {
 
         let labels = try!(MnistDigits::read_labels(labels_fname));
         let values = try!(MnistDigits::read_examples::<T>(vectors_fname));
@@ -102,7 +102,7 @@ impl MnistDigits {
         }
     }
 
-    pub fn training_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+    pub fn training_set<T: Float + FromPrimitive>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
 
         // TODO location of dataset
         MnistDigits::from(
@@ -111,7 +111,7 @@ impl MnistDigits {
         )
     }
 
-    pub fn test_set<T: Float + Cast>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+    pub fn test_set<T: Float + FromPrimitive>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
 
         // TODO location of dataset
         MnistDigits::from(
@@ -119,18 +119,6 @@ impl MnistDigits {
             "datasets/mnist_digits/t10k-labels-idx1-ubyte.gz"
         )
     }
-}
-
-pub trait Cast {
-    fn cast(x: u8) -> Self;
-}
-
-impl Cast for f32 {
-    fn cast(x: u8) -> f32 { x as f32 }
-}
-
-impl Cast for f64 {
-    fn cast(x: u8) -> f64 { x as f64 }
 }
 
 #[cfg(test)]
