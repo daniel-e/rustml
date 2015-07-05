@@ -57,6 +57,7 @@ impl <T: Num + Copy> Sum<T> for [T] {
 
     fn sum(&self, dim: Dimension) -> T {
         match dim {
+            // TODO is there a more efficient method?
             Dimension::Row => self.iter().fold(T::zero(), |init, &val| init + val),
             _ => T::zero()
         }
@@ -67,7 +68,28 @@ impl <T: Num + Copy> Sum<T> for [T] {
 
 /// Trait to compute the mean of values.
 pub trait Mean<T> {
+    /// Computes the mean over all elements for the specified dimension.
+    ///
+    /// When computing the mean of a vector or a slice both
+    /// are interpreted as a row vector. Thus,
+    /// the only valid dimension for vectors or slices
+    /// is `Dimension::Row`. For other dimensions or if the vector or
+    /// slice is empty the function will always return zero. 
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let v = vec![1.0, 5.0, 9.0];
+    /// assert_eq!(v.sum(Dimension::Row), 15.0);
+    /// assert_eq!(v.sum(Dimension::Column), 0.0);
+    /// ```
+    ///
+    /// # Implementation details
+    ///
+    /// Uses the [Sum](trait.Sum.html) trait to compute the sum which is then
+    /// divided by the number of values.
     fn mean(&self, dim: Dimension) -> T;
+    // TODO document matrix
 }
 
 impl <T: Num + Copy + FromPrimitive> Mean<T> for Vec<T> {
@@ -77,6 +99,7 @@ impl <T: Num + Copy + FromPrimitive> Mean<T> for Vec<T> {
             Dimension::Row => {
                 match self.len() {
                     0 => T::zero(),
+                    // TODO unwrap
                     n => self.sum(dim) / (T::from_usize(n).unwrap())
                 }
             }
