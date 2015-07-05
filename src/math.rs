@@ -7,18 +7,53 @@ use matrix::Matrix;
 use vectors::AddVector;
 use self::num::traits::{Num, Float, FromPrimitive};
 
-/// Specifies the dimension over which to perform an operation.
+/// Determines the dimension over which to perform an operation.
 pub enum Dimension {
+    /// Perform the operation over all elements of a row.
     Row,
+    /// Perform the operatino over all elements of a column.
     Column
 }
 
+/// Determines the type of normalization used for computing the variance
+/// or standard deviation.
+pub enum Normalization {
+    /// Use as denominator n, i.e. the number of examples.
+    N,
+    /// Use as denominator (n-1), i.e. the number of examples minus one.
+    MinusOne
+}
+
+// ----------------------------------------------------------------------------
+
 /// Trait to compute the sum of values.
 pub trait Sum<T> {
+    /// Computes the sum over all elements for the specified dimension.
+    ///
+    /// When computing the sum of a vector or a slice both
+    /// are interpreted as a row vector. Thus,
+    /// the only valid dimension for vectors or slices
+    /// is `Dimension::Row`. For other dimensions the function 
+    /// will always return zero.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// let v = vec![1.0, 5.0, 9.0];
+    /// assert_eq!(v.sum(Dimension::Row), 15.0);
+    /// assert_eq!(v.sum(Dimension::Column), 0.0);
+    /// ```
     fn sum(&self, dim: Dimension) -> T;
 }
 
 impl <T: Num + Copy> Sum<T> for Vec<T> {
+
+    fn sum(&self, dim: Dimension) -> T {
+        (&self[..]).sum(dim)
+    }
+}
+
+impl <T: Num + Copy> Sum<T> for [T] {
 
     fn sum(&self, dim: Dimension) -> T {
         match dim {
@@ -60,28 +95,96 @@ impl <T: Float + FromPrimitive> Mean<Vec<T>> for Matrix<T> {
 
         match dim {
             Dimension::Column => {
+                // TODO reimplement when Sum for Matrix is implemented
                 let mut r: Vec<T> = self.values().take(self.cols()).cloned().collect();
                 for row in self.row_iter_at(1) {
                     r.add(row);
                 }
-                let div = T::from_usize(self.rows()).unwrap();
+                let n = T::from_usize(self.rows()).unwrap();
                 for i in r.iter_mut() {
-                    *i = *i / div;
+                    *i = *i / n;
                 }
                 r
             }
             Dimension::Row => {
-                vec![T::zero()]
+                // TODO reimplement when Sum for Matrix is implemented
+                let n = T::from_usize(self.cols()).unwrap();
+                self.row_iter().map(|row| row.sum(Dimension::Row) / n).collect()
             }
         }
     }
 }
 
+// ----------------------------------------------------------------------------
+
+/// Trait to compute sigma squared of values.
+pub trait Var<T> {
+    fn var(&self, dim: Dimension, nrm: Normalization) -> T;
+}
+
+impl <T: Num + Copy + FromPrimitive> Var<T> for Vec<T> {
+
+    fn var(&self, dim: Dimension, nrm: Normalization) -> T {
+        match dim {
+            Dimension::Row => {
+                match self.len() {
+                    0 => T::zero(),
+                    n => {
+                        let mu = self.mean(dim);
+                        let mut d = T::from_usize(n).unwrap();
+                        match nrm {
+                            Normalization::MinusOne => {
+                                if n > 1 {
+                                    d = d - T::one();
+                                }
+                            }
+                            _ => ()
+                        }
+                        self.iter().map(|&x| (x - mu) * (x - mu)).fold(T::zero(), |acc, x| acc + x) / d
+                    }
+                }
+            }
+            _ => T::zero()
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use matrix::*;
+
+    #[test]
+    fn test_var_vec_f32() {
+
+        let x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0];
+        assert_eq!(x.var(Dimension::Row, Normalization::N), 1.25);
+
+        let y: Vec<f32> = vec![10.0, 5.0, 3.0, 11.0, 2.0, 15.0, 13.0, 5.0, 3.0];
+        assert!(y.var(Dimension::Row, Normalization::N) - 20.914 < 0.001);
+
+        let a: Vec<f32> = Vec::new();
+        assert_eq!(a.var(Dimension::Row, Normalization::N), 0.0);
+        assert_eq!(a.var(Dimension::Column, Normalization::N), 0.0);
+        assert_eq!(x.var(Dimension::Column, Normalization::N), 0.0);
+    }
+
+    #[test]
+    fn test_var_minus_vec_f32() {
+
+        let x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0];
+        assert!(x.var(Dimension::Row, Normalization::MinusOne) - 1.6667 < 0.0001);
+
+        let y: Vec<f32> = vec![10.0, 5.0, 3.0, 11.0, 2.0, 15.0, 13.0, 5.0, 3.0];
+        assert!(y.var(Dimension::Row, Normalization::MinusOne) - 23.528 < 0.001);
+
+        let a: Vec<f32> = Vec::new();
+        assert_eq!(a.var(Dimension::Row, Normalization::MinusOne), 0.0);
+        assert_eq!(a.var(Dimension::Column, Normalization::MinusOne), 0.0);
+        assert_eq!(x.var(Dimension::Column, Normalization::MinusOne), 0.0);
+    }
 
     #[test]
     fn test_sum_vec_f32() {
@@ -110,15 +213,18 @@ mod tests {
 
         let a = Matrix::<f32>::new();
         assert_eq!(a.mean(Dimension::Column), vec![]);
+        assert_eq!(a.mean(Dimension::Row), vec![]);
 
         let b = mat![5.0, 6.0];
         assert_eq!(b.mean(Dimension::Column), vec![5.0, 6.0]);
+        assert_eq!(b.mean(Dimension::Row), vec![5.5]);
 
         let x = mat![
             1.0, 2.0;
             3.0, 4.0
         ];
         assert_eq!(x.mean(Dimension::Column), vec![2.0, 3.0]);
+        assert_eq!(x.mean(Dimension::Row), vec![1.5, 3.5]);
     }
 }
 
