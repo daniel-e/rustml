@@ -12,15 +12,15 @@ fn main() {
     println!("Reading training data ...");
     let (training, training_labels) = 
         MnistDigits::from::<T>(
-            "../../datasets/mnist_digits/train-images-idx3-ubyte.gz",
-            "../../datasets/mnist_digits/train-labels-idx1-ubyte.gz"
+            "datasets/mnist_digits/train-images-idx3-ubyte.gz",
+            "datasets/mnist_digits/train-labels-idx1-ubyte.gz"
         ).unwrap();
 
     println!("Reading test data ...");
     let (test, test_labels) = 
         MnistDigits::from::<T>(
-            "../../datasets/mnist_digits/t10k-images-idx3-ubyte.gz",
-            "../../datasets/mnist_digits/t10k-labels-idx1-ubyte.gz"
+            "datasets/mnist_digits/t10k-images-idx3-ubyte.gz",
+            "datasets/mnist_digits/t10k-labels-idx1-ubyte.gz"
         ).unwrap();
 
     // classify the first five examples from the test set

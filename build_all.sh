@@ -1,31 +1,19 @@
 #!/bin/bash
 
-echo "."
+echo "clean"
 cargo clean
 
-cd examples
-for i in *; do
-	echo $i
-	cd $i
-	cargo clean
-	cd ..
-done
-cd ..
-
-echo "."
+echo "building lib ..."
 cargo build
 
-cd examples
-for i in *; do
-	echo $i
-	cd $i
-	cargo build
-	cd ..
+for i in vector_addition mnist_digits matrix_multiplication; do
+	echo "example $i ..."
+	cargo run --example $i
 done
-cd ..
 
 echo "doc"
 cargo doc
+
 echo "test"
 cargo test
 

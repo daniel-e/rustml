@@ -4,7 +4,7 @@
 extern crate num;
 
 use matrix::Matrix;
-use vectors::AddVector;
+use vectors::{AddVector, zero};
 use self::num::traits::{Num, Float, FromPrimitive};
 
 /// Determines the dimension over which to perform an operation.
@@ -38,7 +38,9 @@ pub trait Sum<T> {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```
+    /// use rustml::math::{Sum, Dimension};
+    ///
     /// let v = vec![1.0, 5.0, 9.0];
     /// assert_eq!(v.sum(Dimension::Row), 15.0);
     /// assert_eq!(v.sum(Dimension::Column), 0.0);
@@ -64,6 +66,24 @@ impl <T: Num + Copy> Sum<T> for [T] {
     }
 }
 
+impl <T: Float + Copy> Sum<Vec<T>> for Matrix<T> {
+
+    fn sum(&self, dim: Dimension) -> Vec<T> {
+        match dim {
+            Dimension:: Column => {
+                let mut v = zero::<T>(self.cols());
+                for row in self.row_iter() {
+                    v.add(row);
+                }
+                v
+            }
+            Dimension::Row => {
+                self.row_iter().map(|row| row.sum(Dimension::Row)).collect()
+            }
+        }
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 /// Trait to compute the mean of values.
@@ -79,9 +99,11 @@ pub trait Mean<T> {
     /// # Examples
     ///
     /// ```
+    /// use rustml::math::{Mean, Dimension};
+    ///
     /// let v = vec![1.0, 5.0, 9.0];
-    /// assert_eq!(v.sum(Dimension::Row), 15.0);
-    /// assert_eq!(v.sum(Dimension::Column), 0.0);
+    /// assert_eq!(v.mean(Dimension::Row), 5.0);
+    /// assert_eq!(v.mean(Dimension::Column), 0.0);
     /// ```
     ///
     /// # Implementation details
@@ -140,7 +162,7 @@ impl <T: Float + FromPrimitive> Mean<Vec<T>> for Matrix<T> {
 
 // ----------------------------------------------------------------------------
 
-/// Trait to compute sigma squared of values.
+/// Trait to compute variance of values.
 pub trait Var<T> {
     fn var(&self, dim: Dimension, nrm: Normalization) -> T;
 }
@@ -178,6 +200,18 @@ impl <T: Num + Copy + FromPrimitive> Var<T> for Vec<T> {
 mod tests {
     use super::*;
     use matrix::*;
+
+    #[test]
+    fn test_sum_matrix_f32() {
+
+        let m = mat![1.0, 2.0; 5.0, 10.0];
+        assert_eq!(m.sum(Dimension::Column), vec![6.0, 12.0]);
+        assert_eq!(m.sum(Dimension::Row), vec![3.0, 15.0]);
+
+        let a = Matrix::<f32>::new();
+        assert_eq!(a.sum(Dimension::Column), vec![]);
+        assert_eq!(a.sum(Dimension::Row), vec![]);
+    }
 
     #[test]
     fn test_var_vec_f32() {

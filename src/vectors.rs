@@ -6,7 +6,8 @@ use std::cmp::{PartialEq, min};
 use self::libc::{c_void, size_t, c_int, c_float, c_double};
 use std::mem;
 use std::marker::Copy;
-use self::num::traits::Float;
+use self::num::traits::{Float, Num};
+use std::iter;
 
 use blas::{cblas_saxpy, cblas_daxpy};
 
@@ -17,9 +18,12 @@ pub trait AddVector<T> {
     ///
     /// # Example
     ///
-    /// ```ignore
+    /// ```
+    /// use rustml::vectors::AddVector;
+    ///
     /// let mut v = vec![1.0, 2.0];
     /// let y = vec![3.0, 8.0];
+    /// v.add(&y);
     /// assert_eq!(v, vec![4.0, 10.0]);
     /// ```
     fn add(&mut self, rhs: &[T]);
@@ -79,6 +83,27 @@ pub fn group<T: PartialEq + Clone>(v: &Vec<T>) -> Vec<(T, usize)> {
     r
 }
 
+// ------------------------------------------------------------------
+
+/// Creates a vector for which all elements are equal to zero.
+///
+/// # Example
+///
+/// ```
+/// use rustml::vectors::zero;
+///
+/// let b = zero::<i32>(5);
+/// assert_eq!(b, vec![0, 0, 0, 0, 0]);
+/// let c = zero::<i32>(0);
+/// assert_eq!(c, vec![]);
+/// ```
+pub fn zero<T: Num + Clone>(n: usize) -> Vec<T> {
+
+    // TODO more efficient implementation
+    iter::repeat(T::zero()).take(n).collect()
+}
+
+// ------------------------------------------------------------------
 
 extern {
     fn memcpy(dst: *mut c_void, src: *const c_void, n: size_t);
@@ -106,7 +131,19 @@ pub fn copy_memory<T: Copy>(dst: &mut [T], src: &[T], n: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    extern crate num;
     use super::*;
+
+    #[test]
+    fn test_zero() {
+
+        let a = zero::<f32>(4);
+        assert_eq!(a, vec![0.0, 0.0, 0.0, 0.0]);
+        let b = zero::<i32>(5);
+        assert_eq!(b, vec![0, 0, 0, 0, 0]);
+        let c = zero::<i32>(0);
+        assert_eq!(c, vec![]);
+    }
 
     #[test]
     fn test_add_vectorf32() {

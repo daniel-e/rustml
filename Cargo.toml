@@ -3,6 +3,22 @@ name = "rustml"
 version = "0.0.1"
 authors = ["Your Name <email@example.com>"]
 
+[lib]
+name = "rustml"
+path = "src/lib.rs"
+
+[[example]]
+name = "vector_addition"
+path = "examples/vector_addition.rs"
+
+[[example]]
+name = "mnist_digits"
+path = "examples/mnist_digits.rs"
+
+[[example]]
+name = "matrix_multiplication"
+path = "examples/matrix_multiplication.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"

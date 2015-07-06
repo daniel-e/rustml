@@ -116,10 +116,14 @@ impl <T: Clone> Matrix<T> {
     /// Creates a matrix with random values.
     ///
     /// # Example
-    /// ```ignore
+    /// ```
+    /// use rustml::Matrix;
+    ///
     /// let m = Matrix::<f64>::random::<f64>(3, 2);
     /// assert_eq!(m.rows(), 3);
     /// assert_eq!(m.cols(), 2);
+    /// // all values are in the interval [0, 1)
+    /// assert!(m.values().all(|&x| x < 1.0 && x >= 0.0));
     /// println!("{}", m);
     /// ```
     pub fn random<R: Rand + Clone>(rows: usize, cols: usize) -> Matrix<R> {
@@ -273,9 +277,13 @@ impl Mul for Matrix<f64> {
     /// # Example
     ///
     /// ```ignore
+    /// use rustml::*;
+    ///
     /// let a = mat![1.0, 2.0; 3.0, 4.0];
     /// let b = mat![4,0, 2.0; 5.0, 9.0];
     /// let c = a * b;
+    /// assert_eq!(c.row(0).unwrap(), [14.0, 20.0]);
+    /// assert_eq!(c.row(1).unwrap(), [32.0, 42.0]);
     /// println!("{}", c.unwrap());
     /// ```
     fn mul(self, rhs: Matrix<f64>) -> Self::Output {
@@ -321,6 +329,8 @@ impl Mul for Matrix<f32> {
     /// let a = mat![1.0, 2.0; 3.0, 4.0];
     /// let b = mat![4,0, 2.0; 5.0, 9.0];
     /// let c = a * b;
+    /// assert_eq!(c.row(0).unwrap(), [14.0, 20.0]);
+    /// assert_eq!(c.row(1).unwrap(), [32.0, 42.0]);
     /// println!("{}", c.unwrap());
     /// ```
     fn mul(self, rhs: Matrix<f32>) -> Self::Output {

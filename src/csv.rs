@@ -13,7 +13,9 @@ use matrix::*;
 ///
 /// # Example
 ///
-/// ```ignore
+/// ```
+/// use rustml::csv::vec_to_csv;
+///
 /// let a = &[1, 2, 3];
 /// assert_eq!(vec_to_csv(a, ","), "1,2,3");
 /// ```
@@ -37,6 +39,8 @@ pub fn vec_to_csv<T: fmt::Display>(v: &[T], sep: &str) -> String {
 /// # Example
 ///
 /// ```ignore
+/// use rustml::csv::matrix_to_csv;
+///
 /// let m = mat![1.0, 2.0; 3.0, 4.0];
 /// assert_eq!(matrix_to_csv(&m, ","), "1,2\n3,4\n")
 /// ```

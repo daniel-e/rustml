@@ -17,3 +17,14 @@ fn main() {
     println!("{}", c);
 }
 ```
+
+# Examples
+
+You can find examples in the directory `examples`. These examples can be executed with
+Cargo as follows:
+
+```bash
+cargo run --example vector_addition
+cargo run --example mnist_digits
+cargo run --example matrix_multiplication
+``` 
