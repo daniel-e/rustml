@@ -605,6 +605,16 @@
 <span id="563">563</span>
 <span id="564">564</span>
 <span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Module that contains structs and functions useful for doing matrix</span>
 <span class='doccomment'>//! operations.</span>
@@ -724,10 +734,14 @@
     <span class='doccomment'>/// Creates a matrix with random values.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Example</span>
-    <span class='doccomment'>/// ```ignore</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use rustml::Matrix;</span>
+    <span class='doccomment'>///</span>
     <span class='doccomment'>/// let m = Matrix::&lt;f64&gt;::random::&lt;f64&gt;(3, 2);</span>
     <span class='doccomment'>/// assert_eq!(m.rows(), 3);</span>
     <span class='doccomment'>/// assert_eq!(m.cols(), 2);</span>
+    <span class='doccomment'>/// // all values are in the interval [0, 1)</span>
+    <span class='doccomment'>/// assert!(m.values().all(|&amp;x| x &lt; 1.0 &amp;&amp; x &gt;= 0.0));</span>
     <span class='doccomment'>/// println!(&quot;{}&quot;, m);</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>random</span><span class='op'>&lt;</span><span class='ident'>R</span>: <span class='ident'>Rand</span> <span class='op'>+</span> <span class='ident'>Clone</span><span class='op'>&gt;</span>(<span class='ident'>rows</span>: <span class='ident'>usize</span>, <span class='ident'>cols</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> {
@@ -881,9 +895,13 @@
     <span class='doccomment'>/// # Example</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```ignore</span>
+    <span class='doccomment'>/// use rustml::*;</span>
+    <span class='doccomment'>///</span>
     <span class='doccomment'>/// let a = mat![1.0, 2.0; 3.0, 4.0];</span>
     <span class='doccomment'>/// let b = mat![4,0, 2.0; 5.0, 9.0];</span>
     <span class='doccomment'>/// let c = a * b;</span>
+    <span class='doccomment'>/// assert_eq!(c.row(0).unwrap(), [14.0, 20.0]);</span>
+    <span class='doccomment'>/// assert_eq!(c.row(1).unwrap(), [32.0, 42.0]);</span>
     <span class='doccomment'>/// println!(&quot;{}&quot;, c.unwrap());</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>fn</span> <span class='ident'>mul</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>Output</span> {
@@ -929,6 +947,8 @@
     <span class='doccomment'>/// let a = mat![1.0, 2.0; 3.0, 4.0];</span>
     <span class='doccomment'>/// let b = mat![4,0, 2.0; 5.0, 9.0];</span>
     <span class='doccomment'>/// let c = a * b;</span>
+    <span class='doccomment'>/// assert_eq!(c.row(0).unwrap(), [14.0, 20.0]);</span>
+    <span class='doccomment'>/// assert_eq!(c.row(1).unwrap(), [32.0, 42.0]);</span>
     <span class='doccomment'>/// println!(&quot;{}&quot;, c.unwrap());</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>fn</span> <span class='ident'>mul</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>::<span class='ident'>Output</span> {

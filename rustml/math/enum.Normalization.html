@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `Cast` trait in crate `rustml`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, Cast">
+    <meta name="description" content="API documentation for the Rust `Normalization` enum in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Normalization">
 
-    <title>rustml::datasets::Cast - Rust</title>
+    <title>rustml::math::Normalization - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>datasets</a></p><script>window.sidebarCurrent = {name: 'Cast', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>math</a></p><script>window.sidebarCurrent = {name: 'Normalization', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -40,25 +40,21 @@
         </form>
     </nav>
 
-    <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>datasets</a>::<wbr><a class='trait' href=''>Cast</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>math</a>::<wbr><a class='enum' href=''>Normalization</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-2091' class='srclink' href='../../src/rustml/datasets.rs.html#124-126' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait Cast {
-    fn <a href='#tymethod.cast' class='fnname'>cast</a>(x: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; Self;
-}</pre>
-            <h2 id='required-methods'>Required Methods</h2>
-            <div class='methods'>
-        <h3 id='tymethod.cast' class='method stab '><code>fn <a href='#tymethod.cast' class='fnname'>cast</a>(x: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; Self</code></h3></div>
-        <h2 id='implementors'>Implementors</h2>
-        <ul class='item-list' id='implementors-list'>
-    <li><code>impl <a class='trait' href='../../rustml/datasets/trait.Cast.html' title='rustml::datasets::Cast'>Cast</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a></code></li>
-<li><code>impl <a class='trait' href='../../rustml/datasets/trait.Cast.html' title='rustml::datasets::Cast'>Cast</a> for <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a></code></li>
-</ul><script type="text/javascript" async
-                              src="../../implementors/rustml/datasets/trait.Cast.js">
-                      </script></section>
+        </span><a id='src-3376' class='srclink' href='../../src/rustml/math.rs.html#20-25' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Normalization {
+    N,
+    MinusOne,
+}</pre><div class='docblock'><p>Determines the type of normalization used for computing the variance
+or standard deviation.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.N'><code>N</code></td><td><div class='docblock'><p>Use as denominator n, i.e. the number of examples.</p>
+</div></td></tr><tr><td id='variant.MinusOne'><code>MinusOne</code></td><td><div class='docblock'><p>Use as denominator (n-1), i.e. the number of examples minus one.</p>
+</div></td></tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

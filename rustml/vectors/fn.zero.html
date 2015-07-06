@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `io` mod in crate `rustml`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, io">
+    <meta name="description" content="API documentation for the Rust `zero` fn in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, zero">
 
-    <title>rustml::io - Rust</title>
+    <title>rustml::vectors::zero - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>rustml</a></p><script>window.sidebarCurrent = {name: 'io', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>vectors</a></p><script>window.sidebarCurrent = {name: 'zero', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -40,24 +40,24 @@
         </form>
     </nav>
 
-    <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustml</a>::<wbr><a class='mod' href=''>io</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content fn">
+<h1 class='fqn'><span class='in-band'>Function <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>vectors</a>::<wbr><a class='fn' href=''>zero</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-2385' class='srclink' href='../../src/rustml/io.rs.html#1-108' title='goto source code'>[src]</a></span></h1>
-<div class='docblock'><p>Functions to read and write files (e.g. gzip compressed files).</p>
-</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
-<table>
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.GzipData.html'
-                               title='rustml::io::GzipData'>GzipData</a></td>
-                        <td class='docblock short'>
-                             <p>Struct to decompress gzip streams.</p>
+        </span><a id='src-3253' class='srclink' href='../../src/rustml/vectors.rs.html#102-106' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn zero&lt;T: <a class='trait' href='../../num/traits/trait.Num.html' title='num::traits::Num'>Num</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt;(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</pre><div class='docblock'><p>Creates a vector for which all elements are equal to zero.</p>
 
-                        </td>
-                    </tr>
-                </table></section>
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>vectors</span>::<span class='ident'>zero</span>;
+
+<span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>zero</span>::<span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span>(<span class='number'>5</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>b</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>]);
+<span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>zero</span>::<span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span>(<span class='number'>0</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='macro'>vec</span><span class='macro'>!</span>[]);
+</pre>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
