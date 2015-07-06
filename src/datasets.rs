@@ -16,6 +16,9 @@ use matrix::*;
 /// The database that is used is available at http://yann.lecun.com/exdb/mnist/
 /// and contains 60,000 training examples and 10,000 test examples of handwritten
 /// digits.
+///
+/// Currently, due to upload limits at crate.io a smaller training dataset
+/// is used with 50,000 training examples.
 pub struct MnistDigits;
 
 impl MnistDigits {
@@ -106,8 +109,8 @@ impl MnistDigits {
 
         // TODO location of dataset
         MnistDigits::from(
-            "datasets/mnist_digits/train-images-idx3-ubyte.gz",
-            "datasets/mnist_digits/train-labels-idx1-ubyte.gz"
+            "datasets/mnist_digits/train-images-idx3-ubyte.50k.gz",
+            "datasets/mnist_digits/train-labels-idx1-ubyte.50k.gz"
         )
     }
 
