@@ -1,7 +1,15 @@
 [package]
 name = "rustml"
 version = "0.0.1"
-authors = ["Your Name <email@example.com>"]
+authors = ["Daniel Etzold <detzold@gmail.com>"]
+readme = "README.md"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/daniel-e/rustml"
+homepage = "http://daniel-e.github.io/rustml/rustml/"
+documentation = "http://daniel-e.github.io/rustml/rustml/"
+description = """
+A library for doing maching learning in Rust.
+"""
 
 [lib]
 name = "rustml"

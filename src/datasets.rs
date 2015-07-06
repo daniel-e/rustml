@@ -125,12 +125,12 @@ impl MnistDigits {
 mod tests {
     use super::*;
     use ::io::GzipData;
-    use std::io::Read;
+    //use std::io::Read;
 
     #[test]
     fn test_training_set() {
 
-
+        // TODO
         //let (training, training_labels) = MnistDigits::training_set().unwrap();
         //let (testing, testing_labels) = MnistDigits::test_set().unwrap();
     }
@@ -155,10 +155,12 @@ mod tests {
     }
 
     #[test]
-    fn test_performance() {
-
+    fn test_read() {
+        // TODO
+        /*
         let mut gz = GzipData::from_file("datasets/mnist_digits/train-images-idx3-ubyte.gz").unwrap();
         let mut v: Vec<u8> = Vec::new();
         assert_eq!(gz.read_to_end(&mut v).unwrap(), 47040016);
+        */
     }
 }

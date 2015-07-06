@@ -1,6 +1,7 @@
 //! Functions to operate on vectors.
 extern crate libc;
 extern crate num;
+extern crate rand;
 
 use std::cmp::{PartialEq, min};
 use self::libc::{c_void, size_t, c_int, c_float, c_double};
@@ -8,6 +9,7 @@ use std::mem;
 use std::marker::Copy;
 use self::num::traits::{Float, Num};
 use std::iter;
+use self::rand::{thread_rng, Rng, Rand};
 
 use blas::{cblas_saxpy, cblas_daxpy};
 
@@ -101,6 +103,18 @@ pub fn zero<T: Num + Clone>(n: usize) -> Vec<T> {
 
     // TODO more efficient implementation
     iter::repeat(T::zero()).take(n).collect()
+}
+
+// ------------------------------------------------------------------
+
+/// Creates a vector with random elements.
+///
+/// # Example
+///
+// TODO
+pub fn random<T: Rand + Clone>(n: usize) -> Vec<T> {
+
+    thread_rng().gen_iter::<T>().take(n).collect::<Vec<T>>()
 }
 
 // ------------------------------------------------------------------

@@ -60,7 +60,9 @@ impl <T: Num + Copy> Sum<T> for [T] {
     fn sum(&self, dim: Dimension) -> T {
         match dim {
             // TODO is there a more efficient method?
-            Dimension::Row => self.iter().fold(T::zero(), |init, &val| init + val),
+            Dimension::Row => {
+                self.iter().fold(T::zero(), |init, &val| init + val)
+            }
             _ => T::zero()
         }
     }
@@ -198,8 +200,13 @@ impl <T: Num + Copy + FromPrimitive> Var<T> for Vec<T> {
 
 #[cfg(test)]
 mod tests {
+    //extern crate test;
+    //extern crate time;
+
     use super::*;
     use matrix::*;
+    //use vectors::random;
+    //use self::test::Bencher;
 
     #[test]
     fn test_sum_matrix_f32() {
@@ -283,5 +290,27 @@ mod tests {
         assert_eq!(x.mean(Dimension::Column), vec![2.0, 3.0]);
         assert_eq!(x.mean(Dimension::Row), vec![1.5, 3.5]);
     }
+
+/*
+    #[test]
+    fn test_bench_sum() {
+
+        let v = random::<f32>(1000);
+        let t1 = time::now();
+        for _ in (0..10000) {
+            let _: f32 = v.sum(Dimension::Row);
+        }
+        let t2 = time::now();
+        println!("test_bench_sum: {}", t2 - t1);
+    }
+*/
+    /*
+    #[bench]
+    fn bench_sum(b: &mut Bencher) {
+
+        let v = vec![1.0, 2.0, 3.0];
+        b.iter(|| v.sum(Dimension::Row));
+    }
+    */
 }
 
