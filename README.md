@@ -1,18 +1,18 @@
 # Rustml
 
-Library for doing machine learning in Rust. 
+Rustml is a library for doing machine learning in Rust. 
 
-The documentation for this project can be found  
-[here](http://daniel-e.github.io/rustml/rustml).
+The documentation of the project can be found [here](http://daniel-e.github.io/rustml/rustml).
 
 ## Features 
 
 * powerful matrix and vector support with BLAS bindings for high performance 
 * classification with k-nearest neighbord
-* access to MNIST database of handwritten digits
+* easy access to MNIST database of handwritten digits
 * parse and create CSV files
 * statistical functions like mean and variance for vectors and matrices
 * reading gzip compressed files
+* distance metrics
 
 ## Example: matrix multplication
 
