@@ -1,7 +1,20 @@
-For a documentation of the interfaces have a look at the 
-[rustml documentation](http://daniel-e.github.io/rustml/rustml).
+# Rustml
 
-# Example: matrix multplication
+Library for doing machine learning in Rust. 
+
+The documentation for this project can be found  
+[here](http://daniel-e.github.io/rustml/rustml).
+
+## Features 
+
+* powerful matrix and vector support with BLAS bindings for high performance 
+* classification with k-nearest neighbord
+* access to MNIST database of handwritten digits
+* parse and create CSV files
+* statistical functions like mean and variance for vectors and matrices
+* reading gzip compressed files
+
+## Example: matrix multplication
 
 ```rust
 use rustml::*;
@@ -23,7 +36,7 @@ fn main() {
 }
 ```
 
-# Examples
+### Other examples
 
 You can find orher examples in the directory `examples`. These examples can be executed with
 Cargo as follows:
