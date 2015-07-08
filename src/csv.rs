@@ -38,11 +38,15 @@ pub fn vec_to_csv<T: fmt::Display>(v: &[T], sep: &str) -> String {
 ///
 /// # Example
 ///
-/// ```ignore
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::*;
 /// use rustml::csv::matrix_to_csv;
 ///
+/// # fn main() {
 /// let m = mat![1.0, 2.0; 3.0, 4.0];
 /// assert_eq!(matrix_to_csv(&m, ","), "1,2\n3,4\n")
+/// # }
 /// ```
 pub fn matrix_to_csv<T: fmt::Display + Clone>(m: &Matrix<T>, sep: &str) -> String {
 

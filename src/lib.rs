@@ -16,7 +16,11 @@
 //! the label of a vector with two features based on the examples in the matrix
 //! `m` (the training set) with their known labels stored in the vector `labels`.
 //!
-//! ```ignore
+//! ```
+//! # #[macro_use] extern crate rustml;
+//! use rustml::*;
+//!
+//! # fn main() {
 //! let m = mat![  // training set
 //!     1.0, 2.0;  // each row contains one example for which the label is
 //!     1.1, 2.1;  // known
@@ -35,6 +39,7 @@
 //!         |x, y| Euclid::compute(x, y).unwrap() // use Euclidean distance
 //!     );
 //! assert_eq!(target, 1);
+//! # }
 //! ```
 //!
 //! # All examples
@@ -50,7 +55,7 @@
 pub use distance::{Distance, Euclid};
 pub use matrix::{HasNan, Matrix};
 pub use vectors::AddVector;
-pub use math::Mean;
+pub use math::{Dimension, Mean, Sum, Var};
 
 // ordering is important because the macro mat! is 
 // only available for modules which follow #[macro_use]

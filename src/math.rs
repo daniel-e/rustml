@@ -28,7 +28,7 @@ pub enum Normalization {
 
 /// Trait to compute the sum of values.
 pub trait Sum<T> {
-    /// Computes the sum over all elements for the specified dimension.
+    /// Computes the sum over all elements of the specified dimension.
     ///
     /// When computing the sum of a vector or a slice both
     /// are interpreted as a row vector. Thus,
@@ -38,18 +38,51 @@ pub trait Sum<T> {
     ///
     /// # Examples
     ///
+    /// Compute the sum of all elements of a vector.
+    ///
     /// ```
-    /// use rustml::math::{Sum, Dimension};
+    /// use rustml::*;
     ///
     /// let v = vec![1.0, 5.0, 9.0];
     /// assert_eq!(v.sum(Dimension::Row), 15.0);
+    /// // The dimension `Column` does not exist for a vector. The result
+    /// // is always zero.
     /// assert_eq!(v.sum(Dimension::Column), 0.0);
     /// ```
+    ///
+    /// To compute the sum of all elements in each column or each row of a
+    /// matrix you have to specify the correct dimension. 
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 2.0; 
+    ///     5.0, 10.0
+    /// ];
+    ///
+    /// assert_eq!(m.sum(Dimension::Row), vec![3.0, 15.0]);
+    /// assert_eq!(m.sum(Dimension::Column), vec![6.0, 12.0]);
+    /// # }
+    /// ```
+    ///
+    /// # Implementation details
+    ///
+    /// Currently, the following code is used to compute the sum of a row:
+    /// 
+    /// ```ignore
+    /// self.iter().fold(T::zero(), |init, &val| init + val)
+    /// ```
+    ///
+    /// In the future this may be replaced by a more efficient implementation.
     fn sum(&self, dim: Dimension) -> T;
 }
 
 impl <T: Num + Copy> Sum<T> for Vec<T> {
 
+    // TODO in the future there might be a default value
     fn sum(&self, dim: Dimension) -> T {
         (&self[..]).sum(dim)
     }
@@ -57,9 +90,10 @@ impl <T: Num + Copy> Sum<T> for Vec<T> {
 
 impl <T: Num + Copy> Sum<T> for [T] {
 
+    // TODO in the future there might be a default value
     fn sum(&self, dim: Dimension) -> T {
         match dim {
-            // TODO is there a more efficient method?
+            // TODO is there a more efficient method to sum up all values?
             Dimension::Row => {
                 self.iter().fold(T::zero(), |init, &val| init + val)
             }
