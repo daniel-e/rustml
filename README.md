@@ -14,20 +14,35 @@ The documentation of the project can be found [here](http://daniel-e.github.io/r
 * reading gzip compressed files
 * distance metrics
 
-## Example: matrix multplication
+## Using rustml - example matrix multplication
+
+Create a new project with cargo:
+
+```bash
+cargo new example --bin
+```
+
+A new directory `example` is created. Change into this directory and add the following lines `Cargo.toml`:
+```
+[dependencies.rustml]
+git = "https://github.com/daniel-e/rustml/"
+```
+
+Edit the file `main.rs` in the `src` directory.
 
 ```rust
+#[macro_use] extern crate rustml;
+
 use rustml::*;
 
 fn main() {
-
     let a = mat![
-        1.0, 2.0; 
-        3.0, 4.0; 
+        1.0f32, 2.0;
+        3.0, 4.0;
         5.0, 6.0
     ];
     let b = mat![
-        5.0, 7.0; 
+        5.0, 7.0;
         6.0, 2.0
     ];
     let c = (a * b).unwrap();
@@ -35,6 +50,8 @@ fn main() {
     println!("{}", c);
 }
 ```
+
+Now, in the `example` directory run the example with `cargo run`.
 
 ### Other examples
 
