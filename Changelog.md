@@ -4,3 +4,4 @@
 
 * more documentation and examples
 * matrix: implementation of trait Clone
+* vectors: multiply with scalar, add with scalar

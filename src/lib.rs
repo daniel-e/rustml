@@ -71,4 +71,4 @@ pub mod knn;
 pub mod norm;
 pub mod vectors;
 pub mod math;
-
+pub mod gaussian;

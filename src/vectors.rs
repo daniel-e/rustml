@@ -63,6 +63,22 @@ impl <T: Float> AddVector<T> for Vec<T> {
     }
 }
 
+pub trait VectorOps<T> {
+    fn mul_scalar(&self, scalar: T) -> Vec<T>;
+    fn add_scalar(&self, scalar: T) -> Vec<T>;
+}
+
+impl <T: Float> VectorOps<T> for Vec<T> {
+
+    fn mul_scalar(&self, scalar: T) -> Vec<T> {
+        self.iter().map(|&x| x * scalar).collect()
+    }
+
+    fn add_scalar(&self, scalar: T) -> Vec<T> {
+        self.iter().map(|&x| x + scalar).collect()
+    }
+}
+
 // ------------------------------------------------------------------
 
 /// Groups equal elements into one element and counts them.
@@ -212,5 +228,17 @@ mod tests {
         assert_eq!(copy_memory(&mut c, &d, 3), 3);
         assert_eq!(c, d);
     }
+
+    #[test]
+    fn test_vectorops() {
+
+        let a = vec![1.0f32, 2.0, 3.0];
+        let b = a.mul_scalar(3.0);
+        assert_eq!(b, [3.0, 6.0, 9.0]);
+
+        let c = a.add_scalar(3.0);
+        assert_eq!(c, [4.0, 5.0, 6.0]);
+    }
+
 }
 

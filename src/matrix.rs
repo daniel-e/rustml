@@ -67,8 +67,8 @@ impl <T: Clone> Clone for Matrix<T> {
     fn clone(&self) -> Self {
 
         Matrix {
-            nrows: self.nrows,
-            ncols: self.ncols,
+            nrows: self.nrows.clone(),
+            ncols: self.ncols.clone(),
             data: self.data.clone()
         }
     }
