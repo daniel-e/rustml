@@ -1,8 +1,5 @@
 extern crate num;
 
-use self::num::traits::{Num, FromPrimitive};
-
-use vectors::zero;
 use math::{Dimension, Normalization};
 use math::Mean;
 
@@ -13,39 +10,46 @@ pub trait Var<T> {
     fn var(&self, dim: Dimension, nrm: Normalization) -> T;
 }
 
-impl <T: Num + Copy + FromPrimitive> Var<T> for Vec<T> {
+macro_rules! var_impl {
+    ($($t:ty)*) => ($(
 
-    fn var(&self, dim: Dimension, nrm: Normalization) -> T {
-        (&self[..]).var(dim, nrm)
-    }
-}
+        impl Var<$t> for Vec<$t> {
 
-impl <T: Num + Copy + FromPrimitive> Var<T> for [T] {
+            fn var(&self, dim: Dimension, nrm: Normalization) -> $t {
+                (&self[..]).var(dim, nrm)
+            }
+        }
 
-    fn var(&self, dim: Dimension, nrm: Normalization) -> T {
-        match dim {
-            Dimension::Row => {
-                match self.len() {
-                    0 => T::zero(),
-                    n => {
-                        let mu = self.mean(dim);
-                        let mut d = T::from_usize(n).unwrap();
-                        match nrm {
-                            Normalization::MinusOne => {
-                                if n > 1 {
-                                    d = d - T::one();
+        impl Var<$t> for [$t] {
+
+            fn var(&self, dim: Dimension, nrm: Normalization) -> $t {
+                match dim {
+                    Dimension::Row => {
+                        match self.len() {
+                            0 => 0.0 as $t,
+                            n => {
+                                let mu = self.mean(dim);
+                                let mut d = n as $t;
+                                match nrm {
+                                    Normalization::MinusOne => {
+                                        if n > 1 {
+                                            d = d - (1.0 as $t);
+                                        }
+                                    }
+                                    _ => ()
                                 }
+                                self.iter().map(|&x| (x - mu) * (x - mu)).fold(0.0 as $t, |acc, x| acc + x) / d
                             }
-                            _ => ()
                         }
-                        self.iter().map(|&x| (x - mu) * (x - mu)).fold(T::zero(), |acc, x| acc + x) / d
                     }
+                    _ => 0.0 as $t
                 }
             }
-            _ => T::zero()
         }
-    }
+    )*)
 }
+
+var_impl!{ f32 f64 }
 
 // ----------------------------------------------------------------------------
 

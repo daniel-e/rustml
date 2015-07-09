@@ -215,6 +215,9 @@ impl <T: Clone> Matrix<T> {
 
     // ------------------------------------
 
+    /// Returns the internal buffer that is used to store the matrix.
+    pub fn buf(&self) -> &Vec<T> { &self.data }
+
     /// Is equivalent to calling the method `cols()` on the matrix.
     pub fn lead_dim(&self) -> usize { self.cols()  }
 

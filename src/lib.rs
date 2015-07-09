@@ -54,8 +54,8 @@
 
 pub use distance::{Distance, Euclid};
 pub use matrix::{HasNan, Matrix};
-pub use vectors::AddVector;
-pub use math::{Dimension, Mean, Sum, Var};
+pub use math::{Dimension, Normalization, Mean, Sum, Var};
+pub use ops::{MatrixScalarOps, VectorScalarOps, VectorVectorOps};
 
 // ordering is important because the macro mat! is 
 // only available for modules which follow #[macro_use]
@@ -72,3 +72,4 @@ pub mod norm;
 pub mod vectors;
 pub mod math;
 pub mod gaussian;
+pub mod ops;

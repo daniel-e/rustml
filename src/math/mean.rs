@@ -1,9 +1,10 @@
 extern crate num;
 
-use self::num::traits::{Num, Float, FromPrimitive};
+use self::num::traits::{Num, FromPrimitive};
 
 use matrix::Matrix;
-use vectors::{AddVector, zero};
+use vectors::zero;
+use ops::VectorVectorOps;
 use math::Dimension;
 use math::Sum;
 
@@ -60,35 +61,41 @@ impl <T: Num + Copy + FromPrimitive> Mean<T> for [T] {
     }
 }
 
-impl <T: Float + FromPrimitive> Mean<Vec<T>> for Matrix<T> {
+macro_rules! mean_impl {
+    ($($t:ty)*) => ($(
+        impl Mean<Vec<$t>> for Matrix<$t> {
 
-    fn mean(&self, dim: Dimension) -> Vec<T> {
+            fn mean(&self, dim: Dimension) -> Vec<$t> {
 
-        if self.rows() == 0 || self.cols() == 0 {
-            return vec![];
-        }
-
-        match dim {
-            Dimension::Column => {
-                // TODO reimplement when Sum for Matrix is implemented
-                let mut r: Vec<T> = self.values().take(self.cols()).cloned().collect();
-                for row in self.row_iter_at(1) {
-                    r.add(row);
+                if self.rows() == 0 || self.cols() == 0 {
+                    return vec![];
                 }
-                let n = T::from_usize(self.rows()).unwrap();
-                for i in r.iter_mut() {
-                    *i = *i / n;
+
+                match dim {
+                    Dimension::Column => {
+                        // TODO reimplement when Sum for Matrix is implemented
+                        let mut r: Vec<$t> = self.values().take(self.cols()).cloned().collect();
+                        for row in self.row_iter_at(1) {
+                            r.add(row);
+                        }
+                        let n = self.rows() as $t;
+                        for i in r.iter_mut() {
+                            *i = *i / n;
+                        }
+                        r
+                    }
+                    Dimension::Row => {
+                        // TODO reimplement when Sum for Matrix is implemented
+                        let n = self.cols() as $t;
+                        self.row_iter().map(|row| row.sum(Dimension::Row) / n).collect()
+                    }
                 }
-                r
-            }
-            Dimension::Row => {
-                // TODO reimplement when Sum for Matrix is implemented
-                let n = T::from_usize(self.cols()).unwrap();
-                self.row_iter().map(|row| row.sum(Dimension::Row) / n).collect()
             }
         }
-    }
+    )*)
 }
+
+mean_impl!{ f32 f64 }
 
 // ----------------------------------------------------------------------------
 

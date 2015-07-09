@@ -1,9 +1,10 @@
 extern crate num;
 
-use self::num::traits::{Num, Float};
+use self::num::traits::Num;
 
 use matrix::Matrix;
-use vectors::{AddVector, zero};
+use vectors::zero;
+use ops::VectorVectorOps;
 use math::Dimension;
 
 /// Trait to compute the sum of values.
@@ -82,23 +83,29 @@ impl <T: Num + Copy> Sum<T> for [T] {
     }
 }
 
-impl <T: Float> Sum<Vec<T>> for Matrix<T> {
+macro_rules! sum_impl {
+    ($($t:ty)*) => ($(
+        impl Sum<Vec<$t>> for Matrix<$t> {
 
-    fn sum(&self, dim: Dimension) -> Vec<T> {
-        match dim {
-            Dimension:: Column => {
-                let mut v = zero::<T>(self.cols());
-                for row in self.row_iter() {
-                    v.add(row);
+            fn sum(&self, dim: Dimension) -> Vec<$t> {
+                match dim {
+                    Dimension:: Column => {
+                        let mut v = zero::<$t>(self.cols());
+                        for row in self.row_iter() {
+                            v.add(row);
+                        }
+                        v
+                    }
+                    Dimension::Row => {
+                        self.row_iter().map(|row| row.sum(Dimension::Row)).collect()
+                    }
                 }
-                v
-            }
-            Dimension::Row => {
-                self.row_iter().map(|row| row.sum(Dimension::Row)).collect()
             }
         }
-    }
+    )*)
 }
+
+sum_impl!{ f32 f64 }
 
 // ------------------------------------------------------------------------------
 
