@@ -19,8 +19,7 @@ exclude = [
 	"build_all.sh",
 	"doc.sh",
 	"examples/*",
-	"datasets/mnist_digits/train-images-idx3-ubyte.gz",
-	"datasets/mnist_digits/train-labels-idx1-ubyte.gz",
+	"datasets/*",
 ]
 
 [lib]
