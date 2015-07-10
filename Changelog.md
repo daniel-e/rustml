@@ -11,3 +11,7 @@
    * multiply vector with a scalar
    * add a scalar to a vector
  * module `gaussian` to estimate the parameters of a gaussian distribution from a set of samples
+
+## 0.0.1
+
+ * inital version
