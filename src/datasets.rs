@@ -6,10 +6,13 @@ extern crate std;
 extern crate time;
 
 use std::io::Read;
-use self::num::traits::{Float, FromPrimitive};
+use std::env::home_dir;
+use std::path::Path;
 
 use io::GzipData;
 use matrix::*;
+
+use consts::MNIST_PATH;
 
 /// This structure offers access to the MNIST database of handwritten digits.
 ///
@@ -60,7 +63,7 @@ impl MnistDigits {
         Ok(l)
     }
 
-    fn read_examples<T: Float + FromPrimitive>(fname: &str) -> Result<Vec<T>, &'static str> {
+    fn read_examples(fname: &str) -> Result<Vec<u8>, &'static str> {
 
         let mut data = try!(GzipData::from_file(fname));
 
@@ -77,74 +80,77 @@ impl MnistDigits {
         }
 
         let v = data.buf();
-
         if v.len() != (n * 28 * 28) as usize {
             return Err("Could not read data.");
         }
 
-        let mut r: Vec<T> = Vec::with_capacity(v.len());
-        for i in v {
-            r.push(T::from_u8(*i).unwrap());
-        }
-        Ok(r)
+        Ok(v.to_vec())
     }
 
-    pub fn from<T: Float + FromPrimitive>(vectors_fname: &str, labels_fname: &str) -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+    pub fn from(vectors_fname: &str, labels_fname: &str) -> Result<(Matrix<u8>, Vec<u8>), &'static str> {
 
         let labels = try!(MnistDigits::read_labels(labels_fname));
-        let values = try!(MnistDigits::read_examples::<T>(vectors_fname));
+        let values = try!(MnistDigits::read_examples(vectors_fname));
 
         match Matrix::from_vec(values, labels.len(), 784) {
             Some(matrix) => {
-                if matrix.rows() != labels.len() {
-                    return Err("Number of examples are different.");
+                match matrix.rows() == labels.len() {
+                    true  => Ok((matrix, labels)),
+                    false => Err("Number of examples are different.")
                 }
-                Ok((matrix, labels))
             }
             _ => Err("Invalid matrix.")
         }
     }
 
-    pub fn training_set<T: Float + FromPrimitive>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+    fn path(fname: &str) -> Result<String, &'static str> {
 
-        // TODO location of dataset
-        MnistDigits::from(
-            "datasets/mnist_digits/train-images-idx3-ubyte.50k.gz",
-            "datasets/mnist_digits/train-labels-idx1-ubyte.50k.gz"
-        )
+        match home_dir() {
+            Some(ref mut p) => {
+                p.push(Path::new(MNIST_PATH));
+                p.push(Path::new(fname));
+                Ok(p.as_path().to_str().unwrap().to_string())
+            }
+            None => Err("Could not get home directory.")
+        }
     }
 
-    pub fn test_set<T: Float + FromPrimitive>() -> Result<(Matrix<T>, Vec<u8>), &'static str> {
+    pub fn default_training_set() -> Result<(Matrix<u8>, Vec<u8>), &'static str> {
 
-        // TODO location of dataset
-        MnistDigits::from(
-            "datasets/mnist_digits/t10k-images-idx3-ubyte.gz",
-            "datasets/mnist_digits/t10k-labels-idx1-ubyte.gz"
-        )
+        // tested in tests directory
+        let features = try!(MnistDigits::path("train-images-idx3-ubyte.gz"));
+        let labels = try!(MnistDigits::path("train-labels-idx1-ubyte.gz"));
+        MnistDigits::from(&features, &labels)
+    }
+
+    pub fn default_test_set() -> Result<(Matrix<u8>, Vec<u8>), &'static str> {
+
+        // tested in tests directory
+        let features = try!(MnistDigits::path("t10k-images-idx3-ubyte.gz"));
+        let labels = try!(MnistDigits::path("t10k-labels-idx1-ubyte.gz"));
+        MnistDigits::from(&features, &labels)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ::io::GzipData;
-    //use std::io::Read;
-
-    #[test]
-    fn test_training_set() {
-
-        // TODO
-        //let (training, training_labels) = MnistDigits::training_set().unwrap();
-        //let (testing, testing_labels) = MnistDigits::test_set().unwrap();
-    }
+    use io::GzipData;
 
     #[test]
     fn test_from_high_endian() {
 
         let a = [1, 2, 3];
-        assert_eq!(MnistDigits::from_high_endian(&a), (1 * 256 + 2) * 256 + 3);
+        assert_eq!(
+            MnistDigits::from_high_endian(&a), 
+            (1 * 256 + 2) * 256 + 3
+        );
+
         let b = [255, 254, 253, 252];
-        assert_eq!(MnistDigits::from_high_endian(&b), ((255 * 256 + 254) * 256 + 253) * 256 + 252);
+        assert_eq!(
+            MnistDigits::from_high_endian(&b), 
+            ((255 * 256 + 254) * 256 + 253) * 256 + 252
+        );
     }
 
     #[test]
@@ -154,16 +160,9 @@ mod tests {
         assert!(MnistDigits::read_u32(&mut gz).is_err());
 
         gz = GzipData::from_buf(vec![1, 2, 3, 4]);
-        assert_eq!(MnistDigits::read_u32(&mut gz).unwrap(), ((256 * 1 + 2) * 256 + 3) * 256 + 4);
-    }
-
-    #[test]
-    fn test_read() {
-        // TODO
-        /*
-        let mut gz = GzipData::from_file("datasets/mnist_digits/train-images-idx3-ubyte.gz").unwrap();
-        let mut v: Vec<u8> = Vec::new();
-        assert_eq!(gz.read_to_end(&mut v).unwrap(), 47040016);
-        */
+        assert_eq!(
+            MnistDigits::read_u32(&mut gz).unwrap(), 
+            ((256 * 1 + 2) * 256 + 3) * 256 + 4
+        );
     }
 }

@@ -74,3 +74,4 @@ pub mod vectors;
 pub mod math;
 pub mod gaussian;
 pub mod ops;
+pub mod consts;

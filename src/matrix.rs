@@ -450,6 +450,16 @@ impl <T: Clone> Matrix<T> {
             }
         }
     }
+
+    pub fn map<F, U>(&self, f: F) -> Matrix<U>
+        where F: FnMut(&T) -> U {
+
+        Matrix {
+            nrows: self.nrows,
+            ncols: self.ncols,
+            data: self.data.iter().map(f).collect()
+        }
+    }
 }
 
 // --------------- Iterators ----------------------------------------
@@ -628,8 +638,10 @@ impl <T: fmt::Display + Clone> fmt::Display for Matrix<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::f64;
+
+    use super::*;
+    use ops::MatrixScalarOps;
 
     #[test]
     fn test_from_vec() {
@@ -810,6 +822,17 @@ mod tests {
         assert_eq!(m.has_nan(), false);
         m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0; 7.0, f64::NAN];
         assert!(m.has_nan());
+    }
+
+    #[test]
+    fn test_map() {
+
+        let y = mat![
+            1u8, 2; 
+            3, 4
+        ].map(|&val| val as f32).mul_scalar(0.5);
+
+        assert_eq!(y.buf(), &vec![0.5, 1.0, 1.5, 2.0]);
     }
 }
 
