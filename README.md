@@ -1,26 +1,61 @@
-For a documentation of the interfaces have a look at the 
-[rustml documentation](http://daniel-e.github.io/rustml/mat).
+# Rustml
 
-# Example: matrix multplication
+Rustml is a library for doing machine learning in Rust. 
+
+The documentation of the project can be found [here](http://daniel-e.github.io/rustml/rustml).
+
+## Features 
+
+* powerful matrix and vector support with BLAS bindings for high performance 
+* classification with k-nearest neighbord
+* easy access to MNIST database of handwritten digits
+* parse and create CSV files
+* statistical functions like mean and variance for vectors and matrices
+* reading gzip compressed files
+* distance metrics
+
+## Using rustml - example matrix multplication
+
+Create a new project with cargo:
+
+```bash
+cargo new example --bin
+```
+
+A new directory `example` is created. Change into this directory and add the following lines `Cargo.toml`:
+```
+[dependencies.rustml]
+git = "https://github.com/daniel-e/rustml/"
+```
+
+Edit the file `main.rs` in the `src` directory.
 
 ```rust
-pub mod matrix;
+#[macro_use] extern crate rustml;
 
-use matrix::*;
+use rustml::*;
 
 fn main() {
-
-    let a = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0];
-    let b = mat![5.0, 7.0; 6.0, 2.0];
-    let c = a * b;
+    let a = mat![
+        1.0f32, 2.0;
+        3.0, 4.0;
+        5.0, 6.0
+    ];
+    let b = mat![
+        5.0, 7.0;
+        6.0, 2.0
+    ];
+    let c = (a * b).unwrap();
 
     println!("{}", c);
 }
 ```
 
-# Examples
+Now, in the `example` directory run the example with `cargo run`.
 
-You can find examples in the directory `examples`. These examples can be executed with
+### Other examples
+
+You can find orher examples in the directory `examples`. These examples can be executed with
 Cargo as follows:
 
 ```bash
