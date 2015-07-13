@@ -61,7 +61,7 @@ Now, in the `example` directory run the example with `cargo run`.
 
 ### Other examples
 
-You can find orher examples in the directory `examples`. These examples can be executed with
+You can find other examples in the directory `examples`. These examples can be executed with
 Cargo as follows:
 
 ```bash
@@ -78,7 +78,7 @@ install it into you home path. This can be easily done as follows:
 
 ```
 # download the install script
-wget -q https://github.com/daniel-e/rustml/blob/master/dl_datasets.sh
+wget -q https://raw.githubusercontent.com/daniel-e/rustml/master/dl_datasets.sh
 chmod +x dl_datasets.sh
 
 # download the datasets and install them into ~/.rustml/
