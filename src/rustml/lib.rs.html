@@ -109,6 +109,14 @@
 <span id="67">67</span>
 <span id="68">68</span>
 <span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Library for doing machine learning with Rust.</span>
 <span class='doccomment'>//!</span>
@@ -128,7 +136,11 @@
 <span class='doccomment'>//! the label of a vector with two features based on the examples in the matrix</span>
 <span class='doccomment'>//! `m` (the training set) with their known labels stored in the vector `labels`.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! ```ignore</span>
+<span class='doccomment'>//! ```</span>
+<span class='doccomment'>//! # #[macro_use] extern crate rustml;</span>
+<span class='doccomment'>//! use rustml::*;</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! # fn main() {</span>
 <span class='doccomment'>//! let m = mat![  // training set</span>
 <span class='doccomment'>//!     1.0, 2.0;  // each row contains one example for which the label is</span>
 <span class='doccomment'>//!     1.1, 2.1;  // known</span>
@@ -147,22 +159,24 @@
 <span class='doccomment'>//!         |x, y| Euclid::compute(x, y).unwrap() // use Euclidean distance</span>
 <span class='doccomment'>//!     );</span>
 <span class='doccomment'>//! assert_eq!(target, 1);</span>
+<span class='doccomment'>//! # }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! # All examples</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! * [&lt;i&gt;k&lt;/i&gt;-nearest</span>
-<span class='doccomment'>//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits/src/main.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple &lt;i&gt;k&lt;/i&gt;-nearest neighbor approach.</span>
+<span class='doccomment'>//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple &lt;i&gt;k&lt;/i&gt;-nearest neighbor approach.</span>
 <span class='doccomment'>//! * [matrix</span>
-<span class='doccomment'>//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication/src/main.rs): Multiplies two 6000x6000 matrices.</span>
+<span class='doccomment'>//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs): Multiplies two 6000x6000 matrices.</span>
 <span class='doccomment'>//! * [vector</span>
-<span class='doccomment'>//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition/src/main.rs):</span>
+<span class='doccomment'>//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs):</span>
 <span class='doccomment'>//! Add vectors.</span>
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>distance</span>::{<span class='ident'>Distance</span>, <span class='ident'>Euclid</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>matrix</span>::{<span class='ident'>HasNan</span>, <span class='ident'>Matrix</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>vectors</span>::<span class='ident'>AddVector</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>math</span>::<span class='ident'>Mean</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Dimension</span>, <span class='ident'>Normalization</span>, <span class='ident'>Mean</span>, <span class='ident'>Sum</span>, <span class='ident'>Var</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>MatrixScalarOps</span>, <span class='ident'>VectorScalarOps</span>, <span class='ident'>VectorVectorOps</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>gaussian</span>::{<span class='ident'>GaussianEstimator</span>, <span class='ident'>GaussianFunctions</span>, <span class='ident'>Gaussian</span>};
 
 <span class='comment'>// ordering is important because the macro mat! is </span>
 <span class='comment'>// only available for modules which follow #[macro_use]</span>
@@ -178,7 +192,9 @@
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>norm</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>vectors</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>math</span>;
-
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>gaussian</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>ops</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>consts</span>;
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

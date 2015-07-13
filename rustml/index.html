@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/rustml/lib.rs.html#1-68' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/rustml/lib.rs.html#1-77' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Library for doing machine learning with Rust.</p>
 
 <h1 id="performance" class='section-header'><a
@@ -65,6 +65,8 @@ documentation on this topic available
 the label of a vector with two features based on the examples in the matrix
 <code>m</code> (the training set) with their known labels stored in the vector <code>labels</code>.</p>
 <pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='op'>*</span>;
+
 <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[  <span class='comment'>// training set</span>
     <span class='number'>1.0</span>, <span class='number'>2.0</span>;  <span class='comment'>// each row contains one example for which the label is</span>
     <span class='number'>1.1</span>, <span class='number'>2.1</span>;  <span class='comment'>// known</span>
@@ -88,16 +90,16 @@ the label of a vector with two features based on the examples in the matrix
 <h1 id="all-examples" class='section-header'><a
                            href="#all-examples">All examples</a></h1>
 <ul>
-<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits/src/main.rs"><i>k</i>-nearest
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs"><i>k</i>-nearest
 neighbor</a>: Classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.</li>
-<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication/src/main.rs">matrix
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs">matrix
 multiplication</a>: Multiplies two 6000x6000 matrices.</li>
-<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/vector_addition/src/main.rs">vector
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs">vector
 addition</a>:
 Add vectors.</li>
 </ul>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub use distance::{<a class='trait' href='../rustml/distance/trait.Distance.html' title='rustml::distance::Distance'>Distance</a>, <a class='struct' href='../rustml/distance/struct.Euclid.html' title='rustml::distance::Euclid'>Euclid</a>};</code></td></tr><tr><td><code>pub use matrix::{<a class='trait' href='../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a>, <a class='struct' href='../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>};</code></td></tr><tr><td><code>pub use vectors::<a class='trait' href='../rustml/vectors/trait.AddVector.html' title='rustml::vectors::AddVector'>AddVector</a>;</code></td></tr><tr><td><code>pub use math::<a class='trait' href='../rustml/math/trait.Mean.html' title='rustml::math::Mean'>Mean</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr><td><code>pub use distance::{<a class='trait' href='../rustml/distance/trait.Distance.html' title='rustml::distance::Distance'>Distance</a>, <a class='struct' href='../rustml/distance/struct.Euclid.html' title='rustml::distance::Euclid'>Euclid</a>};</code></td></tr><tr><td><code>pub use matrix::{<a class='trait' href='../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a>, <a class='struct' href='../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>};</code></td></tr><tr><td><code>pub use math::{<a class='enum' href='../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>, <a class='enum' href='../rustml/math/enum.Normalization.html' title='rustml::math::Normalization'>Normalization</a>, <a class='trait' href='../rustml/math/mean/trait.Mean.html' title='rustml::math::mean::Mean'>Mean</a>, <a class='trait' href='../rustml/math/sum/trait.Sum.html' title='rustml::math::sum::Sum'>Sum</a>, <a class='trait' href='../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>};</code></td></tr><tr><td><code>pub use ops::{<a class='trait' href='../rustml/ops/trait.MatrixScalarOps.html' title='rustml::ops::MatrixScalarOps'>MatrixScalarOps</a>, <a class='trait' href='../rustml/ops/trait.VectorScalarOps.html' title='rustml::ops::VectorScalarOps'>VectorScalarOps</a>, <a class='trait' href='../rustml/ops/trait.VectorVectorOps.html' title='rustml::ops::VectorVectorOps'>VectorVectorOps</a>};</code></td></tr><tr><td><code>pub use gaussian::{<a class='trait' href='../rustml/gaussian/trait.GaussianEstimator.html' title='rustml::gaussian::GaussianEstimator'>GaussianEstimator</a>, <a class='trait' href='../rustml/gaussian/trait.GaussianFunctions.html' title='rustml::gaussian::GaussianFunctions'>GaussianFunctions</a>, <a class='struct' href='../rustml/gaussian/struct.Gaussian.html' title='rustml::gaussian::Gaussian'>Gaussian</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                     <tr class=' module-item'>
                         <td><a class='mod' href='blas/index.html'
@@ -105,6 +107,14 @@ Add vectors.</li>
                         <td class='docblock short'>
                              <p>Bindings for BLAS/ATLAS for high performance vector and matrix operations.</p>
 
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='consts/index.html'
+                               title='rustml::consts'>consts</a></td>
+                        <td class='docblock short'>
+                             
                         </td>
                     </tr>
                 
@@ -132,6 +142,15 @@ machine learning algorithms.</p>
                                title='rustml::distance'>distance</a></td>
                         <td class='docblock short'>
                              <p>Functions to compute the distance between vectors.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='gaussian/index.html'
+                               title='rustml::gaussian'>gaussian</a></td>
+                        <td class='docblock short'>
+                             <p>Module to handle Gaussian distributions.</p>
 
                         </td>
                     </tr>
@@ -179,6 +198,14 @@ operations.</p>
                         <td class='docblock short'>
                              <p>Functions to compute norms of vectors.</p>
 
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='ops/index.html'
+                               title='rustml::ops'>ops</a></td>
+                        <td class='docblock short'>
+                             
                         </td>
                     </tr>
                 

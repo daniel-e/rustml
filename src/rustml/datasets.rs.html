@@ -209,6 +209,8 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Module to easily access popular datasets often used to measure the performance of</span>
 <span class='doccomment'>//! machine learning algorithms.</span>
@@ -218,10 +220,13 @@
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>time</span>;
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Read</span>;
-<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>num</span>::<span class='ident'>traits</span>::{<span class='ident'>Float</span>, <span class='ident'>FromPrimitive</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>::<span class='ident'>home_dir</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
 
 <span class='kw'>use</span> <span class='ident'>io</span>::<span class='ident'>GzipData</span>;
 <span class='kw'>use</span> <span class='ident'>matrix</span>::<span class='op'>*</span>;
+
+<span class='kw'>use</span> <span class='ident'>consts</span>::<span class='ident'>MNIST_PATH</span>;
 
 <span class='doccomment'>/// This structure offers access to the MNIST database of handwritten digits.</span>
 <span class='doccomment'>///</span>
@@ -231,6 +236,9 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Currently, due to upload limits at crate.io a smaller training dataset</span>
 <span class='doccomment'>/// is used with 50,000 training examples.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// To be able to use the dataset please follow the instructions mentioned</span>
+<span class='doccomment'>/// [here](https://github.com/daniel-e/rustml#datasets).</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MnistDigits</span>;
 
 <span class='kw'>impl</span> <span class='ident'>MnistDigits</span> {
@@ -272,7 +280,7 @@
         <span class='prelude-val'>Ok</span>(<span class='ident'>l</span>)
     }
 
-    <span class='kw'>fn</span> <span class='ident'>read_examples</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Float</span> <span class='op'>+</span> <span class='ident'>FromPrimitive</span><span class='op'>&gt;</span>(<span class='ident'>fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>read_examples</span>(<span class='ident'>fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>GzipData</span>::<span class='ident'>from_file</span>(<span class='ident'>fname</span>));
 
@@ -289,74 +297,77 @@
         }
 
         <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>data</span>.<span class='ident'>buf</span>();
-
         <span class='kw'>if</span> <span class='ident'>v</span>.<span class='ident'>len</span>() <span class='op'>!=</span> (<span class='ident'>n</span> <span class='op'>*</span> <span class='number'>28</span> <span class='op'>*</span> <span class='number'>28</span>) <span class='kw'>as</span> <span class='ident'>usize</span> {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Could not read data.&quot;</span>);
         }
 
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>v</span>.<span class='ident'>len</span>());
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>v</span> {
-            <span class='ident'>r</span>.<span class='ident'>push</span>(<span class='ident'>T</span>::<span class='ident'>from_u8</span>(<span class='op'>*</span><span class='ident'>i</span>).<span class='ident'>unwrap</span>());
-        }
-        <span class='prelude-val'>Ok</span>(<span class='ident'>r</span>)
+        <span class='prelude-val'>Ok</span>(<span class='ident'>v</span>.<span class='ident'>to_vec</span>())
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Float</span> <span class='op'>+</span> <span class='ident'>FromPrimitive</span><span class='op'>&gt;</span>(<span class='ident'>vectors_fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>labels_fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>), <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>vectors_fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>labels_fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>), <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
 
         <span class='kw'>let</span> <span class='ident'>labels</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>read_labels</span>(<span class='ident'>labels_fname</span>));
-        <span class='kw'>let</span> <span class='ident'>values</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>read_examples</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>vectors_fname</span>));
+        <span class='kw'>let</span> <span class='ident'>values</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>read_examples</span>(<span class='ident'>vectors_fname</span>));
 
         <span class='kw'>match</span> <span class='ident'>Matrix</span>::<span class='ident'>from_vec</span>(<span class='ident'>values</span>, <span class='ident'>labels</span>.<span class='ident'>len</span>(), <span class='number'>784</span>) {
             <span class='prelude-val'>Some</span>(<span class='ident'>matrix</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='ident'>matrix</span>.<span class='ident'>rows</span>() <span class='op'>!=</span> <span class='ident'>labels</span>.<span class='ident'>len</span>() {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Number of examples are different.&quot;</span>);
+                <span class='kw'>match</span> <span class='ident'>matrix</span>.<span class='ident'>rows</span>() <span class='op'>==</span> <span class='ident'>labels</span>.<span class='ident'>len</span>() {
+                    <span class='boolval'>true</span>  <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>((<span class='ident'>matrix</span>, <span class='ident'>labels</span>)),
+                    <span class='boolval'>false</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Number of examples are different.&quot;</span>)
                 }
-                <span class='prelude-val'>Ok</span>((<span class='ident'>matrix</span>, <span class='ident'>labels</span>))
             }
             _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Invalid matrix.&quot;</span>)
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>training_set</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Float</span> <span class='op'>+</span> <span class='ident'>FromPrimitive</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>), <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>path</span>(<span class='ident'>fname</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
 
-        <span class='comment'>// TODO location of dataset</span>
-        <span class='ident'>MnistDigits</span>::<span class='ident'>from</span>(
-            <span class='string'>&quot;datasets/mnist_digits/train-images-idx3-ubyte.50k.gz&quot;</span>,
-            <span class='string'>&quot;datasets/mnist_digits/train-labels-idx1-ubyte.50k.gz&quot;</span>
-        )
+        <span class='kw'>match</span> <span class='ident'>home_dir</span>() {
+            <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>p</span>) <span class='op'>=&gt;</span> {
+                <span class='ident'>p</span>.<span class='ident'>push</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>MNIST_PATH</span>));
+                <span class='ident'>p</span>.<span class='ident'>push</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>fname</span>));
+                <span class='prelude-val'>Ok</span>(<span class='ident'>p</span>.<span class='ident'>as_path</span>().<span class='ident'>to_str</span>().<span class='ident'>unwrap</span>().<span class='ident'>to_string</span>())
+            }
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Could not get home directory.&quot;</span>)
+        }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test_set</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Float</span> <span class='op'>+</span> <span class='ident'>FromPrimitive</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>), <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>default_training_set</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>), <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
 
-        <span class='comment'>// TODO location of dataset</span>
-        <span class='ident'>MnistDigits</span>::<span class='ident'>from</span>(
-            <span class='string'>&quot;datasets/mnist_digits/t10k-images-idx3-ubyte.gz&quot;</span>,
-            <span class='string'>&quot;datasets/mnist_digits/t10k-labels-idx1-ubyte.gz&quot;</span>
-        )
+        <span class='comment'>// tested in tests directory</span>
+        <span class='kw'>let</span> <span class='ident'>features</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>path</span>(<span class='string'>&quot;train-images-idx3-ubyte.gz&quot;</span>));
+        <span class='kw'>let</span> <span class='ident'>labels</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>path</span>(<span class='string'>&quot;train-labels-idx1-ubyte.gz&quot;</span>));
+        <span class='ident'>MnistDigits</span>::<span class='ident'>from</span>(<span class='kw-2'>&amp;</span><span class='ident'>features</span>, <span class='kw-2'>&amp;</span><span class='ident'>labels</span>)
+    }
+
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>default_test_set</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>), <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+
+        <span class='comment'>// tested in tests directory</span>
+        <span class='kw'>let</span> <span class='ident'>features</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>path</span>(<span class='string'>&quot;t10k-images-idx3-ubyte.gz&quot;</span>));
+        <span class='kw'>let</span> <span class='ident'>labels</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>path</span>(<span class='string'>&quot;t10k-labels-idx1-ubyte.gz&quot;</span>));
+        <span class='ident'>MnistDigits</span>::<span class='ident'>from</span>(<span class='kw-2'>&amp;</span><span class='ident'>features</span>, <span class='kw-2'>&amp;</span><span class='ident'>labels</span>)
     }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> ::<span class='ident'>io</span>::<span class='ident'>GzipData</span>;
-    <span class='comment'>//use std::io::Read;</span>
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_training_set</span>() {
-
-        <span class='comment'>// TODO</span>
-        <span class='comment'>//let (training, training_labels) = MnistDigits::training_set().unwrap();</span>
-        <span class='comment'>//let (testing, testing_labels) = MnistDigits::test_set().unwrap();</span>
-    }
+    <span class='kw'>use</span> <span class='ident'>io</span>::<span class='ident'>GzipData</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_from_high_endian</span>() {
 
         <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> [<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>];
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>from_high_endian</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>), (<span class='number'>1</span> <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>2</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>3</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(
+            <span class='ident'>MnistDigits</span>::<span class='ident'>from_high_endian</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>), 
+            (<span class='number'>1</span> <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>2</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>3</span>
+        );
+
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> [<span class='number'>255</span>, <span class='number'>254</span>, <span class='number'>253</span>, <span class='number'>252</span>];
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>from_high_endian</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>), ((<span class='number'>255</span> <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>254</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>253</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>252</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(
+            <span class='ident'>MnistDigits</span>::<span class='ident'>from_high_endian</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>), 
+            ((<span class='number'>255</span> <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>254</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>253</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>252</span>
+        );
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -366,17 +377,10 @@
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>read_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>gz</span>).<span class='ident'>is_err</span>());
 
         <span class='ident'>gz</span> <span class='op'>=</span> <span class='ident'>GzipData</span>::<span class='ident'>from_buf</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>MnistDigits</span>::<span class='ident'>read_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>gz</span>).<span class='ident'>unwrap</span>(), ((<span class='number'>256</span> <span class='op'>*</span> <span class='number'>1</span> <span class='op'>+</span> <span class='number'>2</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>3</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>4</span>);
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_read</span>() {
-        <span class='comment'>// TODO</span>
-        <span class='comment'>/*
-        let mut gz = GzipData::from_file(&quot;datasets/mnist_digits/train-images-idx3-ubyte.gz&quot;).unwrap();
-        let mut v: Vec&lt;u8&gt; = Vec::new();
-        assert_eq!(gz.read_to_end(&amp;mut v).unwrap(), 47040016);
-        */</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(
+            <span class='ident'>MnistDigits</span>::<span class='ident'>read_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>gz</span>).<span class='ident'>unwrap</span>(), 
+            ((<span class='number'>256</span> <span class='op'>*</span> <span class='number'>1</span> <span class='op'>+</span> <span class='number'>2</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>3</span>) <span class='op'>*</span> <span class='number'>256</span> <span class='op'>+</span> <span class='number'>4</span>
+        );
     }
 }
 </pre>

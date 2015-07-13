@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `AddVector` trait in crate `rustml`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, AddVector">
+    <meta name="description" content="API documentation for the Rust `VectorVectorOps` trait in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, VectorVectorOps">
 
-    <title>rustml::vectors::AddVector - Rust</title>
+    <title>rustml::ops::VectorVectorOps - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>vectors</a></p><script>window.sidebarCurrent = {name: 'AddVector', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>ops</a></p><script>window.sidebarCurrent = {name: 'VectorVectorOps', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,12 +41,12 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>vectors</a>::<wbr><a class='trait' href=''>AddVector</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>ops</a>::<wbr><a class='trait' href=''>VectorVectorOps</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-3014' class='srclink' href='../../src/rustml/vectors.rs.html#17-32' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait AddVector&lt;T&gt; {
+        </span><a id='src-7636' class='srclink' href='../../src/rustml/ops.rs.html#79-94' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait VectorVectorOps&lt;T&gt; {
     fn <a href='#tymethod.add' class='fnname'>add</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[T]</a>);
 }</pre><div class='docblock'><p>Trait to add a slice to a vector using the underlying BLAS implementation.</p>
 </div>
@@ -56,7 +56,7 @@
 
 <h1 id="example" class='section-header'><a
                            href="#example">Example</a></h1><pre id='rust-example-rendered' class='rust '>
-<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>vectors</span>::<span class='ident'>AddVector</span>;
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>ops</span>::<span class='ident'>VectorVectorOps</span>;
 
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.0</span>, <span class='number'>2.0</span>];
 <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.0</span>, <span class='number'>8.0</span>];
@@ -66,9 +66,10 @@
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;T: <a class='trait' href='../../num/traits/trait.Float.html' title='num::traits::Float'>Float</a>&gt; <a class='trait' href='../../rustml/vectors/trait.AddVector.html' title='rustml::vectors::AddVector'>AddVector</a>&lt;T&gt; for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></li>
+    <li><code>impl <a class='trait' href='../../rustml/ops/trait.VectorVectorOps.html' title='rustml::ops::VectorVectorOps'>VectorVectorOps</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;</code></li>
+<li><code>impl <a class='trait' href='../../rustml/ops/trait.VectorVectorOps.html' title='rustml::ops::VectorVectorOps'>VectorVectorOps</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt; for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;</code></li>
 </ul><script type="text/javascript" async
-                              src="../../implementors/rustml/vectors/trait.AddVector.js">
+                              src="../../implementors/rustml/ops/trait.VectorVectorOps.js">
                       </script></section>
     <section id='search' class="content hidden"></section>
 

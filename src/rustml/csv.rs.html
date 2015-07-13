@@ -210,6 +210,10 @@
 <span id="168">168</span>
 <span id="169">169</span>
 <span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Functions to parse and create comma-separated values (CSV).</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
@@ -251,11 +255,15 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Example</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// ```ignore</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// # #[macro_use] extern crate rustml;</span>
+<span class='doccomment'>/// use rustml::*;</span>
 <span class='doccomment'>/// use rustml::csv::matrix_to_csv;</span>
 <span class='doccomment'>///</span>
+<span class='doccomment'>/// # fn main() {</span>
 <span class='doccomment'>/// let m = mat![1.0, 2.0; 3.0, 4.0];</span>
 <span class='doccomment'>/// assert_eq!(matrix_to_csv(&amp;m, &quot;,&quot;), &quot;1,2\n3,4\n&quot;)</span>
+<span class='doccomment'>/// # }</span>
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>matrix_to_csv</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='op'>+</span> <span class='ident'>Clone</span><span class='op'>&gt;</span>(<span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>sep</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
 
