@@ -4,64 +4,12 @@ extern crate num;
 extern crate rand;
 
 use std::cmp::{PartialEq, min};
-use self::libc::{c_void, size_t, c_int, c_float, c_double};
-use std::mem;
+use self::libc::{c_void, size_t};
 use std::marker::Copy;
-use self::num::traits::{Float, Num};
+use self::num::traits::Num;
 use std::iter;
 use self::rand::{thread_rng, Rng, Rand};
-
-use blas::{cblas_saxpy, cblas_daxpy};
-
-/// Trait to add a slice to a vector using the underlying BLAS implementation.
-pub trait AddVector<T> {
-
-    /// Adds the given slice `rhs` inplace.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use rustml::vectors::AddVector;
-    ///
-    /// let mut v = vec![1.0, 2.0];
-    /// let y = vec![3.0, 8.0];
-    /// v.add(&y);
-    /// assert_eq!(v, vec![4.0, 10.0]);
-    /// ```
-    fn add(&mut self, rhs: &[T]);
-}
-
-impl <T: Float> AddVector<T> for Vec<T> {
-
-    fn add(&mut self, rhs: &[T]) {
-
-        if self.len() != rhs.len() {
-            panic!("Vectors must have the same length.");
-        }
-
-        unsafe {
-            match mem::size_of::<T>() {
-                4 => cblas_saxpy(
-                    self.len()    as c_int,
-                    1.0           as c_float,
-                    rhs.as_ptr()  as *const c_float,
-                    1             as c_int,
-                    self.as_ptr() as *mut c_float,
-                    1             as c_int
-                ),
-                8 => cblas_daxpy(
-                    self.len()    as c_int,
-                    1.0           as c_double,
-                    rhs.as_ptr()  as *const c_double,
-                    1             as c_int,
-                    self.as_ptr() as *mut c_double,
-                    1             as c_int
-                ),
-                _ => panic!("size")
-            }
-        }
-    }
-}
+use std::mem;
 
 // ------------------------------------------------------------------
 
@@ -157,28 +105,6 @@ mod tests {
         assert_eq!(b, vec![0, 0, 0, 0, 0]);
         let c = zero::<i32>(0);
         assert_eq!(c, vec![]);
-    }
-
-    #[test]
-    fn test_add_vectorf32() {
-
-        let mut x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0];
-        let y: Vec<f32> = vec![2.0, 5.0, 9.0, 15.0];
-        x.add(&y);
-
-        assert_eq!(x, vec![3.0, 7.0, 12.0, 19.0]);
-        assert_eq!(y, vec![2.0, 5.0, 9.0, 15.0]);
-    }
-
-    #[test]
-    fn test_add_vectorf64() {
-
-        let mut x: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0];
-        let y: Vec<f64> = vec![2.0, 5.0, 9.0, 15.0];
-        x.add(&y);
-
-        assert_eq!(x, vec![3.0, 7.0, 12.0, 19.0]);
-        assert_eq!(y, vec![2.0, 5.0, 9.0, 15.0]);
     }
 
     #[test]

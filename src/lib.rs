@@ -16,7 +16,11 @@
 //! the label of a vector with two features based on the examples in the matrix
 //! `m` (the training set) with their known labels stored in the vector `labels`.
 //!
-//! ```ignore
+//! ```
+//! # #[macro_use] extern crate rustml;
+//! use rustml::*;
+//!
+//! # fn main() {
 //! let m = mat![  // training set
 //!     1.0, 2.0;  // each row contains one example for which the label is
 //!     1.1, 2.1;  // known
@@ -35,22 +39,24 @@
 //!         |x, y| Euclid::compute(x, y).unwrap() // use Euclidean distance
 //!     );
 //! assert_eq!(target, 1);
+//! # }
 //! ```
 //!
 //! # All examples
 //!
 //! * [<i>k</i>-nearest
-//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits/src/main.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.
+//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.
 //! * [matrix
-//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication/src/main.rs): Multiplies two 6000x6000 matrices.
+//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs): Multiplies two 6000x6000 matrices.
 //! * [vector
-//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition/src/main.rs):
+//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs):
 //! Add vectors.
 
 pub use distance::{Distance, Euclid};
 pub use matrix::{HasNan, Matrix};
-pub use vectors::AddVector;
-pub use math::Mean;
+pub use math::{Dimension, Normalization, Mean, Sum, Var};
+pub use ops::{MatrixScalarOps, VectorScalarOps, VectorVectorOps};
+pub use gaussian::{GaussianEstimator, GaussianFunctions, Gaussian};
 
 // ordering is important because the macro mat! is 
 // only available for modules which follow #[macro_use]
@@ -66,4 +72,6 @@ pub mod knn;
 pub mod norm;
 pub mod vectors;
 pub mod math;
-
+pub mod gaussian;
+pub mod ops;
+pub mod consts;

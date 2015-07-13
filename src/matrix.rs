@@ -17,10 +17,61 @@ use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 // ------------------------------------------------------------------
 
 /// A matrix with elements of type T.
+///
+/// An `Option` is returned which is `None` if the matrices cannot be 
+/// multiplied because the number of columns of the left matrix is not
+/// equal to the number of rows of the right matrix.
+///
+/// Because the trait 
+/// [Mul](http://doc.rust-lang.org/nightly/core/ops/trait.Mul.html) is 
+/// implemented for matrices where `T` is `f32` or `f64` such matrices
+/// can be multplied with the `*` operator.
+///
+/// # Multiplication of matrices
+///
+/// To multiply two matrices the underlying BLAS implementation is used. By
+/// default this is CBLAS. In many cases performance
+/// can be greatly improved when switching to ATLAS. For a detailed description on how
+/// to optimize the numeric computations please read the separate
+/// documentation on this topic available
+/// [here](https://github.com/daniel-e/rustml/tree/master/build).
+///
+/// ## Example
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::*;
+///
+/// # fn main() {
+/// let a = mat![
+///     1.0f32, 5.0, 2.0; 
+///     2.0, 2.0, 3.0 
+/// ];
+/// let b = mat![
+///     3.0, 7.0, 4.0, 8.0;
+///     4.0, 2.0, 1.0, 4.0;
+///     5.0, 2.0, 1.0, 9.0
+/// ];
+/// let c = (a * b).unwrap();
+/// assert_eq!(c.row(0).unwrap(), &[33.0, 21.0, 11.0, 46.0]);
+/// assert_eq!(c.row(1).unwrap(), &[29.0, 24.0, 13.0, 51.0]);
+/// # }
+/// ```
 pub struct Matrix<T> {
     nrows: usize,
     ncols: usize,
     data: Vec<T>
+}
+
+impl <T: Clone> Clone for Matrix<T> {
+
+    fn clone(&self) -> Self {
+
+        Matrix {
+            nrows: self.nrows.clone(),
+            ncols: self.ncols.clone(),
+            data: self.data.clone()
+        }
+    }
 }
 
 /// Trait to check if a matrix contains a NaN value.
@@ -83,6 +134,14 @@ impl <T: Clone> Matrix<T> {
     // Functions for constructing a matrix.
 
     /// Creates a new matrix with 0 rows and 0 columns.
+    ///
+    /// ```
+    /// use rustml::Matrix;
+    ///
+    /// let m = Matrix::<f32>::new();
+    /// assert_eq!(m.rows(), 0);
+    /// assert_eq!(m.cols(), 0);
+    /// ```
     pub fn new() -> Matrix<T> {
 
         Matrix::from_vec(Vec::new(), 0, 0).unwrap()
@@ -90,6 +149,14 @@ impl <T: Clone> Matrix<T> {
 
     /// Creates a matrix with the given number of rows and columns
     /// where each element is set to `value`.
+    ///
+    /// ```
+    /// use rustml::Matrix;
+    ///
+    /// let m = Matrix::<f32>::fill(1.2, 2, 2);
+    /// assert_eq!(m.row(0).unwrap(), [1.2, 1.2]);
+    /// assert_eq!(m.row(1).unwrap(), [1.2, 1.2]);
+    /// ```
     pub fn fill(value: T, rows: usize, cols: usize) -> Matrix<T> {
 
         Matrix::from_vec(
@@ -99,8 +166,19 @@ impl <T: Clone> Matrix<T> {
     }
 
     /// Creates a matrix with the given number of rows and columns. The matrix is
-    /// initialized with the values from the vector `vals` where the elements
+    /// initialized with the values from the vector `vals`. The elements
     /// are arranged in row-major order in the vector.
+    ///
+    /// ```
+    /// use rustml::Matrix;
+    ///
+    /// let m = Matrix::<f32>::from_vec(
+    ///     vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 3, 2
+    /// ).unwrap();
+    /// assert_eq!(m.row(0).unwrap(), [1.0, 2.0]);
+    /// assert_eq!(m.row(1).unwrap(), [3.0, 4.0]);
+    /// assert_eq!(m.row(2).unwrap(), [5.0, 6.0]);
+    /// ```
     pub fn from_vec(vals: Vec<T>, rows: usize, cols: usize) -> Option<Matrix<T>> {
 
         match rows * cols == vals.len() {
@@ -137,14 +215,61 @@ impl <T: Clone> Matrix<T> {
 
     // ------------------------------------
 
-    /// Is equivalent with calling the method `cols`.
+    /// Returns the internal buffer that is used to store the matrix.
+    pub fn buf(&self) -> &Vec<T> { &self.data }
+
+    /// Is equivalent to calling the method `cols()` on the matrix.
     pub fn lead_dim(&self) -> usize { self.cols()  }
+
     /// Returns the number of rows of the matrix.
-    pub fn rows    (&self) -> usize { self.nrows   }
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5, 1.8; 
+    ///     2.0, 2.5, 2.8
+    /// ];
+    /// assert_eq!(m.rows(), 2);
+    /// # }
+    /// ```
+    pub fn rows    (&self) -> usize { self.nrows }
+    
     /// Returns the number of columns of the matrix.
-    pub fn cols    (&self) -> usize { self.ncols   }
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5, 1.8; 
+    ///     2.0, 2.5, 2.8
+    /// ];
+    /// assert_eq!(m.cols(), 3);
+    /// # }
+    /// ```
+    pub fn cols    (&self) -> usize { self.ncols }
 
     /// Returns an iterator over all elements of the matrix in row-major order.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5
+    /// ];
+    /// let mut i = m.values();
+    /// assert_eq!(i.next().unwrap(), &1.0);
+    /// assert_eq!(i.next().unwrap(), &1.5);
+    /// assert_eq!(i.next().unwrap(), &2.0);
+    /// # }
+    /// ```
     pub fn values(&self) -> Iter<T> {
         self.data.iter()
     }
@@ -152,12 +277,45 @@ impl <T: Clone> Matrix<T> {
     /// Returns an iterator over the rows of the matrix.
     ///
     /// Each call to the `next` method is done in O(1).
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5;
+    ///     5.0, 5.5
+    /// ];
+    /// let mut i = m.row_iter();
+    /// assert_eq!(i.next().unwrap(), [1.0, 1.5]);
+    /// assert_eq!(i.next().unwrap(), [2.0, 2.5]);
+    /// assert_eq!(i.next().unwrap(), [5.0, 5.5]);
+    /// # }
+    /// ```
     pub fn row_iter(&self) -> RowIterator<T> {
         self.row_iter_at(0)
     }
 
-    /// Returns an iterator over the rows of the matrix where the iterator
+    /// Returns an iterator over the rows of the matrix. The iterator
     /// starts at the the row with index `n`.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5;
+    ///     5.0, 5.5
+    /// ];
+    /// let mut i = m.row_iter_at(1);
+    /// assert_eq!(i.next().unwrap(), [2.0, 2.5]);
+    /// assert_eq!(i.next().unwrap(), [5.0, 5.5]);
+    /// # }
+    /// ```
     pub fn row_iter_at(&self, n: usize) -> RowIterator<T> {
 
         RowIterator {
@@ -166,6 +324,27 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    /// Returns an iterator over the rows of the matrix with the specified
+    /// indexes in `rows`.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5;
+    ///     3.0, 3.5;
+    ///     4.0, 4.5;
+    ///     5.0, 5.5
+    /// ];
+    /// let mut i = m.row_iter_of(&[1, 3, 4]);
+    /// assert_eq!(i.next().unwrap(), [2.0, 2.5]);
+    /// assert_eq!(i.next().unwrap(), [4.0, 4.5]);
+    /// assert_eq!(i.next().unwrap(), [5.0, 5.5]);
+    /// # }
+    /// ```
     pub fn row_iter_of(&self, rows: &[usize]) -> SelectedRowIterator<T> {
 
         SelectedRowIterator {
@@ -175,6 +354,8 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    /// Returns the position where the element at row `row` and column `col`
+    /// is stored in the internal vector that is used to store the matrix.
     fn idx(&self, row: usize, col: usize) -> Option<usize> {
         
         match row < self.rows() && col < self.cols() {
@@ -183,8 +364,25 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
-    /// Returns the element of the matrix at row `row` (starting at zero) and column
-    /// `col` (starting at zero) or None if row or column does not exist.
+    /// Returns the element of the matrix at row `row`
+    /// (indexing starts at zero) and column `col` or
+    /// `None` if row or column does not exist.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5;
+    ///     5.0, 5.5
+    /// ];
+    /// assert_eq!(m.get(0, 1).unwrap(), &1.5);
+    /// assert_eq!(m.get(2, 0).unwrap(), &5.0);
+    /// assert!(m.get(3, 0).is_none());
+    /// # }
+    /// ```
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
 
         match self.idx(row, col) {
@@ -194,6 +392,23 @@ impl <T: Clone> Matrix<T> {
     }
 
     /// Returns the row at index `n` (starting at zero) in O(1).
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5;
+    ///     5.0, 5.5
+    /// ];
+    /// assert_eq!(m.row(0).unwrap(), [1.0, 1.5]);
+    /// assert_eq!(m.row(1).unwrap(), [2.0, 2.5]);
+    /// assert_eq!(m.row(2).unwrap(), [5.0, 5.5]);
+    /// assert!(m.row(3).is_none())
+    /// # }
+    /// ```
     pub fn row(&self, n: usize) -> Option<&[T]> {
 
         match self.idx(n, 0) {
@@ -202,9 +417,26 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
-    /// Replaces the element at row `row` (starting at zero) and column `col` 
-    /// (starting at zero) with the new value `newval`. Returns true on
+    /// Replaces the element at row `row` (indexing starts at zero) and column `col` 
+    /// with the new value `newval`. Returns true on
     /// success and false on failure, i.e. if the row or column does not exist.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let mut m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5;
+    ///     5.0, 5.5
+    /// ];
+    /// assert_eq!(m.get(1, 0).unwrap(), &2.0);
+    /// m.set(1, 0, 8.0);
+    /// assert_eq!(m.get(1, 0).unwrap(), &8.0);
+    /// assert_eq!(m.set(3, 0, 8.9), false);
+    /// # }
+    /// ```
     pub fn set(&mut self, row: usize, col: usize, newval: T) -> bool {
 
         match self.idx(row, col) {
@@ -216,6 +448,16 @@ impl <T: Clone> Matrix<T> {
                 }
                 None => false,
             }
+        }
+    }
+
+    pub fn map<F, U>(&self, f: F) -> Matrix<U>
+        where F: FnMut(&T) -> U {
+
+        Matrix {
+            nrows: self.nrows,
+            ncols: self.ncols,
+            data: self.data.iter().map(f).collect()
         }
     }
 }
@@ -276,15 +518,18 @@ impl Mul for Matrix<f64> {
     ///
     /// # Example
     ///
-    /// ```ignore
+    /// ```
+    /// # #[macro_use] extern crate rustml;
     /// use rustml::*;
     ///
-    /// let a = mat![1.0, 2.0; 3.0, 4.0];
-    /// let b = mat![4,0, 2.0; 5.0, 9.0];
-    /// let c = a * b;
-    /// assert_eq!(c.row(0).unwrap(), [14.0, 20.0]);
-    /// assert_eq!(c.row(1).unwrap(), [32.0, 42.0]);
-    /// println!("{}", c.unwrap());
+    /// # fn main() {
+    /// let a = mat![1.0f32, 2.0; 3.0, 4.0];
+    /// let b = mat![4.0f32, 2.0; 5.0, 9.0];
+    /// let c = (a * b).unwrap();
+    /// assert_eq!(c.row(0).unwrap(), &[14.0, 20.0]);
+    /// assert_eq!(c.row(1).unwrap(), &[32.0, 42.0]);
+    /// println!("{}", c);
+    /// # }
     /// ```
     fn mul(self, rhs: Matrix<f64>) -> Self::Output {
 
@@ -325,13 +570,18 @@ impl Mul for Matrix<f32> {
     ///
     /// # Example
     ///
-    /// ```ignore
-    /// let a = mat![1.0, 2.0; 3.0, 4.0];
-    /// let b = mat![4,0, 2.0; 5.0, 9.0];
-    /// let c = a * b;
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let a = mat![1.0f32, 2.0; 3.0, 4.0];
+    /// let b = mat![4.0f32, 2.0; 5.0, 9.0];
+    /// let c = (a * b).unwrap();
     /// assert_eq!(c.row(0).unwrap(), [14.0, 20.0]);
     /// assert_eq!(c.row(1).unwrap(), [32.0, 42.0]);
-    /// println!("{}", c.unwrap());
+    /// println!("{}", c);
+    /// # }
     /// ```
     fn mul(self, rhs: Matrix<f32>) -> Self::Output {
 
@@ -388,8 +638,10 @@ impl <T: fmt::Display + Clone> fmt::Display for Matrix<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::f64;
+
+    use super::*;
+    use ops::MatrixScalarOps;
 
     #[test]
     fn test_from_vec() {
@@ -570,6 +822,17 @@ mod tests {
         assert_eq!(m.has_nan(), false);
         m = mat![1.0, 2.0; 3.0, 4.0; 5.0, 6.0; 7.0, f64::NAN];
         assert!(m.has_nan());
+    }
+
+    #[test]
+    fn test_map() {
+
+        let y = mat![
+            1u8, 2; 
+            3, 4
+        ].map(|&val| val as f32).mul_scalar(0.5);
+
+        assert_eq!(y.buf(), &vec![0.5, 1.0, 1.5, 2.0]);
     }
 }
 
