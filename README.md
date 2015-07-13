@@ -76,7 +76,7 @@ Rustml comes with the MNIST database of handwritten digits and provides
 an API to access this database. In prior to use the dataset you have to
 install it into you home path. This can be easily done as follows:
 
-```
+```bash
 # download the install script
 wget -q https://raw.githubusercontent.com/daniel-e/rustml/master/dl_datasets.sh
 chmod +x dl_datasets.sh
