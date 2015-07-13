@@ -1,9 +1,6 @@
 extern crate num;
 
-use self::num::traits::{Num, FromPrimitive};
-
 use matrix::Matrix;
-use vectors::zero;
 use ops::VectorVectorOps;
 use math::Dimension;
 use math::Sum;
@@ -38,28 +35,33 @@ pub trait Mean<T> {
     // TODO document matrix
 }
 
-impl <T: Num + Copy + FromPrimitive> Mean<T> for Vec<T> {
+macro_rules! mean_vec_impl {
+    ($($t:ty)*) => ($(
+        impl Mean<$t> for Vec<$t> {
 
-    fn mean(&self, dim: Dimension) -> T {
-        (&self[..]).mean(dim)
-    }
-}
+            fn mean(&self, dim: Dimension) -> $t {
+                (&self[..]).mean(dim)
+            }
+        }
 
-impl <T: Num + Copy + FromPrimitive> Mean<T> for [T] {
+        impl Mean<$t> for [$t] {
 
-    fn mean(&self, dim: Dimension) -> T {
-        match dim {
-            Dimension::Row => {
-                match self.len() {
-                    0 => T::zero(),
-                    // TODO unwrap
-                    n => self.sum(dim) / (T::from_usize(n).unwrap())
+            fn mean(&self, dim: Dimension) -> $t {
+                match dim {
+                    Dimension::Row => {
+                        match self.len() {
+                            0 => 0 as $t,
+                            n => self.sum(dim) / (n as $t)
+                        }
+                    }
+                    _ => 0 as $t
                 }
             }
-            _ => T::zero()
         }
-    }
+    )*)
 }
+
+mean_vec_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 macro_rules! mean_impl {
     ($($t:ty)*) => ($(

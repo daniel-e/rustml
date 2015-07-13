@@ -7,6 +7,7 @@ use blas::{cblas_saxpy, cblas_daxpy};
 
 // ----------------------------------------------------------------------------
 
+/// Trait for matrix scalar operations.
 pub trait MatrixScalarOps<T> {
     /// Adds a scalar to each element of the matrix.
     fn add_scalar(&self, scalar: T) -> Matrix<T>;
@@ -45,6 +46,7 @@ matrix_scalar_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 
+/// Trait for vector scalar operations.
 pub trait VectorScalarOps<T> {
     /// Adds a scalar to each element of the vector.
     fn mul_scalar(&self, scalar: T) -> Vec<T>;

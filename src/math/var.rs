@@ -26,23 +26,23 @@ macro_rules! var_impl {
                 match dim {
                     Dimension::Row => {
                         match self.len() {
-                            0 => 0.0 as $t,
+                            0 => 0 as $t,
                             n => {
                                 let mu = self.mean(dim);
                                 let mut d = n as $t;
                                 match nrm {
                                     Normalization::MinusOne => {
                                         if n > 1 {
-                                            d = d - (1.0 as $t);
+                                            d = d - (1 as $t);
                                         }
                                     }
                                     _ => ()
                                 }
-                                self.iter().map(|&x| (x - mu) * (x - mu)).fold(0.0 as $t, |acc, x| acc + x) / d
+                                self.iter().map(|&x| (x - mu) * (x - mu)).fold(0 as $t, |acc, x| acc + x) / d
                             }
                         }
                     }
-                    _ => 0.0 as $t
+                    _ => 0 as $t
                 }
             }
         }

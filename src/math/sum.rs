@@ -1,7 +1,5 @@
 extern crate num;
 
-use self::num::traits::Num;
-
 use matrix::Matrix;
 use vectors::zero;
 use ops::VectorVectorOps;
@@ -61,27 +59,33 @@ pub trait Sum<T> {
     fn sum(&self, dim: Dimension) -> T;
 }
 
-impl <T: Num + Copy> Sum<T> for Vec<T> {
+macro_rules! sum_vec_impl {
+    ($($t:ty)*) => ($(
+        impl Sum<$t> for Vec<$t> {
 
-    // TODO in the future there might be a default value
-    fn sum(&self, dim: Dimension) -> T {
-        (&self[..]).sum(dim)
-    }
-}
-
-impl <T: Num + Copy> Sum<T> for [T] {
-
-    // TODO in the future there might be a default value
-    fn sum(&self, dim: Dimension) -> T {
-        match dim {
-            // TODO is there a more efficient method to sum up all values?
-            Dimension::Row => {
-                self.iter().fold(T::zero(), |init, &val| init + val)
+            // TODO in the future there might be a default value
+            fn sum(&self, dim: Dimension) -> $t {
+                (&self[..]).sum(dim)
             }
-            _ => T::zero()
         }
-    }
+
+        impl Sum<$t> for [$t] {
+
+            // TODO in the future there might be a default value
+            fn sum(&self, dim: Dimension) -> $t {
+                match dim {
+                    // TODO is there a more efficient method to sum up all values?
+                    Dimension::Row => {
+                        self.iter().fold(0 as $t, |init, &val| init + val)
+                    }
+                    _ => 0 as $t
+                }
+            }
+        }
+    )*)
 }
+
+sum_vec_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 macro_rules! sum_impl {
     ($($t:ty)*) => ($(

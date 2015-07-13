@@ -28,6 +28,12 @@ A new directory `example` is created. Change into this directory and add the fol
 git = "https://github.com/daniel-e/rustml/"
 ```
 
+or the following dependency:
+```
+[dependencies]
+rustml = "*"
+```
+[
 Edit the file `main.rs` in the `src` directory.
 
 ```rust
@@ -63,3 +69,19 @@ cargo run --example vector_addition
 cargo run --example mnist_digits
 cargo run --example matrix_multiplication
 ``` 
+
+## Datasets
+
+Rustml comes with the MNIST database of handwritten digits and provides
+an API to access this database. In prior to use the dataset you have to
+install it into you home path. This can be easily done as follows:
+
+```
+# download the install script
+wget -q https://github.com/daniel-e/rustml/blob/master/dl_datasets.sh
+chmod +x dl_datasets.sh
+
+# download the datasets and install them into ~/.rustml/
+./dl_datasets.sh
+```
+

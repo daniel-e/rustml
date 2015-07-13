@@ -22,6 +22,9 @@ use consts::MNIST_PATH;
 ///
 /// Currently, due to upload limits at crate.io a smaller training dataset
 /// is used with 50,000 training examples.
+///
+/// To be able to use the dataset please follow the instructions mentioned
+/// [here](https://github.com/daniel-e/rustml#datasets).
 pub struct MnistDigits;
 
 impl MnistDigits {

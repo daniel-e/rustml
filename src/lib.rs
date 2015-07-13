@@ -45,11 +45,11 @@
 //! # All examples
 //!
 //! * [<i>k</i>-nearest
-//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits/src/main.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.
+//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.
 //! * [matrix
-//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication/src/main.rs): Multiplies two 6000x6000 matrices.
+//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs): Multiplies two 6000x6000 matrices.
 //! * [vector
-//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition/src/main.rs):
+//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs):
 //! Add vectors.
 
 pub use distance::{Distance, Euclid};
