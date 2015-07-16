@@ -1,7 +1,7 @@
 extern crate num;
 
 use matrix::Matrix;
-use ops::VectorVectorOps;
+use ops_inplace::VectorVectorOpsInPlace;
 use math::Dimension;
 use math::Sum;
 

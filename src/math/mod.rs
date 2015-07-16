@@ -20,11 +20,11 @@ pub enum Dimension {
 
 /// Determines the type of normalization used for computing the variance
 /// or standard deviation.
+#[derive(Copy, Clone)]
 pub enum Normalization {
     /// Use as denominator n, i.e. the number of examples.
     N,
     /// Use as denominator (n-1), i.e. the number of examples minus one.
     MinusOne
 }
-
 

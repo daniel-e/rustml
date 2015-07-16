@@ -1,18 +1,17 @@
-extern crate libc;
 extern crate num;
 
-use self::libc::{c_int, c_float, c_double};
 use matrix::Matrix;
-use blas::{cblas_saxpy, cblas_daxpy};
 
 // ----------------------------------------------------------------------------
 
 /// Trait for matrix scalar operations.
 pub trait MatrixScalarOps<T> {
-    /// Adds a scalar to each element of the matrix.
+    /// Adds a scalar to each element of the matrix and returns
+    /// the result.
     fn add_scalar(&self, scalar: T) -> Matrix<T>;
 
-    /// Multiplies each element of the matrix with a scalar.
+    /// Multiplies each element of the matrix with a scalar
+    /// and returns the result.
     fn mul_scalar(&self, scalar: T) -> Matrix<T>;
 }
 
@@ -48,10 +47,12 @@ matrix_scalar_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 /// Trait for vector scalar operations.
 pub trait VectorScalarOps<T> {
-    /// Adds a scalar to each element of the vector.
+    /// Adds a scalar to each element of the vector and returns
+    /// the result.
     fn mul_scalar(&self, scalar: T) -> Vec<T>;
 
-    /// Multiplies each element of the vector with a scalar.
+    /// Multiplies each element of the vector with a scalar
+    /// and returns the result.
     fn add_scalar(&self, scalar: T) -> Vec<T>;
 }
 
@@ -75,66 +76,38 @@ vector_scalar_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 
-/// Trait to add a slice to a vector using the underlying BLAS implementation.
+/// Trait for vector vector operations.
 pub trait VectorVectorOps<T> {
 
-    /// Adds the given slice `rhs` inplace.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use rustml::ops::VectorVectorOps;
-    ///
-    /// let mut v = vec![1.0, 2.0];
-    /// let y = vec![3.0, 8.0];
-    /// v.add(&y);
-    /// assert_eq!(v, vec![4.0, 10.0]);
-    /// ```
-    fn add(&mut self, rhs: &[T]);
+    fn sub(&self, rhs: &[T]) -> Vec<T>;
+
+    fn mutate<F>(&self, f: F) -> Vec<T>
+        where F: Fn(T) -> T;
 }
 
-impl VectorVectorOps<f32> for Vec<f32> {
+macro_rules! vector_vector_ops_impl {
+    ($($t:ty)*) => ($(
 
-    fn add(&mut self, rhs: &[f32]) {
+        impl VectorVectorOps<$t> for [$t] {
+            fn sub(&self, v: &[$t]) -> Vec<$t> {
+                self.iter().zip(v.iter()).map(|(&x, &y)| x - y).collect()
+            }
 
-        if self.len() != rhs.len() {
-            panic!("Vectors must have the same length.");
+            fn mutate<F>(&self, f: F) -> Vec<$t>
+                where F: Fn($t) -> $t {
+
+                self.iter().map(|&x| f(x)).collect()
+            }
         }
 
-        unsafe {
-            cblas_saxpy(
-                self.len()    as c_int,
-                1.0           as c_float,
-                rhs.as_ptr()  as *const c_float,
-                1             as c_int,
-                self.as_ptr() as *mut c_float,
-                1             as c_int
-            )
+        impl VectorVectorOps<$t> for Vec<$t> {
+            fn sub(&self, v: &[$t])                 -> Vec<$t> { (self[..]).sub(v)    }
+            fn mutate<F: Fn($t) -> $t>(&self, f: F) -> Vec<$t> { (self[..]).mutate(f) }
         }
-    }
+    )*)
 }
 
-impl VectorVectorOps<f64> for Vec<f64> {
-
-    fn add(&mut self, rhs: &[f64]) {
-
-        if self.len() != rhs.len() {
-            panic!("Vectors must have the same length.");
-        }
-
-        unsafe {
-            cblas_daxpy(
-                self.len()    as c_int,
-                1.0           as c_double,
-                rhs.as_ptr()  as *const c_double,
-                1             as c_int,
-                self.as_ptr() as *mut c_double,
-                1             as c_int
-            )
-        }
-    }
-}
-
+vector_vector_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 
@@ -171,26 +144,13 @@ mod tests {
     }
 
     #[test]
-    fn test_add_vectorf32() {
+    fn test_vector_vector_ops() {
 
-        let mut x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0];
-        let y: Vec<f32> = vec![2.0, 5.0, 9.0, 15.0];
-        x.add(&y);
+        let a = vec![1, 2, 3, 4, 5];
+        let b = vec![3, 2, 4, 5, 1];
+        assert_eq!(a.sub(&b), vec![-2, 0, -1, -1, 4]);
 
-        assert_eq!(x, vec![3.0, 7.0, 12.0, 19.0]);
-        assert_eq!(y, vec![2.0, 5.0, 9.0, 15.0]);
+        assert_eq!(a.mutate(|x| x * 2), vec![2, 4, 6, 8, 10]);
     }
-
-    #[test]
-    fn test_add_vectorf64() {
-
-        let mut x: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0];
-        let y: Vec<f64> = vec![2.0, 5.0, 9.0, 15.0];
-        x.add(&y);
-
-        assert_eq!(x, vec![3.0, 7.0, 12.0, 19.0]);
-        assert_eq!(y, vec![2.0, 5.0, 9.0, 15.0]);
-    }
-
 }
 

@@ -2,7 +2,7 @@ extern crate num;
 
 use matrix::Matrix;
 use vectors::zero;
-use ops::VectorVectorOps;
+use ops_inplace::VectorVectorOpsInPlace;
 use math::Dimension;
 
 /// Trait to compute the sum of values.

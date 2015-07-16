@@ -55,7 +55,8 @@
 pub use distance::{Distance, Euclid};
 pub use matrix::{HasNan, Matrix};
 pub use math::{Dimension, Normalization, Mean, Sum, Var};
-pub use ops::{MatrixScalarOps, VectorScalarOps, VectorVectorOps};
+pub use ops::{MatrixScalarOps, VectorScalarOps};
+pub use ops_inplace::{VectorVectorOpsInPlace};
 pub use gaussian::{GaussianEstimator, GaussianFunctions, Gaussian};
 
 // ordering is important because the macro mat! is 
@@ -75,3 +76,4 @@ pub mod math;
 pub mod gaussian;
 pub mod ops;
 pub mod consts;
+pub mod ops_inplace;
