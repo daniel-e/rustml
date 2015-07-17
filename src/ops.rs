@@ -15,6 +15,8 @@ pub trait MatrixScalarOps<T> {
     fn mul_scalar(&self, scalar: T) -> Matrix<T>;
 }
 
+// ----------------------------------------------------------------------------
+
 macro_rules! matrix_scalar_ops_impl {
     ($($t:ty)*) => ($(
 
@@ -108,6 +110,32 @@ macro_rules! vector_vector_ops_impl {
 }
 
 vector_vector_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
+
+// ----------------------------------------------------------------------------
+
+pub trait MatrixVectorOps<T> {
+
+    /// Adds the given vector to each row of the matrix.
+    fn add_row(&self, rhs: &[T]) -> Matrix<T>;
+}
+
+macro_rules! matrix_vector_ops_impl {
+    ($($t:ty)*) => ($(
+
+        impl MatrixVectorOps<$t> for Matrix<$t> {
+
+            fn add_row(&self, rhs: &[$t]) -> Matrix<$t> {
+
+                let mut m = self.clone();
+                //XXX
+                //mut_row_iter()
+                m
+            }
+        }
+    )*)
+}
+
+matrix_vector_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 

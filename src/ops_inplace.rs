@@ -24,6 +24,7 @@ pub trait VectorVectorOpsInPlace<T> {
 
 macro_rules! impl_vector_vector_ops_inplace {
     ( $( $x:ty, $y:expr, $z:ty )+ ) => ($(
+
         impl VectorVectorOpsInPlace<$x> for Vec<$x> {
 
             fn add(&mut self, rhs: &[$x]) {
