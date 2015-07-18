@@ -323,7 +323,16 @@ impl <T: Clone> Matrix<T> {
             idx: n
         }
     }
+/*
+    // XXX
+    pub fn row_iter_at_mut(&mut self, n: usize) -> RowIterMut<T> {
 
+        RowIterMut {
+            m: self,
+            idx: n
+        }
+    }
+*/
     /// Returns an iterator over the rows of the matrix with the specified
     /// indexes in `rows`.
     ///
@@ -417,6 +426,15 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    // XXX
+    pub fn row_mut(&mut self, n: usize) -> Option<&mut [T]> {
+
+        match self.idx(n, 0) {
+            None => None,
+            Some(p) => Some(self.data.split_at_mut(p).1.split_at_mut(self.ncols).0)
+        }
+    }
+
     /// Replaces the element at row `row` (indexing starts at zero) and column `col` 
     /// with the new value `newval`. Returns true on
     /// success and false on failure, i.e. if the row or column does not exist.
@@ -481,6 +499,26 @@ impl <'q, T: Clone> Iterator for RowIterator<'q, T> {
         }
     }
 }
+
+/*
+/// A mutabl iterator over the rows of a matrix.
+pub struct RowIterMut<'q, T: 'q> {
+    m: &'q mut Matrix<T>,
+    idx: usize
+}
+
+impl <'q, T: Clone> Iterator for RowIterMut<'q, T> {
+    type Item = &'q mut [T];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.idx += 1;
+        match self.idx > self.m.rows() {
+            true => None,
+            false => self.m.row_mut(self.idx - 1)
+        }
+    }
+}
+*/
 
 /// An iterator over a set of selected rows of a matrix.
 pub struct SelectedRowIterator<'q, T: 'q> {
@@ -833,6 +871,25 @@ mod tests {
         ].map(|&val| val as f32).mul_scalar(0.5);
 
         assert_eq!(y.buf(), &vec![0.5, 1.0, 1.5, 2.0]);
+    }
+
+    #[test]
+    fn test_row_mut() {
+
+        let mut m = mat![1, 2; 3, 4];
+        {
+            let mut row = m.row_mut(0).unwrap();
+            row[0] = 7;
+            row[1] = 9;
+        }
+        {
+            let mut row = m.row_mut(1).unwrap();
+            row[0] = 6;
+            row[1] = 11;
+        }
+
+        assert_eq!(m.row(0).unwrap().to_vec(), vec![7, 9]);
+        assert_eq!(m.row(1).unwrap().to_vec(), vec![6, 11]);
     }
 }
 
