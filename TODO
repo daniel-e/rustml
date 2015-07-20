@@ -1,3 +1,13 @@
 * scaling.rs
 * matrix.rs
 * libsvm integration
+
+
+MatrixScalar
+MatrixVector
+MatrixMatrix
+
+VectorScalar
+VectorVector
+
+

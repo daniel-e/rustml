@@ -5,6 +5,24 @@ use self::num::traits::Float;
 use matrix::*;
 use vectors::group;
 
+
+/*
+use distance::Euclid;
+
+pub struct Knn<T> {
+    distance: Fn(&[T], &[T]) -> T
+}
+
+impl Knn<f64> {
+
+    pub fn new() -> Knn<f64> {
+        Knn {
+            distance: |x, y| Euclid::compute(x, y).unwrap(),
+        }
+    }
+}
+*/
+
 /// Search the k nearest neighbours for the given example.
 pub fn scan<D, T: Float>(m: &Matrix<T>, example: &[T], k: usize, df: D) -> Option<Vec<usize>>
     where D : Fn(&[T], &[T]) -> T {

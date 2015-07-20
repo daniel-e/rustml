@@ -148,8 +148,7 @@ macro_rules! var_impl {
                             Normalization::N        => n as $t,
                             Normalization::MinusOne => if n > 1 { (n - 1) as $t } else { n as $t }
                         };
-                        // TODO div_scalar
-                        v.mul_scalar(1 as $t / d)
+                        v.div_scalar(d)
                     }
                 }
             }
@@ -222,6 +221,7 @@ mod tests {
 
         x = m.var(Dimension::Column, Normalization::N);
         assert_eq!(x.len(), 5);
+    assert_eq!(x.to_vec(), vec![1.5556, 7.1667, 0.10889, 21.342, 0.0066667]);
         assert!(vec_equal(&x, &vec![1.5556, 7.1667, 0.10889, 21.342, 0.0066667]));
         y = m.var(Dimension::Column, Normalization::MinusOne);
         assert_eq!(y.len(), 5);

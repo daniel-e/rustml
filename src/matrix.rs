@@ -7,7 +7,7 @@ extern crate num;
 
 use std::{iter, fmt};
 use std::ops::Mul;
-use std::slice::Iter;
+use std::slice::{Iter, IterMut};
 use self::rand::{thread_rng, Rng, Rand};
 use self::num::traits::Float;
 use self::libc::{c_int, c_double, c_float};
@@ -426,7 +426,26 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
-    // XXX
+    /// Returns the row at index `n` in O(1) that is mutable.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let mut m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5;
+    ///     5.0, 5.5
+    /// ];
+    /// {
+    ///     let mut r = m.row_mut(1).unwrap();
+    ///     r[0] = 4.0;
+    ///     r[1] = 3.0;
+    /// }
+    /// assert_eq!(m.row(1).unwrap(), [4.0, 3.0]);
+    /// # }
+    /// ```
     pub fn row_mut(&mut self, n: usize) -> Option<&mut [T]> {
 
         match self.idx(n, 0) {
@@ -501,7 +520,7 @@ impl <'q, T: Clone> Iterator for RowIterator<'q, T> {
 }
 
 /*
-/// A mutabl iterator over the rows of a matrix.
+/// A mutable iterator over the rows of a matrix.
 pub struct RowIterMut<'q, T: 'q> {
     m: &'q mut Matrix<T>,
     idx: usize
@@ -510,7 +529,7 @@ pub struct RowIterMut<'q, T: 'q> {
 impl <'q, T: Clone> Iterator for RowIterMut<'q, T> {
     type Item = &'q mut [T];
 
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next(&mut self) -> Option<&'q mut [T]> {
         self.idx += 1;
         match self.idx > self.m.rows() {
             true => None,

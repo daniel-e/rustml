@@ -19,6 +19,9 @@ macro_rules! scaling_impl {
 
                 let r = mean_vec.iter().zip(var_vec.iter()).map(|(&x, &y)| Gaussian::new(x, y)).collect();
 
+                let mut mr = Matrix::<$t>::fill(0 as $t, self.rows(), self.cols());
+                
+
                 // TODO
                 (self.clone(), r)
             }
