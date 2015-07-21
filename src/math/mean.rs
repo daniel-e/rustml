@@ -78,7 +78,7 @@ macro_rules! mean_impl {
                         // TODO reimplement when Sum for Matrix is implemented
                         let mut r: Vec<$t> = self.values().take(self.cols()).cloned().collect();
                         for row in self.row_iter_at(1) {
-                            r.add(row);
+                            r.iadd(row);
                         }
                         let n = self.rows() as $t;
                         for i in r.iter_mut() {

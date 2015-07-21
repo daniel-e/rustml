@@ -141,7 +141,7 @@ macro_rules! var_impl {
                         let mut v = zero::<$t>(self.cols());
                         for row in self.row_iter() {
                             let x = row.sub(&mean_vec).mutate(|x| x * x);
-                            v.add(&x);
+                            v.iadd(&x);
                         }
                         let n = self.rows();
                         let d = match nrm {
@@ -221,7 +221,6 @@ mod tests {
 
         x = m.var(Dimension::Column, Normalization::N);
         assert_eq!(x.len(), 5);
-    assert_eq!(x.to_vec(), vec![1.5556, 7.1667, 0.10889, 21.342, 0.0066667]);
         assert!(vec_equal(&x, &vec![1.5556, 7.1667, 0.10889, 21.342, 0.0066667]));
         y = m.var(Dimension::Column, Normalization::MinusOne);
         assert_eq!(y.len(), 5);

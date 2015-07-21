@@ -38,6 +38,10 @@ path = "examples/mnist_digits.rs"
 name = "matrix_multiplication"
 path = "examples/matrix_multiplication.rs"
 
+[[example]]
+name = "scale_matrix"
+path = "examples/scale_matrix.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"

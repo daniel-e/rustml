@@ -7,7 +7,7 @@ extern crate num;
 
 use std::{iter, fmt};
 use std::ops::Mul;
-use std::slice::{Iter, IterMut};
+use std::slice::Iter;
 use self::rand::{thread_rng, Rng, Rand};
 use self::num::traits::Float;
 use self::libc::{c_int, c_double, c_float};
@@ -897,12 +897,12 @@ mod tests {
 
         let mut m = mat![1, 2; 3, 4];
         {
-            let mut row = m.row_mut(0).unwrap();
+            let row = m.row_mut(0).unwrap();
             row[0] = 7;
             row[1] = 9;
         }
         {
-            let mut row = m.row_mut(1).unwrap();
+            let row = m.row_mut(1).unwrap();
             row[0] = 6;
             row[1] = 11;
         }

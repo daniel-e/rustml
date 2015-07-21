@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.3
+
+ * module `ops`
+   * matrix-scalar, matrix-vector, vector-vector, etc operations
+ * module `ops_inplace`
+   * operations on matrices and vectors inplace
+
 ## 0.0.2
 
  * more documentation and examples

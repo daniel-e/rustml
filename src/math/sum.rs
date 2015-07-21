@@ -96,7 +96,7 @@ macro_rules! sum_impl {
                     Dimension:: Column => {
                         let mut v = zero::<$t>(self.cols());
                         for row in self.row_iter() {
-                            v.add(row);
+                            v.iadd(row);
                         }
                         v
                     }
