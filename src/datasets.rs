@@ -2,12 +2,13 @@
 //! machine learning algorithms.
 
 extern crate num;
-extern crate std;
 extern crate time;
+extern crate rand;
 
 use std::io::Read;
 use std::env::home_dir;
 use std::path::Path;
+use self::rand::distributions::{Normal, IndependentSample};
 
 use io::GzipData;
 use matrix::*;
@@ -134,6 +135,19 @@ impl MnistDigits {
         MnistDigits::from(&features, &labels)
     }
 }
+
+
+// TODO tests?
+pub fn gaussian_distributed(n: usize, mean: f64, std: f64) -> Vec<f64> {
+
+    let normal = Normal::new(mean, std);
+    let mut v: Vec<f64> = vec![];
+    for _ in (0..n) {
+        v.push(normal.ind_sample(&mut rand::thread_rng()));
+    }
+    v
+}
+
 
 #[cfg(test)]
 mod tests {

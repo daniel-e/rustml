@@ -79,4 +79,5 @@ pub mod ops;
 pub mod consts;
 pub mod ops_inplace;
 pub mod scaling;
+pub mod opencv;
 
