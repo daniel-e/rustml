@@ -22,7 +22,7 @@
 extern crate num;
 
 use self::num::traits::Float;
-use math::{Mean, Var};
+use math::{Mean, MeanVec, Var};
 use math::{Dimension, Normalization};
 
 
@@ -152,7 +152,7 @@ macro_rules! gaussian_impl {
         impl GaussianEstimator<$t> for [$t] {
             fn gaussian(&self, nrm: Normalization) -> Gaussian<$t> {
                 Gaussian {
-                    mean: self.mean(Dimension::Row),
+                    mean: self.mean(),
                     var: self.var(Dimension::Row, nrm)
                 }
             }

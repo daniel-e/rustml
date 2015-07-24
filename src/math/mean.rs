@@ -3,7 +3,34 @@ extern crate num;
 use matrix::Matrix;
 use ops_inplace::VectorVectorOpsInPlace;
 use math::Dimension;
-use math::Sum;
+use math::{Sum, SumVec};
+
+// ----------------------------------------------------------------------------
+
+pub trait MeanVec<T> {
+    fn mean(&self) -> T;
+}
+
+macro_rules! mean_vec_impl {
+    ($($t:ty)*) => ($(
+        impl MeanVec<$t> for Vec<$t> {
+
+            fn mean(&self) -> $t {
+                (&self[..]).mean()
+            }
+        }
+
+        impl MeanVec<$t> for [$t] {
+
+            fn mean(&self) -> $t {
+                let n = if self.len() == 0 { 1 as $t } else { self.len() as $t };
+                self.sum() / n
+            }
+        }
+    )*)
+}
+
+mean_vec_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 
@@ -20,11 +47,10 @@ pub trait Mean<T> {
     /// # Examples
     ///
     /// ```
-    /// use rustml::math::{Mean, Dimension};
+    /// use rustml::*;
     ///
     /// let v = vec![1.0, 5.0, 9.0];
-    /// assert_eq!(v.mean(Dimension::Row), 5.0);
-    /// assert_eq!(v.mean(Dimension::Column), 0.0);
+    /// assert_eq!(v.mean(), 5.0);
     /// ```
     ///
     /// # Implementation details
@@ -34,34 +60,6 @@ pub trait Mean<T> {
     fn mean(&self, dim: Dimension) -> T;
     // TODO document matrix
 }
-
-macro_rules! mean_vec_impl {
-    ($($t:ty)*) => ($(
-        impl Mean<$t> for Vec<$t> {
-
-            fn mean(&self, dim: Dimension) -> $t {
-                (&self[..]).mean(dim)
-            }
-        }
-
-        impl Mean<$t> for [$t] {
-
-            fn mean(&self, dim: Dimension) -> $t {
-                match dim {
-                    Dimension::Row => {
-                        match self.len() {
-                            0 => 0 as $t,
-                            n => self.sum(dim) / (n as $t)
-                        }
-                    }
-                    _ => 0 as $t
-                }
-            }
-        }
-    )*)
-}
-
-mean_vec_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
 macro_rules! mean_impl {
     ($($t:ty)*) => ($(
@@ -89,7 +87,7 @@ macro_rules! mean_impl {
                     Dimension::Row => {
                         // TODO reimplement when Sum for Matrix is implemented
                         let n = self.cols() as $t;
-                        self.row_iter().map(|row| row.sum(Dimension::Row) / n).collect()
+                        self.row_iter().map(|row| row.sum() / n).collect()
                     }
                 }
             }
@@ -111,14 +109,13 @@ mod tests {
     fn test_mean_vec_f32() {
 
         let x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0];
-        assert_eq!(x.mean(Dimension::Row), 2.5);
+        assert_eq!(x.mean(), 2.5);
 
         let a: Vec<f32> = Vec::new();
-        assert_eq!(a.mean(Dimension::Row), 0.0);
-        assert_eq!(a.mean(Dimension::Column), 0.0);
+        assert_eq!(a.mean(), 0.0);
 
         let b = [1.0f32, 2.0, 3.0, 4.0];
-        assert_eq!(b.mean(Dimension::Row), 2.5);
+        assert_eq!(b.mean(), 2.5);
     }
 
     #[test]

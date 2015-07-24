@@ -1,6 +1,6 @@
 extern crate num;
 
-use math::{Dimension, Normalization, Mean};
+use math::{Dimension, Normalization, Mean, MeanVec};
 use vectors::zero;
 use matrix::Matrix;
 use ops::{VectorVectorOps, VectorScalarOps};
@@ -113,7 +113,7 @@ macro_rules! var_impl {
 
                 match dim {
                     Dimension::Row => {
-                        let m = self.mean(dim);
+                        let m = self.mean();
                         let n = self.len();
                         let d = match nrm {
                             Normalization::N        => n as $t,

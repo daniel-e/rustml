@@ -6,6 +6,7 @@
    * matrix-scalar, matrix-vector, vector-vector, etc operations
  * module `ops_inplace`
    * operations on matrices and vectors inplace
+ * OpenCV integration
 
 ## 0.0.2
 

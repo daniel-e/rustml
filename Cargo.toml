@@ -42,6 +42,10 @@ path = "examples/matrix_multiplication.rs"
 name = "scale_matrix"
 path = "examples/scale_matrix.rs"
 
+[[example]]
+name = "video_histogram"
+path = "examples/video_histogram.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"

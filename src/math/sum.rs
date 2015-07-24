@@ -5,6 +5,36 @@ use vectors::zero;
 use ops_inplace::VectorVectorOpsInPlace;
 use math::Dimension;
 
+pub trait SumVec<T> {
+    fn sum(&self) -> T;
+}
+
+macro_rules! vec_sum_impl {
+    ($($t:ty)*) => ($(
+        impl SumVec<$t> for Vec<$t> {
+
+            // TODO in the future there might be a default value
+            fn sum(&self) -> $t {
+                (&self[..]).sum()
+            }
+        }
+
+        impl SumVec<$t> for [$t] {
+
+            // TODO in the future there might be a default value
+            fn sum(&self) -> $t {
+                // TODO is there a more efficient method to sum up all values?
+                self.iter().fold(0 as $t, |init, &val| init + val)
+            }
+        }
+    )*)
+}
+
+vec_sum_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
+
+
+
+
 /// Trait to compute the sum of values.
 pub trait Sum<T> {
     /// Computes the sum over all elements of the specified dimension.
@@ -23,10 +53,7 @@ pub trait Sum<T> {
     /// use rustml::*;
     ///
     /// let v = vec![1.0, 5.0, 9.0];
-    /// assert_eq!(v.sum(Dimension::Row), 15.0);
-    /// // The dimension `Column` does not exist for a vector. The result
-    /// // is always zero.
-    /// assert_eq!(v.sum(Dimension::Column), 0.0);
+    /// assert_eq!(v.sum(), 15.0);
     /// ```
     ///
     /// To compute the sum of all elements in each column or each row of a
@@ -59,6 +86,7 @@ pub trait Sum<T> {
     fn sum(&self, dim: Dimension) -> T;
 }
 
+/*
 macro_rules! sum_vec_impl {
     ($($t:ty)*) => ($(
         impl Sum<$t> for Vec<$t> {
@@ -86,6 +114,7 @@ macro_rules! sum_vec_impl {
 }
 
 sum_vec_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
+*/
 
 macro_rules! sum_impl {
     ($($t:ty)*) => ($(
@@ -101,7 +130,7 @@ macro_rules! sum_impl {
                         v
                     }
                     Dimension::Row => {
-                        self.row_iter().map(|row| row.sum(Dimension::Row)).collect()
+                        self.row_iter().map(|row| row.sum()).collect()
                     }
                 }
             }
@@ -138,11 +167,10 @@ mod tests {
     fn test_sum_vec_f32() {
 
         let x: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0];
-        assert_eq!(x.sum(Dimension::Row), 10.0);
+        assert_eq!(x.sum(), 10.0);
 
         let a: Vec<f32> = Vec::new();
-        assert_eq!(a.sum(Dimension::Row), 0.0);
-        assert_eq!(a.sum(Dimension::Column), 0.0);
+        assert_eq!(a.sum(), 0.0);
     }
 }
 

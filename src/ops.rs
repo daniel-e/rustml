@@ -5,6 +5,33 @@ use ops_inplace::VectorVectorOpsInPlace;
 
 // ----------------------------------------------------------------------------
 
+pub trait VectorOps<T> {
+
+    fn map<F, U>(&self, f: F) -> Vec<U>
+        where F: Fn(&T) -> U;
+}
+
+
+macro_rules! vector_ops_impl {
+    ($($t:ty)*) => ($(
+
+        impl VectorOps<$t> for Vec<$t> {
+            fn map<F, U>(&self, f: F) -> Vec<U> 
+                where F: Fn(& $t) -> U {
+                let mut v: Vec<U> = Vec::new();
+                for i in self.iter() {
+                    v.push(f(i));
+                }
+                v
+            }
+        }
+    )*)
+}
+
+vector_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
+
+// ----------------------------------------------------------------------------
+
 /// Trait for operations on matices.
 pub trait MatrixOps<T> {
 
@@ -247,6 +274,7 @@ matrix_vector_ops_impl!{ f32 f64 }
 mod tests {
     use super::*;
     use matrix::Matrix;
+    use math::*;
 
     #[test]
     fn test_matrix_ops() {
@@ -297,7 +325,7 @@ mod tests {
     }
 
     #[test]
-    fn test_vector_ops() {
+    fn test_vector_scalar_ops() {
 
         let a = vec![1.0f32, 2.0, 3.0];
 
@@ -326,6 +354,14 @@ mod tests {
         assert_eq!(b.div(&a), vec![2.0, 1.0, 2.0, 1.25, 0.2]);
 
         assert_eq!(a.mutate(|x| x * 2.0), vec![3.0, 4.0, 4.0, 8.0, 10.0]);
+    }
+    
+    #[test]
+    fn test_vector_ops() {
+
+        let v: Vec<u8> = vec![255, 100, 101, 202];
+        let m = v.map(|&x| x as u32);
+        assert_eq!(m.sum(), 658);
     }
 }
 

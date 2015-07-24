@@ -2,10 +2,17 @@
 
 extern crate libc;
 
+use std::fmt;
 use self::libc::{c_char, c_int, c_void};
 
 #[repr(C)]
 pub struct CvCapture;
+
+#[repr(C)]
+pub struct CvSize {
+    width: c_int,
+    height: c_int
+}
 
 // http://docs.opencv.org/modules/core/doc/old_basic_structures.html
 #[repr(C)]
@@ -14,7 +21,7 @@ pub struct IplImage {
     id: c_int,
     pub nchannels: c_int,
     alphachannel: c_int,
-    depth: c_int,
+    pub depth: c_int,  // iki.icub.org/yarpdoc/IplImage_8h.html
     colormodel: [c_char; 4],
     channelseq: [c_char; 4],
     dataorder: c_int,
@@ -26,7 +33,7 @@ pub struct IplImage {
     maskroi: *mut c_void, // actually it is not a void pointer
     imageid: *mut c_void,
     titleinfo: *mut c_void,
-    imagesize: c_int,
+    pub imagesize: c_int,
     pub imagedata: *mut c_char,
     pub widthstep: c_int,
     bordermode: [c_int; 4],
@@ -36,26 +43,309 @@ pub struct IplImage {
 
 #[link(name = "opencv_highgui")]
 extern {
-    pub fn cvCreateFileCapture(fname: *const c_char) -> *mut CvCapture;
+    pub fn cvCreateFileCapture(fname: *const c_char) -> *const CvCapture;
 
-    pub fn cvGrabFrame(cvcapture: *mut CvCapture) -> c_int;
+    pub fn cvGrabFrame(cvcapture: *const CvCapture) -> c_int;
 
-    pub fn cvRetrieveFrame(cvcapture: *mut CvCapture, streamidx: c_int) -> *mut IplImage;
+    pub fn cvRetrieveFrame(cvcapture: *const CvCapture, streamidx: c_int) -> *const IplImage;
+
+    pub fn cvReleaseCapture(cvcapture: *const *const CvCapture);
+
+    pub fn cvLoadImage(fname: *const c_char, iscolor: c_int) -> *const IplImage;
 }
 
-
-/*
-pub struct Video {
-    cvcapture: Box<CvCapture>
+#[link(name = "opencv_core")]
+extern {
+    pub fn cvCreateImage(siz: CvSize, depth: c_int, channels: c_int) -> *const IplImage;
 }
 
-pub fn from_file(fname: &str) -> *mut CvCapture {
+// ----------------------------------------------------------------------------
 
-    unsafe {
+pub struct GrayPixel {
+    pub g: u8,
+}
 
+impl fmt::Display for GrayPixel {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({})", self.g)
     }
 }
-*/
+
+// ------------------------------------------------------------------
+
+pub struct ColorPixel {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8
+}
+
+impl fmt::Display for ColorPixel {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({} {} {})", self.r, self.g, self.b)
+    }
+}
+
+// ------------------------------------------------------------------
+
+pub struct ColorImage {
+    iplimage: *const IplImage
+}
+
+impl ColorImage {
+
+    pub fn from_file(fname: &str) -> Option<ColorImage> {
+
+        unsafe {
+            let mut s = fname.to_string();
+            s.push('\0');
+            // 1 = return a 3-channel color imge
+            // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#imread
+            let r = cvLoadImage(fname.as_ptr() as *const c_char, 1 as c_int);
+            let i = ColorImage{ iplimage: r };
+
+            if r.is_null() || i.depth() != 8 || i.channels() != 3 {
+                return None;
+            }
+            Some(i)
+        }
+    }
+
+    pub fn from_raw(image: *const IplImage) -> ColorImage {
+
+        // TODO convert images
+        unsafe {
+            assert!((*image).depth == 8 && (*image).nchannels == 3);
+            ColorImage {
+                iplimage: image
+            }
+        }
+    }
+
+    pub fn width(&self) -> usize { unsafe { (*self.iplimage).width as usize } }
+    pub fn height(&self) -> usize { unsafe { (*self.iplimage).height as usize } }
+    pub fn depth(&self) -> usize { unsafe { (*self.iplimage).depth as usize } }
+    pub fn widthstep(&self) -> usize { unsafe { (*self.iplimage).widthstep as usize } }
+    pub fn channels(&self) -> usize { unsafe { (*self.iplimage).nchannels as usize } }
+
+    pub fn pixel(&self, x: usize, y: usize) -> Option<ColorPixel> {
+
+        unsafe {
+            let img = &(*self.iplimage);
+            let off = (y * self.widthstep() + x * 3) as isize;
+
+            if off < 0 || off + 2 >= (img.imagesize as isize) { 
+                return None; 
+            }
+            
+            Some(ColorPixel {
+                b: *img.imagedata.offset(off) as u8,
+                g: *img.imagedata.offset(off + 1) as u8,
+                r: *img.imagedata.offset(off + 2) as u8
+            })
+        }
+    }
+
+}
+
+// ------------------------------------------------------------------
+
+pub struct GrayImage {
+    iplimage: *const IplImage
+}
+
+impl GrayImage {
+
+    pub fn from_file(fname: &str) -> Option<GrayImage> {
+
+        unsafe {
+            let mut s = fname.to_string();
+            s.push('\0');
+            // 0 = return a grayscale image
+            // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#imread
+            let r = cvLoadImage(fname.as_ptr() as *const c_char, 0 as c_int);
+            let i = GrayImage{ iplimage: r };
+
+            if r.is_null() || i.depth() != 8 || i.channels() != 1 {
+                return None;
+            }
+            Some(i)
+        }
+    }
+
+    pub fn from_raw(image: *const IplImage) -> GrayImage {
+
+        unsafe {
+            if (*image).depth != 8 || (*image).nchannels == 1 {
+                let siz = CvSize {
+                    width: (*image).width,
+                    height: (*image).height
+                };
+                GrayImage {
+                    iplimage: cvCreateImage(siz, 8, 1)
+                }
+            } else {
+                GrayImage {
+                    iplimage: image
+                }
+            }
+        }
+    }
+
+    pub fn width(&self) -> usize { unsafe { (*self.iplimage).width as usize } }
+    pub fn height(&self) -> usize { unsafe { (*self.iplimage).height as usize } }
+    pub fn depth(&self) -> usize { unsafe { (*self.iplimage).depth as usize } }
+    pub fn widthstep(&self) -> usize { unsafe { (*self.iplimage).widthstep as usize } }
+    pub fn channels(&self) -> usize { unsafe { (*self.iplimage).nchannels as usize } }
+
+    pub fn pixel(&self, x: usize, y: usize) -> Option<GrayPixel> {
+
+        unsafe {
+            let img = &(*self.iplimage);
+            let off = (y * self.widthstep() + x) as isize;
+
+            if off < 0 || off >= (img.imagesize as isize) { 
+                return None; 
+            }
+            
+            Some(GrayPixel {
+                g: *img.imagedata.offset(off) as u8,
+            })
+        }
+    }
+
+    pub fn pixels_from_mask_as_u8(&self, i: &GrayImage) -> Option<Vec<u8>> {
+
+        if self.width() != i.width() || self.height() != i.height() {
+            return None;
+        }
+
+        let mut pixels: Vec<u8> = Vec::new();
+        unsafe {
+            for y in (0..self.height()) {
+                let s: *const c_char = (*self.iplimage).imagedata.offset(y as isize * self.widthstep() as isize);
+                let m: *const c_char = (*i.iplimage).imagedata.offset(y as isize * i.widthstep() as isize);
+                for x in (0..self.width()) {
+                    if *m.offset(x as isize) != 0 {
+                        pixels.push(*s.offset(x as isize) as u8);
+                    }
+                }
+            }
+        }
+
+        Some(pixels)
+    }
+}
+
+
+// ------------------------------------------------------------------
+
+pub struct Video {
+    pub cvcapture: *const CvCapture
+}
+
+impl Video {
+
+    // TODO use path
+    pub fn from_file(fname: &str) -> Option<Video> {
+        let mut f = fname.to_string();
+        f.push('\0');
+        unsafe {
+            let c = cvCreateFileCapture(f.as_ptr() as *const c_char);
+            match c.is_null() {
+                true  => None,
+                false => {
+                    Some(Video {
+                        cvcapture: c
+                    })
+                }
+            }
+        }
+    }
+
+    pub fn color_frame_iter(&self) -> ColorImageIterator {
+        ColorImageIterator {
+            video: self,
+        }
+    }
+
+    pub fn gray_frame_iter(&self) -> GrayImageIterator {
+        GrayImageIterator {
+            video: self,
+        }
+    }
+}
+
+impl Drop for Video {
+    fn drop(&mut self) {
+        unsafe { cvReleaseCapture(&self.cvcapture); }
+    }
+}
+
+
+pub struct ColorImageIterator<'q> {
+    video: &'q Video,
+}
+
+impl <'q> Iterator for ColorImageIterator<'q> {
+    type Item = ColorImage;
+
+    // TODO return a reference; currently it is dangerous because the pointer
+    // can become invalid
+    fn next(&mut self) -> Option<Self::Item> {
+
+        unsafe {
+            let i = cvGrabFrame(self.video.cvcapture);
+            match i {
+                0 => None,
+                _ => {
+                    // http://www.cs.indiana.edu/cgi-pub/oleykin/website/OpenCVHelp/ref/OpenCVRef_HighGUI.htm
+                    // "the retrieved frame should not be released by the user"
+                    let f = cvRetrieveFrame(self.video.cvcapture, 0 as c_int);
+                    match f.is_null() {
+                        true  => None,
+                        false => {
+                            Some(ColorImage::from_raw(f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub struct GrayImageIterator<'q> {
+    video: &'q Video,
+}
+
+impl <'q> Iterator for GrayImageIterator<'q> {
+    type Item = GrayImage;
+
+    // TODO return a reference; currently it is dangerous because the pointer
+    // can become invalid
+    fn next(&mut self) -> Option<Self::Item> {
+
+        unsafe {
+            let i = cvGrabFrame(self.video.cvcapture);
+            match i {
+                0 => None,
+                _ => {
+                    // http://www.cs.indiana.edu/cgi-pub/oleykin/website/OpenCVHelp/ref/OpenCVRef_HighGUI.htm
+                    // "the retrieved frame should not be released by the user"
+                    let f = cvRetrieveFrame(self.video.cvcapture, 0 as c_int);
+                    match f.is_null() {
+                        true  => None,
+                        false => {
+                            Some(GrayImage::from_raw(f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 #[cfg(test)]
@@ -66,7 +356,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_cv_capture_from_file() {
+    fn test_cv_capture_from_file_lowlevel() {
         unsafe {
             // Opening a file that does not exist should result in null.
             let c = cvCreateFileCapture("xxxxxxxxxxxxxxx\0".as_ptr() as *const c_char);
@@ -92,6 +382,130 @@ mod tests {
             assert!(i == 0);
             let k = cvRetrieveFrame(d, 0 as c_int);
             assert!(k.is_null());
+
+            //cvReleaseCapture(&d);
         }
+    }
+
+    #[test]
+    fn test_cv_capture_pixel_lowlevel() {
+        let d = Video::from_file("datasets/testing/colors.mp4").unwrap();
+
+        let i = d.color_frame_iter().next().unwrap();
+        assert_eq!(i.channels(), 3);
+        assert_eq!(i.widthstep(), 300);
+        assert_eq!(i.depth(), 8);
+
+        // check that the red box exists
+        for y in (0..45) {
+            for x in (0..45) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r > 230);
+                assert!(p.g < 20);
+                assert!(p.b < 20);
+            }
+        }
+        // check that the white box exists
+        for y in (0..45) {
+            for x in (55..95) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r > 230);
+                assert!(p.g > 230);
+                assert!(p.b > 230);
+            }
+        }
+        // check that the black box exists
+        for y in (55..100) {
+            for x in (0..45) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r < 20);
+                assert!(p.g < 20);
+                assert!(p.b < 20);
+            }
+        }
+        // check that the green box exists
+        for y in (55..100) {
+            for x in (55..95) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r < 20);
+                assert!(p.g > 230);
+                assert!(p.b < 20);
+            }
+        }
+    }
+
+    #[test]
+    fn test_video() {
+        assert!(Video::from_file("xxxxxxxxxxx.mp4").is_none());
+
+        {
+        let c = Video::from_file("datasets/testing/colors.mp4").unwrap();
+        let i = c.color_frame_iter();
+        assert_eq!(i.count(), 25);
+        }
+
+        let c = Video::from_file("datasets/testing/colors.mp4").unwrap();
+        let mut k = 0;
+        for img in c.color_frame_iter() {
+            k += 1;
+            let mut p = img.pixel(25, 25).unwrap();
+            assert!(p.r > 200 && p.b < 20 && p.g < 20);
+            p = img.pixel(75, 25).unwrap();
+            assert!(p.r > 200 && p.b > 200 && p.g > 200);
+            p = img.pixel(25, 75).unwrap();
+            assert!(p.r < 20 && p.b < 20 && p.g < 20);
+            p = img.pixel(75, 75).unwrap();
+            assert!(p.r < 20 && p.b < 20 && p.g > 200);
+        }
+        assert_eq!(k, 25);
+    }
+
+    #[test]
+    fn test_colorimage_error() {
+        assert!(ColorImage::from_file("xxxxxxxxxxxx.png").is_none());
+    }
+
+    #[test]
+    fn test_colorimage() {
+        let i = ColorImage::from_file("datasets/testing/colors.png").unwrap();
+        assert_eq!(i.width(), 100);
+        assert_eq!(i.height(), 100);
+
+        // check that the red box exists
+        for y in (0..50) {
+            for x in (0..50) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r == 255 && p.b == 0 && p.g == 0);
+            }
+        }
+        for y in (0..50) {
+            for x in (50..100) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r == 255 && p.b == 255 && p.g == 255);
+            }
+        }
+        for y in (50..100) {
+            for x in (0..50) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r == 0 && p.b == 0 && p.g == 0);
+            }
+        }
+        for y in (50..100) {
+            for x in (50..100) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r == 0 && p.b == 0 && p.g == 255);
+            }
+        }
+    }
+
+    #[test]
+    fn test_mask() {
+
+        let mask = GrayImage::from_file("datasets/testing/10x10colors_mask.png").unwrap();
+        let gray = GrayImage::from_file("datasets/testing/10x10gray.png").unwrap();
+        let v = gray.pixels_from_mask_as_u8(&mask);
+        assert_eq!(v.unwrap(),
+            vec![0x36, 0x36, 0xed, 0x12, 0x12, 0x36, 0x36, 0xff, 0x36, 0x49, 0x00, 0xff]
+        );
     }
 }

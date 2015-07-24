@@ -6,8 +6,8 @@ pub mod sum;
 pub mod mean;
 pub mod var;
 
-pub use self::sum::Sum;
-pub use self::mean::Mean;
+pub use self::sum::{Sum, SumVec};
+pub use self::mean::{Mean, MeanVec};
 pub use self::var::Var;
 
 /// Determines the dimension over which to perform an operation.

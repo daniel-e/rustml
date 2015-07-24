@@ -55,8 +55,8 @@
 
 pub use distance::{Distance, Euclid};
 pub use matrix::{HasNan, Matrix};
-pub use math::{Dimension, Normalization, Mean, Sum, Var};
-pub use ops::{MatrixScalarOps, VectorScalarOps};
+pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
+pub use ops::{MatrixScalarOps, VectorScalarOps, VectorOps};
 pub use ops_inplace::{VectorVectorOpsInPlace};
 pub use gaussian::{GaussianEstimator, GaussianFunctions, Gaussian};
 
