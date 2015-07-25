@@ -242,6 +242,46 @@ impl GrayImage {
         }
     }
 
+    // TODO test + bounce checking
+    pub fn set_pixel(&mut self, x: usize, y: usize, newval: u8) {
+
+        unsafe {
+            let img = &(*self.iplimage);
+            let off = (y * self.widthstep() + x) as isize;
+
+            let p = img.imagedata.offset(off) as *mut u8;
+            *p = newval;
+        }
+    }
+
+
+    // TODO test
+    pub fn set_pixel_mask(&mut self, mask: &GrayImage, newval: u8) {
+
+        // TODO check size of mask
+        for y in (0..self.height()) {
+            for x in (0..self.width()) {
+                if mask.pixel(x, y).unwrap().g == 255 {
+                    self.set_pixel(x, y, newval);
+                }
+            }
+        }
+    }
+
+    pub fn to_file(&self, fname: &str) -> bool {
+
+        let mut s = fname.to_string();
+        s.push('\0');
+        unsafe {
+            let r = cvSaveImage(
+                s.as_ptr()      as *const c_char, 
+                self.iplimage   as *const CvArr,
+                0               as *const c_int
+            );
+            r != 0
+        }
+    }
+
     pub fn pixels_from_mask_as_u8(&self, i: &GrayImage) -> Option<Vec<u8>> {
 
         if self.width() != i.width() || self.height() != i.height() {
@@ -262,6 +302,19 @@ impl GrayImage {
         }
 
         Some(pixels)
+    }
+
+    // TODO test
+    pub fn rectangle(&self, x: usize, y: usize, width: usize, height: usize) -> Vec<u8> {
+
+        // TODO bounce checking
+        let mut v = Vec::new();
+        for i in (y..y+height) {
+            for j in (x..x+width) {
+                v.push(self.pixel(j, i).unwrap().g);
+            }
+        }
+        v
     }
 
     pub fn mask_iter<'q>(&'q self, i: &'q GrayImage) -> MaskIter {

@@ -5,7 +5,9 @@ extern crate libc;
 extern crate rand;
 extern crate num;
 
-use std::{iter, fmt};
+use std::{iter, fmt, fs};
+use std::io::Read;
+use std::str::FromStr;
 use std::ops::Mul;
 use std::slice::Iter;
 use self::rand::{thread_rng, Rng, Rand};
@@ -188,6 +190,41 @@ impl <T: Clone> Matrix<T> {
                 ncols: cols,
                 data: vals
             })
+        }
+    }
+
+    // TODO test
+    pub fn from_file<R: FromStr + Clone>(fname: &str) -> Option<Matrix<R>> {
+
+        match fs::File::open(fname) {
+            Ok(mut f) => {
+                let mut data = String::new();
+                match f.read_to_string(&mut data) {
+                    Ok(_n) => {
+                        let mut m: Matrix<R> = Matrix::new();
+                        for line in data.split("\n") {
+                            let items = 
+                                line.split(|c: char| c.is_whitespace()).filter(|s| s.len() > 0);
+                            let mut v: Vec<R> = Vec::new();
+                            for s in items {
+                                match s.parse::<R>() {
+                                    Ok(val) => v.push(val),
+                                    _ => { return None; }
+                                }
+                            }
+                            if v.len() > 0 {
+                                if m.rows() > 0 && v.len() != m.cols() {
+                                    return None;
+                                }
+                                m.add_row(&v);
+                            }
+                        }
+                        Some(m)
+                    }
+                    _ => None
+                }
+            }
+            _ => None
         }
     }
 
@@ -496,6 +533,35 @@ impl <T: Clone> Matrix<T> {
             ncols: self.ncols,
             data: self.data.iter().map(f).collect()
         }
+    }
+
+    pub fn add_row(&mut self, row: &Vec<T>) {
+        
+        if self.rows() == 0 {
+            self.ncols = row.len();
+        } else {
+            if self.cols() != row.len() {
+                panic!("Invalid dimension.");
+            }
+        }
+        self.nrows += 1;
+        for i in row {
+            self.data.push(i.clone());
+        }
+    }
+
+    // TODO test
+    pub fn add_matrix_below(&self, m: &Matrix<T>) -> Option<Matrix<T>> {
+
+        if self.cols() != m.cols() {
+            return None;
+        }
+
+        Some(Matrix {
+            nrows: self.rows() + m.rows(),
+            ncols: self.cols(),
+            data: self.buf().iter().chain(m.buf().iter()).cloned().collect()
+        })
     }
 }
 
@@ -909,6 +975,23 @@ mod tests {
 
         assert_eq!(m.row(0).unwrap().to_vec(), vec![7, 9]);
         assert_eq!(m.row(1).unwrap().to_vec(), vec![6, 11]);
+    }
+
+    #[test]
+    fn test_add_row() {
+
+        let mut m = Matrix::<i32>::new();
+        assert_eq!(m.rows(), 0);
+        assert_eq!(m.cols(), 0);
+        m.add_row(&vec![1, 2, 3]);
+        assert_eq!(m.rows(), 1);
+        assert_eq!(m.cols(), 3);
+        m.add_row(&vec![4, 5, 6]);
+        assert_eq!(m.rows(), 2);
+        assert_eq!(m.cols(), 3);
+
+        assert_eq!(m.row(0).unwrap().to_vec(), vec![1, 2, 3]);
+        assert_eq!(m.row(1).unwrap().to_vec(), vec![4, 5, 6]);
     }
 }
 
