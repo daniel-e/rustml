@@ -102,7 +102,7 @@ impl ColorImage {
             s.push('\0');
             // 1 = return a 3-channel color imge
             // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#imread
-            let r = cvLoadImage(fname.as_ptr() as *const c_char, 1 as c_int);
+            let r = cvLoadImage(s.as_ptr() as *const c_char, 1 as c_int);
             let i = ColorImage{ iplimage: r };
 
             if r.is_null() || i.depth() != 8 || i.channels() != 3 {
@@ -164,20 +164,19 @@ impl GrayImage {
             s.push('\0');
             // 0 = return a grayscale image
             // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#imread
-            let r = cvLoadImage(fname.as_ptr() as *const c_char, 0 as c_int);
-            let i = GrayImage{ iplimage: r };
+            let r = cvLoadImage(s.as_ptr() as *const c_char, 0 as c_int);
 
-            if r.is_null() || i.depth() != 8 || i.channels() != 1 {
+            if r.is_null() {
                 return None;
             }
-            Some(i)
+            Some(GrayImage::from_raw(r))
         }
     }
 
     pub fn from_raw(image: *const IplImage) -> GrayImage {
 
         unsafe {
-            if (*image).depth != 8 || (*image).nchannels == 1 {
+            if (*image).depth != 8 || (*image).nchannels != 1 {
                 let siz = CvSize {
                     width: (*image).width,
                     height: (*image).height
@@ -235,6 +234,53 @@ impl GrayImage {
         }
 
         Some(pixels)
+    }
+
+    pub fn mask_iter<'q>(&'q self, i: &'q GrayImage) -> MaskIter {
+
+        MaskIter {
+            src: self,
+            mask: i,
+            x: 0,
+            y: 0,
+        }
+    }
+}
+
+pub struct MaskIter<'t> {
+    src: &'t GrayImage,
+    mask: &'t GrayImage,
+    x: usize,
+    y: usize,
+}
+
+impl <'t> Iterator for MaskIter<'t> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<u8> {
+       
+        if self.src.width() != self.mask.width() || self.src.height() != self.mask.height() {
+            return None;
+        }
+
+        loop {
+
+            if self.x >= self.src.width() {
+                self.x = 0;
+                self.y += 1;
+            }
+
+            if self.y >= self.src.height() {
+                return None;
+            }
+
+            if self.mask.pixel(self.x, self.y).unwrap().g != 0 {
+                let r = self.src.pixel(self.x, self.y).unwrap().g;
+                self.x += 1;
+                return Some(r);
+            }
+            self.x += 1;
+        }
     }
 }
 
@@ -503,8 +549,14 @@ mod tests {
 
         let mask = GrayImage::from_file("datasets/testing/10x10colors_mask.png").unwrap();
         let gray = GrayImage::from_file("datasets/testing/10x10gray.png").unwrap();
+
         let v = gray.pixels_from_mask_as_u8(&mask);
         assert_eq!(v.unwrap(),
+            vec![0x36, 0x36, 0xed, 0x12, 0x12, 0x36, 0x36, 0xff, 0x36, 0x49, 0x00, 0xff]
+        );
+
+        let x: Vec<u8> = gray.mask_iter(&mask).collect();
+        assert_eq!(x,
             vec![0x36, 0x36, 0xed, 0x12, 0x12, 0x36, 0x36, 0xff, 0x36, 0x49, 0x00, 0xff]
         );
     }
