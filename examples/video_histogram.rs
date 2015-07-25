@@ -5,26 +5,19 @@ use rustml::*;
 use rustml::opencv::*;
 
 fn main() {
-    
+    // TODO example files
     let video = Video::from_file("/home/dz/videos/generated/reduced.avi").unwrap();
     let mask = GrayImage::from_file("/home/dz/videos/generated/mask.png").unwrap();
 
-    let mut values: Vec<u32> = Vec::new();
-    let mut c = 0;
+    for (idx, img) in video.gray_frame_iter().enumerate() {
 
-    for i in video.gray_frame_iter() {
-        values.push(
-            i.pixels_from_mask_as_u8(&mask).unwrap()
-             .map(|&x| x as u32)
-             .mean()
-        );
-
-        c += 1;
-        if c % 1000 == 0 {
-            writeln!(&mut std::io::stderr(), "{}", c);
+        if idx % 1000 == 0 {
+            writeln!(&mut std::io::stderr(), "{} frames", idx).unwrap();
         }
 
-        println!("{}", values.last().unwrap());
+        println!("{}", 
+            img.mask_iter(&mask).map(|x| x as u32).collect::<Vec<u32>>().mean()
+        );
     }
 }
 
