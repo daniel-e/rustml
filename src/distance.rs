@@ -3,9 +3,30 @@
 extern crate libc;
 
 use self::libc::{c_int, c_double, c_float};
-use ::matrix::*;
-use ::norm::{L2Norm, Norm};
-use ::blas::{cblas_daxpy, cblas_saxpy};
+use matrix::*;
+use norm::{L2Norm, Norm};
+use blas::{cblas_daxpy, cblas_saxpy};
+use structs::Point2D;
+
+pub trait DistancePoint2D<T> {
+    fn euclid(&self, other: &Point2D<T>) -> T;
+}
+
+macro_rules! distance_point2d_impl {
+    ($($t:ty)*) => ($(
+
+        impl DistancePoint2D<$t> for Point2D<$t> {
+            fn euclid(&self, other: &Point2D<$t>) -> $t {
+                ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
+            }
+        }
+    )*)
+}
+
+distance_point2d_impl!{ f32 f64 }
+
+
+// ----------------------------------------------------------------------------
 
 /// Computes the distance between two vectors.
 pub trait Distance<T> {
@@ -110,8 +131,9 @@ pub fn all_pair_distances(m: &Matrix<f64>) -> Matrix<f64> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Distance, Euclid, all_pair_distances};
-    use ::matrix::*;
+    use matrix::*;
+    use super::*;
+    use structs::Point2D;
 
     #[test]
     fn test_euclid() {
@@ -144,6 +166,17 @@ mod tests {
 
         assert!(*r.get(1, 2).unwrap() - 17.0 <= 0.001);
         assert!(*r.get(2, 1).unwrap() - 17.0 <= 0.001);
+    }
+
+    #[test]
+    fn test_euclid_point2d() {
+
+        let a = Point2D::new(2.0, 8.0);
+        let b = Point2D::new(5.0, 12.0);
+        assert!(a.euclid(&b) - 5.0 < 0.00001);
+
+        let d = Point2D::new(2.0, 8.0);
+        assert_eq!(a.euclid(&d), 0.0);
     }
 }
 

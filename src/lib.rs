@@ -53,12 +53,13 @@
 //! vectors
 //! * [feature scaling](https://github.com/daniel-e/rustml/blob/master/examples/scale_matrix.rs)
 
-pub use distance::{Distance, Euclid};
+pub use distance::{Distance, Euclid, DistancePoint2D};
 pub use matrix::{HasNan, Matrix};
 pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
 pub use ops::{MatrixScalarOps, VectorScalarOps, VectorOps};
 pub use ops_inplace::{VectorVectorOpsInPlace};
 pub use gaussian::{GaussianEstimator, GaussianFunctions, Gaussian};
+pub use structs::{Point2D};
 
 // ordering is important because the macro mat! is 
 // only available for modules which follow #[macro_use]
@@ -80,4 +81,5 @@ pub mod consts;
 pub mod ops_inplace;
 pub mod scaling;
 pub mod opencv;
+pub mod structs;
 
