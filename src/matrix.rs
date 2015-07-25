@@ -550,16 +550,16 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
-    // TODO test
-    pub fn add_matrix_below(&self, m: &Matrix<T>) -> Option<Matrix<T>> {
+    /// Extends the current matrix by putting the matrix `m` below it.
+    pub fn push_matrix_below(&self, m: &Matrix<T>) -> Option<Matrix<T>> {
 
-        if self.cols() != m.cols() {
+        if self.rows() > 0 && self.cols() != m.cols() {
             return None;
         }
 
         Some(Matrix {
             nrows: self.rows() + m.rows(),
-            ncols: self.cols(),
+            ncols: m.cols(),
             data: self.buf().iter().chain(m.buf().iter()).cloned().collect()
         })
     }
@@ -993,5 +993,35 @@ mod tests {
         assert_eq!(m.row(0).unwrap().to_vec(), vec![1, 2, 3]);
         assert_eq!(m.row(1).unwrap().to_vec(), vec![4, 5, 6]);
     }
+
+    #[test]
+    fn test_push_matrix_below() {
+
+        let m = mat![
+            1, 2, 3;
+            4, 5, 6
+        ];
+
+        let a = mat![
+            7, 8, 9;
+            10, 11, 12
+        ];
+
+        let b = m.push_matrix_below(&a).unwrap();
+        assert_eq!(b.rows(), 4);
+        assert_eq!(b.row(0).unwrap().to_vec(), vec![1, 2, 3]);
+        assert_eq!(b.row(1).unwrap().to_vec(), vec![4, 5, 6]);
+        assert_eq!(b.row(2).unwrap().to_vec(), vec![7, 8, 9]);
+        assert_eq!(b.row(3).unwrap().to_vec(), vec![10, 11, 12]);
+
+        let c = mat![1, 2; 3, 4];
+        assert!(c.push_matrix_below(&a).is_none());
+
+        let d = Matrix::<i32>::new().push_matrix_below(&a).unwrap();
+        assert_eq!(d.rows(), 2);
+        assert_eq!(d.row(0).unwrap().to_vec(), vec![7, 8, 9]);
+        assert_eq!(d.row(1).unwrap().to_vec(), vec![10, 11, 12]);
+    }
+
 }
 
