@@ -20,11 +20,10 @@ for i in  \
 	"train-images-idx3-ubyte.gz" \
 	"train-labels-idx1-ubyte.gz" \
 ; do
-	URL="https://github.com/daniel-e/rustml/blob/dev/datasets/mnist_digits/$i?raw=true"
+	URL="https://github.com/daniel-e/rustml/blob/master/datasets/mnist_digits/$i?raw=true"
 	echo "> downloading $i ..."
 	wget -q -O $RUSTMLPATH/datasets/mnist_digits/$i $URL
 done
-echo -e "\e[1;32mdone\e[0m"	
 
 # --------------------------------------------
 
@@ -36,7 +35,7 @@ for i in  \
 	"day_and_night_in_gray.avi" \
 	"day_and_night_in_gray_mask_sky.png" \
 ; do
-	URL="https://github.com/daniel-e/rustml/blob/dev/datasets/videos/$i?raw=true"
+	URL="https://github.com/daniel-e/rustml/blob/master/datasets/videos/$i?raw=true"
 	echo "> downloading $i ..."
 	wget -q -O $RUSTMLPATH/datasets/videos/$i $URL
 done
