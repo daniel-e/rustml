@@ -1,3 +1,5 @@
+use std::fmt;
+
 pub struct Point2D<T> {
     pub x: T,
     pub y: T
@@ -9,6 +11,13 @@ impl <T> Point2D<T> {
             x: x,
             y: y
         }
+    }
+}
+
+impl <T: fmt::Display + Clone> fmt::Display for Point2D<T> {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({} {})", self.x, self.y)
     }
 }
 
