@@ -57,6 +57,8 @@ extern {
     pub fn cvReleaseCapture(cvcapture: *const *const CvCapture);
 
     pub fn cvLoadImage(fname: *const c_char, iscolor: c_int) -> *const IplImage;
+
+    pub fn cvSaveImage(fname: *const c_char, img: *const CvArr, params: *const c_int) -> c_int;
 }
 
 #[link(name = "opencv_core")]
@@ -130,6 +132,20 @@ impl ColorImage {
             ColorImage {
                 iplimage: image
             }
+        }
+    }
+
+    pub fn to_file(&self, fname: &str) -> bool {
+
+        let mut s = fname.to_string();
+        s.push('\0');
+        unsafe {
+            let r = cvSaveImage(
+                s.as_ptr()      as *const c_char, 
+                self.iplimage   as *const CvArr,
+                0               as *const c_int
+            );
+            r != 0
         }
     }
 
@@ -586,5 +602,15 @@ mod tests {
             255, 255, 255, 255, 255, 255, 255, 255, 255, 
             0, 0, 149, 149, 149, 0, 149, 149, 149, 0, 149, 149, 149, 0
         ]);
+    }
+
+    #[test]
+    fn test_image_to_file() {
+
+        let img = ColorImage::from_file("datasets/testing/tree.png").unwrap();
+        assert!(img.to_file("/tmp/ab.jpg"));
+        // the following test should fail because the directory does not
+        // exist
+        assert!(!img.to_file("datasets/nulldir/ab.jpg"));
     }
 }
