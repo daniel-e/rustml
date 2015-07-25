@@ -73,6 +73,55 @@ extern {
 
 // ----------------------------------------------------------------------------
 
+pub fn grid(images: &Vec<GrayImage>, cols: usize, space: usize) -> Option<GrayImage> {
+
+    if images.len() == 0 || cols == 0 {
+        return None;
+    }
+
+    let mut rows = images.len() / cols;
+    if rows * cols < images.len() {
+        rows += 1;
+    }
+
+    let img_width = images.last().unwrap().width();
+    let img_height = images.last().unwrap().height();
+    let w = img_width * cols + (cols - 1) * space;
+    let h = img_height * rows + (rows - 1) * space;
+
+    let siz = CvSize {
+        width: w as c_int,
+        height: h as c_int
+    };
+    let mut dst = GrayImage { iplimage: unsafe { cvCreateImage(siz, 8, 1) } };
+
+    let mut col = 0;
+    let mut row = 0;
+
+    for img in images {
+        if img_width != img.width() || img_height != img.height() {
+            return None;
+        }
+        for y in (0..img_height) {
+            for x in (0..img_width) {
+                dst.set_pixel(
+                    x + col * (img_width + space), y + row * (img_height + space), 
+                    img.pixel(x, y).unwrap().g
+                );
+            }
+        }
+        col += 1;
+        if col >= cols {
+            col = 0;
+            row += 1;
+        }
+    }
+
+    Some(dst)
+}
+
+// ----------------------------------------------------------------------------
+
 pub struct GrayPixel {
     pub g: u8,
 }
@@ -197,6 +246,26 @@ impl GrayImage {
             }
             Some(GrayImage::from_raw(r))
         }
+    }
+
+    pub fn from_slice(v: &[u8], rows: usize, cols: usize) -> Option<GrayImage> {
+
+        if rows * cols != v.len() {
+            return None;
+        }
+
+        let siz = CvSize {
+            width: cols as c_int,
+            height: rows as c_int
+        };
+        let mut dst = GrayImage { iplimage: unsafe { cvCreateImage(siz, 8, 1) } };
+        
+        for y in (0..rows) {
+            for x in (0..cols) {
+                dst.set_pixel(x, y, *v.get(y * cols + x).unwrap());
+            }
+        }
+        Some(dst)
     }
 
     pub fn from_raw(image: *const IplImage) -> GrayImage {
