@@ -8,7 +8,7 @@ pub fn dbscan(data: &Vec<Point2D<f64>>, eps: f64, minpts: usize) -> Vec<isize> {
     s.compute()
 }
 
-pub struct ClusterDbscan<'a> {
+struct ClusterDbscan<'a> {
     data: &'a Vec<Point2D<f64>>,
     eps: f64,
     minpts: usize,
@@ -125,15 +125,8 @@ mod tests {
             Point2D::new(32.0, 25.0),
         ];
 
-        let s = ClusterDbscan::new(&data, 5.0, 3);
-        assert_eq!(s.neighbours(0), vec![0, 1, 2, 3, 4, 5, 6, 7]);
-        assert_eq!(s.neighbours(8), vec![8, 9, 10]);
-        assert_eq!(s.neighbours(11), vec![11]);
-
         let r = dbscan(&data, 5.0, 3);
-        for i in r {
-            println!("{}", i);
-        }
+        assert_eq!(r, vec![0,0,0,0,0,0,0,0,1,1,1,-1]);
     }
 }
 
