@@ -9,6 +9,9 @@ use self::libc::{c_char, c_int, c_void};
 pub struct CvCapture;
 
 #[repr(C)]
+pub struct CvArr;
+
+#[repr(C)]
 pub struct CvSize {
     width: c_int,
     height: c_int
@@ -41,6 +44,8 @@ pub struct IplImage {
     imagedataorigin: *mut c_char
 }
 
+const CV_BGR2GRAY: c_int = 6;
+
 #[link(name = "opencv_highgui")]
 extern {
     pub fn cvCreateFileCapture(fname: *const c_char) -> *const CvCapture;
@@ -57,6 +62,11 @@ extern {
 #[link(name = "opencv_core")]
 extern {
     pub fn cvCreateImage(siz: CvSize, depth: c_int, channels: c_int) -> *const IplImage;
+}
+
+#[link(name = "opencv_imgproc")]
+extern {
+    pub fn cvCvtColor(src: *const CvArr, dst: *mut CvArr, code: c_int);
 }
 
 // ----------------------------------------------------------------------------
@@ -181,8 +191,10 @@ impl GrayImage {
                     width: (*image).width,
                     height: (*image).height
                 };
+                let ipl = cvCreateImage(siz, 8, 1);
+                cvCvtColor(image as *const CvArr, ipl as *mut CvArr, CV_BGR2GRAY);
                 GrayImage {
-                    iplimage: cvCreateImage(siz, 8, 1)
+                    iplimage: ipl
                 }
             } else {
                 GrayImage {
@@ -545,7 +557,7 @@ mod tests {
     }
 
     #[test]
-    fn test_mask() {
+    fn test_mask_image() {
 
         let mask = GrayImage::from_file("datasets/testing/10x10colors_mask.png").unwrap();
         let gray = GrayImage::from_file("datasets/testing/10x10gray.png").unwrap();
@@ -559,5 +571,20 @@ mod tests {
         assert_eq!(x,
             vec![0x36, 0x36, 0xed, 0x12, 0x12, 0x36, 0x36, 0xff, 0x36, 0x49, 0x00, 0xff]
         );
+    }
+
+    #[test]
+    fn test_mask_video() {
+
+        let video = Video::from_file("datasets/testing/colors.mp4").unwrap();
+        let mask = GrayImage::from_file("datasets/testing/colors_mask.png").unwrap();
+
+        let img = video.gray_frame_iter().next().unwrap();
+        let pixels = img.mask_iter(&mask).collect::<Vec<u8>>();
+        assert_eq!(pixels, vec![
+            76, 76, 76, 76,
+            255, 255, 255, 255, 255, 255, 255, 255, 255, 
+            0, 0, 149, 149, 149, 0, 149, 149, 149, 0, 149, 149, 149, 0
+        ]);
     }
 }
