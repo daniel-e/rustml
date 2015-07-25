@@ -6,7 +6,8 @@ cargo clean
 echo "building lib ..."
 cargo build
 
-for i in vector_addition mnist_digits matrix_multiplication; do
+for i in $(find examples/ -name "*.rs" | cut -d/ -f2 | cut -d. -f1);
+do
 	echo "example $i ..."
 	cargo run --example $i
 done

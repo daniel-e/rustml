@@ -6,11 +6,11 @@
 sudo ./docker run -t -i ubuntu:14.04 /bin/bash
 ```
 
-### Install the required dependencies
+### Install the required dependencies in the docker image
 
 ```bash
 apt-get update
-apt-get -y install build-essential git screen aptitude wget unzip libblas-dev 
+apt-get -y install build-essential git aptitude wget unzip libblas-dev 
 ```
 
 ### Install rust

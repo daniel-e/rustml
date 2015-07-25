@@ -2,19 +2,23 @@
 
 Rustml is a library for doing machine learning in Rust. 
 
-The documentation of the project can be found [here](http://daniel-e.github.io/rustml/rustml).
+The documentation of the project with a descprition of the modules can be found [here](http://daniel-e.github.io/rustml/rustml).
 
 ## Features 
 
-* powerful matrix and vector support with BLAS bindings for high performance 
+* powerful matrix and vector support with BLAS bindings to provide very high performance 
 * classification with k-nearest neighbord
-* easy access to MNIST database of handwritten digits
+* easy access to MNIST database of handwritten digits via an the rustml dataset package
 * parse and create CSV files
 * statistical functions like mean and variance for vectors and matrices
 * reading gzip compressed files
 * distance metrics
+* implementation of the DBSCAN clustering algorithm
+* OpenCV binding to read images and videos plus interfaces for simplify feature extraction from images and videos (e.g. select pixels from images or frames of a video via a mask)
+* scaling of feature vectors and matrices
+* examples
 
-## Using rustml - example matrix multplication
+## Using rustml from scratch - example matrix multplication
 
 Create a new project with cargo:
 
@@ -66,15 +70,20 @@ Cargo as follows:
 
 ```bash
 cargo run --example vector_addition
-cargo run --example mnist_digits
 cargo run --example matrix_multiplication
+cargo run --example scale_matrix
+
+# the following examples require the rustml dataset package (see below)
+cargo run --example video_histogram
+cargo run --example mnist_digits
 ``` 
 
-## Datasets
+## Rustml datasets package
 
-Rustml comes with the MNIST database of handwritten digits and provides
-an API to access this database. In prior to use the dataset you have to
-install it into you home path. This can be easily done as follows:
+The rustml dataset package needs to be installed separately. The package currently contains
+the MNIST database of handwritten digits and videos for the examples. Download the following
+script which will download and install the package in your home in the directory
+`~/.rustml/`.
 
 ```bash
 # download the install script

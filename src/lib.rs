@@ -45,13 +45,17 @@
 //! # All examples
 //!
 //! * [<i>k</i>-nearest
-//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs): classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach.
+//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs): classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach. (this examples requires an external dataset that has to be downloaded separately (see [here](https://github.com/daniel-e/rustml#datasets))
 //! * [matrix
 //! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs): multiplies two 6000x6000 matrices.
 //! * [vector
 //! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs): add
 //! vectors
 //! * [feature scaling](https://github.com/daniel-e/rustml/blob/master/examples/scale_matrix.rs)
+//! * [feature extraction from all frames of a
+//! video](https://github.com/daniel-e/rustml/blob/master/examples/video_histogram.rs): this
+//! examples requires an external dataset that has to be downloaded separately (see
+//! [here](https://github.com/daniel-e/rustml#datasets)).
 
 pub use distance::{Distance, Euclid, DistancePoint2D};
 pub use matrix::{HasNan, Matrix};
