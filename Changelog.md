@@ -7,6 +7,8 @@
  * module `ops_inplace`
    * operations on matrices and vectors inplace
  * OpenCV integration
+ * Point2D
+ * DBSCAN clustering algorithm
 
 ## 0.0.2
 
