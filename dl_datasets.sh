@@ -26,3 +26,20 @@ for i in  \
 done
 echo -e "\e[1;32mdone\e[0m"	
 
+# --------------------------------------------
+
+echo -e "\e[1;34mdownloading example videos ...\e[0m"
+if [ ! -e $RUSTMLPATH/datasets/videos ]; then
+	mkdir -p $RUSTMLPATH/datasets/videos
+fi
+for i in  \
+	"day_and_night_in_gray.avi" \
+	"day_and_night_in_gray_mask_sky.png" \
+; do
+	URL="https://github.com/daniel-e/rustml/blob/dev/datasets/videos/$i?raw=true"
+	echo "> downloading $i ..."
+	wget -q -O $RUSTMLPATH/datasets/videos/$i $URL
+done
+echo -e "\e[1;32mdone\e[0m"	
+
+
