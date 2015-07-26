@@ -87,4 +87,4 @@ pub mod scaling;
 pub mod opencv;
 pub mod structs;
 pub mod dbscan;
-
+pub mod sliding;
