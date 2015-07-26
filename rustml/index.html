@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `rustml` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, rustml">
+
+    <title>rustml - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'rustml', ty: 'mod', relpath: '../'};</script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>rustml</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-0' class='srclink' href='../src/rustml/lib.rs.html#1-90' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Library for doing machine learning with Rust.</p>
+
+<h1 id="performance" class='section-header'><a
+                           href="#performance">Performance</a></h1>
+<p>When it comes to vector and matrix operations rustml makes heavy
+use of highly optimized numeric libraries like <a href="http://www.netlib.org/blas/">BLAS</a>
+or <a href="http://math-atlas.sourceforge.net/">ATLAS</a>. By default CBLAS is used because
+it is installed on many systems by default. However, in many cases performance
+can be greatly improved when switching to ATLAS. For a detailed description on how
+to optimize the numeric computations please read the separate
+documentation on this topic available
+<a href="https://github.com/daniel-e/rustml/tree/master/build">here</a>.</p>
+
+<h1 id="example-how-to-do-classifications" class='section-header'><a
+                           href="#example-how-to-do-classifications">Example how to do classifications</a></h1>
+<p>In the following example a simple k-nearest neighbour algorithm is used to predict
+the label of a vector with two features based on the examples in the matrix
+<code>m</code> (the training set) with their known labels stored in the vector <code>labels</code>.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='op'>*</span>;
+
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[  <span class='comment'>// training set</span>
+    <span class='number'>1.0</span>, <span class='number'>2.0</span>;  <span class='comment'>// each row contains one example for which the label is</span>
+    <span class='number'>1.1</span>, <span class='number'>2.1</span>;  <span class='comment'>// known</span>
+    <span class='number'>2.0</span>, <span class='number'>3.0</span>;
+    <span class='number'>0.9</span>, <span class='number'>1.9</span>;
+    <span class='number'>2.1</span>, <span class='number'>2.9</span>
+];
+
+<span class='kw'>let</span> <span class='ident'>labels</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>2</span>, <span class='number'>1</span>, <span class='number'>2</span>];
+
+<span class='comment'>// predict the label for feature vector [1.3, 2.0]</span>
+<span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> 
+    <span class='ident'>knn</span>::<span class='ident'>classify</span>(
+        <span class='kw-2'>&amp;</span><span class='ident'>m</span>, <span class='kw-2'>&amp;</span><span class='ident'>labels</span>, <span class='kw-2'>&amp;</span>[<span class='number'>1.3</span>, <span class='number'>2.0</span>], 
+        <span class='number'>3</span>, <span class='comment'>// look at the 3 nearest neighbours to make the decision</span>
+        <span class='op'>|</span><span class='ident'>x</span>, <span class='ident'>y</span><span class='op'>|</span> <span class='ident'>Euclid</span>::<span class='ident'>compute</span>(<span class='ident'>x</span>, <span class='ident'>y</span>).<span class='ident'>unwrap</span>() <span class='comment'>// use Euclidean distance</span>
+    );
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='number'>1</span>);
+</pre>
+
+<h1 id="all-examples" class='section-header'><a
+                           href="#all-examples">All examples</a></h1>
+<ul>
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs"><i>k</i>-nearest
+neighbor</a>: classifies the examples of the test set of the MNIST database of handwritten digits with a simple <i>k</i>-nearest neighbor approach. (this examples requires an external dataset that has to be downloaded separately (see <a href="https://github.com/daniel-e/rustml#datasets">here</a>)</li>
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs">matrix
+multiplication</a>: multiplies two 6000x6000 matrices.</li>
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs">vector
+addition</a>: add
+vectors</li>
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/scale_matrix.rs">feature scaling</a></li>
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/video_histogram.rs">feature extraction from all frames of a
+video</a>: this
+examples requires an external dataset that has to be downloaded separately (see
+<a href="https://github.com/daniel-e/rustml#datasets">here</a>).</li>
+</ul>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use distance::{<a class='trait' href='../rustml/distance/trait.Distance.html' title='rustml::distance::Distance'>Distance</a>, <a class='struct' href='../rustml/distance/struct.Euclid.html' title='rustml::distance::Euclid'>Euclid</a>, <a class='trait' href='../rustml/distance/trait.DistancePoint2D.html' title='rustml::distance::DistancePoint2D'>DistancePoint2D</a>};</code></td></tr><tr><td><code>pub use matrix::{<a class='trait' href='../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a>, <a class='struct' href='../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>};</code></td></tr><tr><td><code>pub use math::{<a class='enum' href='../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>, <a class='enum' href='../rustml/math/enum.Normalization.html' title='rustml::math::Normalization'>Normalization</a>, <a class='trait' href='../rustml/math/mean/trait.Mean.html' title='rustml::math::mean::Mean'>Mean</a>, <a class='trait' href='../rustml/math/mean/trait.MeanVec.html' title='rustml::math::mean::MeanVec'>MeanVec</a>, <a class='trait' href='../rustml/math/sum/trait.Sum.html' title='rustml::math::sum::Sum'>Sum</a>, <a class='trait' href='../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>, <a class='trait' href='../rustml/math/sum/trait.SumVec.html' title='rustml::math::sum::SumVec'>SumVec</a>};</code></td></tr><tr><td><code>pub use ops::{<a class='trait' href='../rustml/ops/trait.MatrixScalarOps.html' title='rustml::ops::MatrixScalarOps'>MatrixScalarOps</a>, <a class='trait' href='../rustml/ops/trait.VectorScalarOps.html' title='rustml::ops::VectorScalarOps'>VectorScalarOps</a>, <a class='trait' href='../rustml/ops/trait.VectorOps.html' title='rustml::ops::VectorOps'>VectorOps</a>};</code></td></tr><tr><td><code>pub use ops_inplace::{<a class='trait' href='../rustml/ops_inplace/trait.VectorVectorOpsInPlace.html' title='rustml::ops_inplace::VectorVectorOpsInPlace'>VectorVectorOpsInPlace</a>};</code></td></tr><tr><td><code>pub use gaussian::{<a class='trait' href='../rustml/gaussian/trait.GaussianEstimator.html' title='rustml::gaussian::GaussianEstimator'>GaussianEstimator</a>, <a class='trait' href='../rustml/gaussian/trait.GaussianFunctions.html' title='rustml::gaussian::GaussianFunctions'>GaussianFunctions</a>, <a class='struct' href='../rustml/gaussian/struct.Gaussian.html' title='rustml::gaussian::Gaussian'>Gaussian</a>};</code></td></tr><tr><td><code>pub use structs::{<a class='struct' href='../rustml/structs/struct.Point2D.html' title='rustml::structs::Point2D'>Point2D</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='blas/index.html'
+                               title='rustml::blas'>blas</a></td>
+                        <td class='docblock short'>
+                             <p>Bindings for BLAS/ATLAS for high performance vector and matrix operations.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='consts/index.html'
+                               title='rustml::consts'>consts</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='csv/index.html'
+                               title='rustml::csv'>csv</a></td>
+                        <td class='docblock short'>
+                             <p>Functions to parse and create comma-separated values (CSV).</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='datasets/index.html'
+                               title='rustml::datasets'>datasets</a></td>
+                        <td class='docblock short'>
+                             <p>Module to easily access popular datasets often used to measure the performance of
+machine learning algorithms.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='dbscan/index.html'
+                               title='rustml::dbscan'>dbscan</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='distance/index.html'
+                               title='rustml::distance'>distance</a></td>
+                        <td class='docblock short'>
+                             <p>Functions to compute the distance between vectors.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='gaussian/index.html'
+                               title='rustml::gaussian'>gaussian</a></td>
+                        <td class='docblock short'>
+                             <p>Module to handle Gaussian distributions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='io/index.html'
+                               title='rustml::io'>io</a></td>
+                        <td class='docblock short'>
+                             <p>Functions to read and write files (e.g. gzip compressed files).</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='knn/index.html'
+                               title='rustml::knn'>knn</a></td>
+                        <td class='docblock short'>
+                             <p>Functions to compute the k-nearest neighbours.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='math/index.html'
+                               title='rustml::math'>math</a></td>
+                        <td class='docblock short'>
+                             <p>Module with a collection of different mathematical functions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='matrix/index.html'
+                               title='rustml::matrix'>matrix</a></td>
+                        <td class='docblock short'>
+                             <p>Module that contains structs and functions useful for doing matrix
+operations.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='norm/index.html'
+                               title='rustml::norm'>norm</a></td>
+                        <td class='docblock short'>
+                             <p>Functions to compute norms of vectors.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='opencv/index.html'
+                               title='rustml::opencv'>opencv</a></td>
+                        <td class='docblock short'>
+                             <p><font color="red"><b>Experimental</b></font> module for image and video manipulation.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='ops/index.html'
+                               title='rustml::ops'>ops</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='ops_inplace/index.html'
+                               title='rustml::ops_inplace'>ops_inplace</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='scaling/index.html'
+                               title='rustml::scaling'>scaling</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='sliding/index.html'
+                               title='rustml::sliding'>sliding</a></td>
+                        <td class='docblock short'>
+                             <p>Sliding windows for arbitrary dimensions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='structs/index.html'
+                               title='rustml::structs'>structs</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='vectors/index.html'
+                               title='rustml::vectors'>vectors</a></td>
+                        <td class='docblock short'>
+                             <p>Functions to operate on vectors.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='macro' href='macro.mat!.html'
+                               title='rustml::mat!'>mat!</a></td>
+                        <td class='docblock short'>
+                             <p>Macro to create a matrix.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "rustml";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>

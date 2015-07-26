@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GzipData","Struct to decompress gzip streams."]]});

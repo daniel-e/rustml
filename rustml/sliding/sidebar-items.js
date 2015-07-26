@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["builder",""],["sliding_window",""],["sliding_window_1d",""],["sliding_window_2d",""]],"struct":[["DimensionParameters",""],["SlidingWindowBuilder",""]]});
