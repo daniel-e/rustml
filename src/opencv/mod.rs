@@ -1,11 +1,17 @@
-//! Experimental module for image and video manipulation.
+//! <font color="red"><b>Experimental</b></font> module for image and video manipulation.
+//!
+//! Interfaces may change in the future.
+
+// TODO remove memory leaks
 
 extern crate libc;
+extern crate rand;
 
 mod bindings;
 
 use std::fmt;
 use self::libc::{c_char, c_int, c_float, c_double};
+use self::rand::{thread_rng, Rng};
 
 use self::bindings::*;
 
@@ -22,6 +28,7 @@ pub enum FontFace {
 
 // ----------------------------------------------------------------------------
 
+/// Font to draw text on images.
 pub struct Font {
     font: Box<CvFont>
 }
@@ -74,21 +81,140 @@ impl Font {
 
 // ----------------------------------------------------------------------------
 
+/// A window to display an image.
+pub struct Window {
+    name: String
+}
+
+impl Window {
+    // TODO destroyWindow
+
+    /// Creates a new window for displaying an image.
+    pub fn new() -> Window {
+        unsafe {
+            let mut s: String = thread_rng().gen_ascii_chars().take(30).collect();
+            s.push('\0');
+            cvNamedWindow(s.as_ptr() as *const c_char, CV_WINDOW_AUTOSIZE);
+            Window {
+                name: s
+            }
+        }
+    }
+
+    /// Displays the given image in the window.
+    ///
+    /// ```ignore
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::opencv::*;
+    ///
+    /// # fn main() {
+    /// let img = RgbImage::from_file("datasets/testing/tree.png").unwrap();
+    /// Window::new()
+    ///     .show_image(&img)
+    ///     .wait_key(0);
+    /// # }
+    /// ```
+    pub fn show_image<T: Image>(&self, img: &T) -> &Self {
+        unsafe {
+            cvShowImage(
+                self.name.as_ptr() as *const c_char, 
+                img.buffer()       as *const CvArr
+            );
+        }
+        self
+    }
+
+    /// Waits for the specified amount of time in milliseconds or until
+    /// a key is pressed if `delay` is zero.
+    pub fn wait_key(&self, delay: i32) {
+        unsafe {
+            cvWaitKey(delay as c_int);
+            cvDestroyWindow(self.name.as_ptr() as *const c_char);
+        }
+    }
+}
+
+// ------------------------------------------------------------------
+
+/// Represents a pixel with a red, green and blue component.
+pub struct Rgb {
+    /// Value for red.
+    pub r: u8,
+    /// Value for green.
+    pub g: u8,
+    /// Value for blue.
+    pub b: u8
+}
+
+/// Implementation of `Display`. The format is `(red, green, blue)`.
+impl fmt::Display for Rgb {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({} {} {})", self.r, self.g, self.b)
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+/// Represents a pixel with only one component.
+pub struct GrayValue {
+    pub val: u8,
+}
+
+/// Implementation of `Display`. The format is `(value)`.
+impl fmt::Display for GrayValue {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({})", self.val)
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+/// Trait for images.
 pub trait Image {
+    /// Creates a new image with the given width and height.
+    fn new(width: usize, height: usize) -> Self;
+
+    /// Returns the internal representation of the image.
     fn buffer(&self) -> *const IplImage;
 
-    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<ColorPixel>;
+    /// Returns the RGB value of the pixel at location `(x, y)`.
+    ///
+    /// If the image is a grayscale image all color components have the same value.
+    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<Rgb>;
 
-    fn set_pixel_from_rgb(&self, x: usize, y: usize, p: &ColorPixel);
+    /// Sets the pixel at the location `(x, y)` to the value specified by `p`.
+    ///
+    /// If the image is a frayscale image the following grayscale value is
+    /// set: val = 0.299 * red + 0.587 * green + 0.114 * blue
+    fn set_pixel_from_rgb(&self, x: usize, y: usize, p: &Rgb);
 
     // implemenations ----------------------------------------------------
 
+    /// Returns the width of the image.
     fn width(&self) -> usize { unsafe { (*self.buffer()).width as usize } }
+
+    /// Returns the height of the image.
     fn height(&self) -> usize { unsafe { (*self.buffer()).height as usize } }
+
+    /// Returns the color depth of the image.
     fn depth(&self) -> usize { unsafe { (*self.buffer()).depth as usize } }
+
+    /// Internal method which returns the length of one row in bytes.
+    ///
+    /// Due to the fact that rows might by aligned the number of bytes might
+    /// be greater than the width of the image.
     fn widthstep(&self) -> usize { unsafe { (*self.buffer()).widthstep as usize } }
+
+    /// Returns the number of color components used for this image.
     fn channels(&self) -> usize { unsafe { (*self.buffer()).nchannels as usize } }
 
+    /// Writes the image into a file.
+    ///
+    /// The file format that is written depends on the extension of the filename.
+    /// Supported formats are JPEG, PNG, PPM, PGM, PBM. Returns `false` if file
+    /// could not be written and `true` on success.
     fn to_file(&self, fname: &str) -> bool {
 
         let mut s = fname.to_string();
@@ -103,10 +229,13 @@ pub trait Image {
         }
     }
 
+    /// Copies an area from the given image at location `(x,y )` with width `width`
+    /// and height `height` into this image at position `(dstx, dsty)`.
     fn copy_from<T: Image>(&mut self, 
             img: &T, x: usize, y: usize, width: usize, height: usize, // source
             dstx: usize, dsty: usize) { // dst
 
+        // TODO bounce checking, error handling, performance
         for iy in (0..height) {
             for ix in (0..width) {
                 self.set_pixel_from_rgb(
@@ -116,6 +245,7 @@ pub trait Image {
         }
     }
 
+    /// Draws text on the image at position `(x, y)`.
     fn draw_text(&mut self, txt: &str, x: usize, y: usize, font: &Font) {
 
         let mut s = txt.to_string();
@@ -126,7 +256,7 @@ pub trait Image {
             y: y as c_int
         };
 
-        // TODO
+        // TODO color
         let sc = CvScalar {
             val: [255 as c_double, 255 as c_double, 255 as c_double, 255 as c_double]
         };
@@ -141,12 +271,38 @@ pub trait Image {
             );
         }
     }
+
+    /// Creates a new image by organizing the given list of images into a grid.
+    ///
+    /// All images must have the same size, otherwise returns `None`. The number
+    /// of columns of the grid is specified with the parameter `cols`. The
+    /// parameter `space` specifies the number of pixels between each image that
+    /// is used to separate them.
+    fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<Self>;
 }
 
 impl Image for GrayImage {
+    // TODO refactoring
+
+    fn new(w: usize, h: usize) -> GrayImage {
+
+        let siz = CvSize {
+            width: w as c_int,
+            height: h as c_int
+        };
+        GrayImage { 
+            iplimage: unsafe { cvCreateImage(siz, 8, 1) } 
+        }
+    }
+
+    fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<GrayImage> {
+
+        grid::<GrayImage>(images, cols, space)
+    }
+
     fn buffer(&self) -> *const IplImage { self.iplimage }
 
-    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<ColorPixel> { 
+    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<Rgb> { 
         
         unsafe {
             let img = &(*self.buffer());
@@ -158,7 +314,7 @@ impl Image for GrayImage {
             
             let gr = *img.imagedata.offset(off) as u8;
 
-            Some(ColorPixel {
+            Some(Rgb {
                 r: gr,
                 g: gr,
                 b: gr
@@ -166,7 +322,7 @@ impl Image for GrayImage {
         }
     }
 
-    fn set_pixel_from_rgb(&self, x: usize, y: usize, p: &ColorPixel) {
+    fn set_pixel_from_rgb(&self, x: usize, y: usize, p: &Rgb) {
 
         let g =
             0.299 * (p.r as f64) +
@@ -184,10 +340,28 @@ impl Image for GrayImage {
 
 }
 
-impl Image for ColorImage {
+impl Image for RgbImage {
+    // TODO refactoring
+
+    fn new(w: usize, h: usize) -> RgbImage {
+
+        let siz = CvSize {
+            width: w as c_int,
+            height: h as c_int
+        };
+        RgbImage { 
+            iplimage: unsafe { cvCreateImage(siz, 8, 3) } 
+        }
+    }
+
+    fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<RgbImage> {
+
+        grid::<RgbImage>(images, cols, space)
+    }
+
     fn buffer(&self) -> *const IplImage { self.iplimage }
 
-    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<ColorPixel> { 
+    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<Rgb> { 
 
         unsafe {
             let img = &(*self.buffer());
@@ -197,7 +371,7 @@ impl Image for ColorImage {
                 return None; 
             }
             
-            Some(ColorPixel {
+            Some(Rgb {
                 b: *img.imagedata.offset(off) as u8,
                 g: *img.imagedata.offset(off + 1) as u8,
                 r: *img.imagedata.offset(off + 2) as u8
@@ -205,7 +379,7 @@ impl Image for ColorImage {
         }
     }
 
-    fn set_pixel_from_rgb(&self, x: usize, y: usize, px: &ColorPixel) {
+    fn set_pixel_from_rgb(&self, x: usize, y: usize, px: &Rgb) {
 
         unsafe {
             let img = &(*self.buffer());
@@ -223,49 +397,13 @@ impl Image for ColorImage {
 
 // ----------------------------------------------------------------------------
 
-pub struct Window {
-    name: String
-}
-
-impl Window {
-    // TODO destroyWindow
-
-    pub fn new(name: &str) -> Window {
-
-        let mut s = name.to_string();
-        s.push('\0');
-        unsafe {
-            cvNamedWindow(s.as_ptr() as *const c_char, CV_WINDOW_AUTOSIZE);
-        }
-        Window {
-            name: s
-        }
-    }
-
-    pub fn show_image<T: Image>(&self, img: &T) -> &Self {
-
-        unsafe {
-            cvShowImage(
-                self.name.as_ptr() as *const c_char, 
-                img.buffer()       as *const CvArr
-            );
-        }
-        self
-    }
-
-    pub fn wait_key(&self, delay: i32) {
-
-        unsafe {
-            cvWaitKey(delay as c_int);
-            cvDestroyWindow(self.name.as_ptr() as *const c_char);
-        }
-    }
-}
-
-
-// ----------------------------------------------------------------------------
-
-pub fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<GrayImage> {
+/// Creates a new image by organizing the given list of images into a grid.
+///
+/// All images must have the same size, otherwise returns `None`. The number
+/// of columns of the grid is specified with the parameter `cols`. The
+/// parameter `space` specifies the number of pixels between each image that
+/// is used to separate them.
+fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<T> {
 
     if images.len() == 0 || cols == 0 {
         return None;
@@ -281,13 +419,7 @@ pub fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<Gray
     let w = img_width * cols + (cols - 1) * space;
     let h = img_height * rows + (rows - 1) * space;
 
-    let siz = CvSize {
-        width: w as c_int,
-        height: h as c_int
-    };
-    // TODO GrayImage vs ColorImage
-    let mut dst = GrayImage { iplimage: unsafe { cvCreateImage(siz, 8, 1) } };
-
+    let mut dst = T::new(w, h);
     let mut col = 0;
     let mut row = 0;
 
@@ -307,54 +439,15 @@ pub fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<Gray
     Some(dst)
 }
 
-// ----------------------------------------------------------------------------
-
-pub struct GrayPixel {
-    pub g: u8,
-}
-
-impl fmt::Display for GrayPixel {
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({})", self.g)
-    }
-}
-
 // ------------------------------------------------------------------
 
-pub struct ColorPixel {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8
-}
-
-impl fmt::Display for ColorPixel {
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({} {} {})", self.r, self.g, self.b)
-    }
-}
-
-// ------------------------------------------------------------------
-
-pub struct ColorImage {
+pub struct RgbImage {
     iplimage: *const IplImage
 }
 
-impl ColorImage {
+impl RgbImage {
 
-    pub fn new(w: usize, h: usize) -> ColorImage {
-
-        let siz = CvSize {
-            width: w as c_int,
-            height: h as c_int
-        };
-        ColorImage { 
-            iplimage: unsafe { cvCreateImage(siz, 8, 3) } 
-        }
-    }
-
-    pub fn from_file(fname: &str) -> Option<ColorImage> {
+    pub fn from_file(fname: &str) -> Option<RgbImage> {
 
         unsafe {
             let mut s = fname.to_string();
@@ -362,7 +455,7 @@ impl ColorImage {
             // 1 = return a 3-channel color imge
             // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#imread
             let r = cvLoadImage(s.as_ptr() as *const c_char, 1 as c_int);
-            let i = ColorImage{ iplimage: r };
+            let i = RgbImage{ iplimage: r };
 
             if r.is_null() || i.depth() != 8 || i.channels() != 3 {
                 return None;
@@ -371,18 +464,18 @@ impl ColorImage {
         }
     }
 
-    pub fn from_raw(image: *const IplImage) -> ColorImage {
+    pub fn from_raw(image: *const IplImage) -> RgbImage {
 
         // TODO convert images
         unsafe {
             assert!((*image).depth == 8 && (*image).nchannels == 3);
-            ColorImage {
+            RgbImage {
                 iplimage: image
             }
         }
     }
 
-    pub fn pixel(&self, x: usize, y: usize) -> Option<ColorPixel> {
+    pub fn pixel(&self, x: usize, y: usize) -> Option<Rgb> {
 
         self.pixel_as_rgb(x, y)
     }
@@ -455,12 +548,12 @@ impl GrayImage {
         }
     }
 
-    pub fn pixel(&self, x: usize, y: usize) -> Option<GrayPixel> {
+    pub fn pixel(&self, x: usize, y: usize) -> Option<GrayValue> {
 
         match self.pixel_as_rgb(x, y) {
             Some(p) => {
-                Some(GrayPixel {
-                    g: p.r
+                Some(GrayValue {
+                    val: p.r
                 })
             }
             _ => None
@@ -486,7 +579,7 @@ impl GrayImage {
         // TODO check size of mask
         for y in (0..self.height()) {
             for x in (0..self.width()) {
-                if mask.pixel(x, y).unwrap().g == 255 {
+                if mask.pixel(x, y).unwrap().val == 255 {
                     self.set_pixel(x, y, newval);
                 }
             }
@@ -522,7 +615,7 @@ impl GrayImage {
         let mut v = Vec::new();
         for i in (y..y+height) {
             for j in (x..x+width) {
-                v.push(self.pixel(j, i).unwrap().g);
+                v.push(self.pixel(j, i).unwrap().val);
             }
         }
         v
@@ -566,8 +659,8 @@ impl <'t> Iterator for MaskIter<'t> {
                 return None;
             }
 
-            if self.mask.pixel(self.x, self.y).unwrap().g != 0 {
-                let r = self.src.pixel(self.x, self.y).unwrap().g;
+            if self.mask.pixel(self.x, self.y).unwrap().val != 0 {
+                let r = self.src.pixel(self.x, self.y).unwrap().val;
                 self.x += 1;
                 return Some(r);
             }
@@ -627,7 +720,7 @@ pub struct VideoColorFrameIterator<'q> {
 }
 
 impl <'q> Iterator for VideoColorFrameIterator<'q> {
-    type Item = ColorImage;
+    type Item = RgbImage;
 
     // TODO return a reference; currently it is dangerous because the pointer
     // can become invalid
@@ -644,7 +737,7 @@ impl <'q> Iterator for VideoColorFrameIterator<'q> {
                     match f.is_null() {
                         true  => None,
                         false => {
-                            Some(ColorImage::from_raw(f))
+                            Some(RgbImage::from_raw(f))
                         }
                     }
                 }
@@ -801,12 +894,12 @@ mod tests {
 
     #[test]
     fn test_colorimage_error() {
-        assert!(ColorImage::from_file("xxxxxxxxxxxx.png").is_none());
+        assert!(RgbImage::from_file("xxxxxxxxxxxx.png").is_none());
     }
 
     #[test]
     fn test_colorimage() {
-        let i = ColorImage::from_file("datasets/testing/colors.png").unwrap();
+        let i = RgbImage::from_file("datasets/testing/colors.png").unwrap();
         assert_eq!(i.width(), 100);
         assert_eq!(i.height(), 100);
 
@@ -872,7 +965,7 @@ mod tests {
     #[test]
     fn test_image_to_file() {
 
-        let img = ColorImage::from_file("datasets/testing/tree.png").unwrap();
+        let img = RgbImage::from_file("datasets/testing/tree.png").unwrap();
         assert!(img.to_file("/tmp/ab.jpg"));
         // the following test should fail because the directory does not
         // exist
@@ -882,7 +975,7 @@ mod tests {
     #[test]
     fn test_font() {
 
-        let mut img = ColorImage::new(300, 300);
+        let mut img = RgbImage::new(300, 300);
         let f = vec![
             Font::new(FontFace::CvFontHersheySimplex),
             Font::new(FontFace::CvFontHersheyComplex),
