@@ -45,6 +45,7 @@ pub struct IplImage {
 }
 
 const CV_BGR2GRAY: c_int = 6;
+const CV_WINDOW_AUTOSIZE: c_int = 1;
 
 #[link(name = "opencv_highgui")]
 extern {
@@ -59,6 +60,14 @@ extern {
     pub fn cvLoadImage(fname: *const c_char, iscolor: c_int) -> *const IplImage;
 
     pub fn cvSaveImage(fname: *const c_char, img: *const CvArr, params: *const c_int) -> c_int;
+
+    pub fn cvNamedWindow(name: *const c_char, flags: c_int);
+
+    pub fn cvShowImage(winname: *const c_char, img: *const CvArr);
+
+    pub fn cvWaitKey(delay: c_int) -> c_int;
+
+    pub fn cvDestroyWindow(winname: *const c_char);
 }
 
 #[link(name = "opencv_core")]
@@ -70,6 +79,48 @@ extern {
 extern {
     pub fn cvCvtColor(src: *const CvArr, dst: *mut CvArr, code: c_int);
 }
+
+// ----------------------------------------------------------------------------
+
+pub struct Window {
+    name: String
+}
+
+impl Window {
+    // TODO destroyWindow
+
+    pub fn new(name: &str) -> Window {
+
+        let mut s = name.to_string();
+        s.push('\0');
+        unsafe {
+            cvNamedWindow(s.as_ptr() as *const c_char, CV_WINDOW_AUTOSIZE);
+        }
+        Window {
+            name: s
+        }
+    }
+
+    pub fn show_image(&self, img: &GrayImage) -> &Self {
+
+        unsafe {
+            cvShowImage(
+                self.name.as_ptr() as *const c_char, 
+                img.iplimage       as *const CvArr
+            );
+        }
+        self
+    }
+
+    pub fn wait_key(&self, delay: i32) {
+
+        unsafe {
+            cvWaitKey(delay as c_int);
+            cvDestroyWindow(self.name.as_ptr() as *const c_char);
+        }
+    }
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -258,6 +309,7 @@ impl GrayImage {
             width: cols as c_int,
             height: rows as c_int
         };
+        // TODO background
         let mut dst = GrayImage { iplimage: unsafe { cvCreateImage(siz, 8, 1) } };
         
         for y in (0..rows) {
