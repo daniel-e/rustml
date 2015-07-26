@@ -1,83 +1,224 @@
-//! Bindings for OpenCV.
+//! Experimental module for image and video manipulation.
 
 extern crate libc;
 
+mod bindings;
+
 use std::fmt;
-use self::libc::{c_char, c_int, c_void};
+use self::libc::{c_char, c_int, c_float, c_double};
 
-#[repr(C)]
-pub struct CvCapture;
+use self::bindings::*;
 
-#[repr(C)]
-pub struct CvArr;
-
-#[repr(C)]
-pub struct CvSize {
-    width: c_int,
-    height: c_int
+pub enum FontFace {
+    CvFontHersheyComplex,
+    CvFontHersheyComplexSmall,
+    CvFontHersheyDuplex,
+    CvFontHersheyPlain,
+    CvFontHersheyScriptComplex,
+    CvFontHersheyScriptSimplex,
+    CvFontHersheySimplex,
+    CvFontHersheyTriplex
 }
 
-// http://docs.opencv.org/modules/core/doc/old_basic_structures.html
-#[repr(C)]
-pub struct IplImage {
-    nsize: c_int,
-    id: c_int,
-    pub nchannels: c_int,
-    alphachannel: c_int,
-    pub depth: c_int,  // iki.icub.org/yarpdoc/IplImage_8h.html
-    colormodel: [c_char; 4],
-    channelseq: [c_char; 4],
-    dataorder: c_int,
-    origin: c_int,
-    align: c_int,
-    pub width: c_int,
-    pub height: c_int,
-    roi: *mut c_void, // actually it is not a void pointer
-    maskroi: *mut c_void, // actually it is not a void pointer
-    imageid: *mut c_void,
-    titleinfo: *mut c_void,
-    pub imagesize: c_int,
-    pub imagedata: *mut c_char,
-    pub widthstep: c_int,
-    bordermode: [c_int; 4],
-    borderconst: [c_int; 4],
-    imagedataorigin: *mut c_char
+// ----------------------------------------------------------------------------
+
+pub struct Font {
+    font: Box<CvFont>
 }
 
-const CV_BGR2GRAY: c_int = 6;
-const CV_WINDOW_AUTOSIZE: c_int = 1;
+impl Font {
 
-#[link(name = "opencv_highgui")]
-extern {
-    pub fn cvCreateFileCapture(fname: *const c_char) -> *const CvCapture;
+    // TODO parameters
+    pub fn new(font: FontFace) -> Font {
 
-    pub fn cvGrabFrame(cvcapture: *const CvCapture) -> c_int;
+        let mut f = Box::new(CvFont {
+            namefont: 0 as *const c_char,
+            color: CvScalar {
+                val: [0 as c_double, 0 as c_double, 0 as c_double, 0 as c_double]
+            },
+            font_face: 0 as c_int,
+            ascii: 0 as *const c_int,
+            greek: 0 as *const c_int,
+            cyrillic: 0 as *const c_int,
+            hscale: 0 as c_float,
+            vscale: 0 as c_float,
+            shear: 0 as c_float,
+            thickness: 0 as c_int,
+            dx: 0 as c_float,
+            line_type: 0 as c_int
+        });
 
-    pub fn cvRetrieveFrame(cvcapture: *const CvCapture, streamidx: c_int) -> *const IplImage;
+        let font_face: c_int = match font {
+            FontFace::CvFontHersheySimplex => 0,
+            FontFace::CvFontHersheyComplex => 3,
+            FontFace::CvFontHersheyComplexSmall => 5,
+            FontFace::CvFontHersheyDuplex => 2,
+            FontFace::CvFontHersheyPlain => 1,
+            FontFace::CvFontHersheyScriptComplex => 7,
+            FontFace::CvFontHersheyScriptSimplex => 6,
+            FontFace::CvFontHersheyTriplex => 4,
+        };
 
-    pub fn cvReleaseCapture(cvcapture: *const *const CvCapture);
+        unsafe {
+            cvInitFont(
+                (&mut *f) as *mut CvFont, font_face, 1 as c_double, 1 as c_double,
+                0 as c_double, 1 as c_int, 8 as c_int
+            );
+        }
 
-    pub fn cvLoadImage(fname: *const c_char, iscolor: c_int) -> *const IplImage;
-
-    pub fn cvSaveImage(fname: *const c_char, img: *const CvArr, params: *const c_int) -> c_int;
-
-    pub fn cvNamedWindow(name: *const c_char, flags: c_int);
-
-    pub fn cvShowImage(winname: *const c_char, img: *const CvArr);
-
-    pub fn cvWaitKey(delay: c_int) -> c_int;
-
-    pub fn cvDestroyWindow(winname: *const c_char);
+        Font {
+            font: f
+        }
+    }
 }
 
-#[link(name = "opencv_core")]
-extern {
-    pub fn cvCreateImage(siz: CvSize, depth: c_int, channels: c_int) -> *const IplImage;
+// ----------------------------------------------------------------------------
+
+pub trait Image {
+    fn buffer(&self) -> *const IplImage;
+
+    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<ColorPixel>;
+
+    fn set_pixel_from_rgb(&self, x: usize, y: usize, p: &ColorPixel);
+
+    // implemenations ----------------------------------------------------
+
+    fn width(&self) -> usize { unsafe { (*self.buffer()).width as usize } }
+    fn height(&self) -> usize { unsafe { (*self.buffer()).height as usize } }
+    fn depth(&self) -> usize { unsafe { (*self.buffer()).depth as usize } }
+    fn widthstep(&self) -> usize { unsafe { (*self.buffer()).widthstep as usize } }
+    fn channels(&self) -> usize { unsafe { (*self.buffer()).nchannels as usize } }
+
+    fn to_file(&self, fname: &str) -> bool {
+
+        let mut s = fname.to_string();
+        s.push('\0');
+        unsafe {
+            let r = cvSaveImage(
+                s.as_ptr()      as *const c_char, 
+                self.buffer()   as *const CvArr,
+                0               as *const c_int
+            );
+            r != 0
+        }
+    }
+
+    fn copy_from<T: Image>(&mut self, 
+            img: &T, x: usize, y: usize, width: usize, height: usize, // source
+            dstx: usize, dsty: usize) { // dst
+
+        for iy in (0..height) {
+            for ix in (0..width) {
+                self.set_pixel_from_rgb(
+                    dstx + ix, dsty + iy, &img.pixel_as_rgb(x + ix, y + iy).unwrap()
+                );
+            }
+        }
+    }
+
+    fn draw_text(&mut self, txt: &str, x: usize, y: usize, font: &Font) {
+
+        let mut s = txt.to_string();
+        s.push('\0');
+
+        let p = CvPoint {
+            x: x as c_int,
+            y: y as c_int
+        };
+
+        // TODO
+        let sc = CvScalar {
+            val: [255 as c_double, 255 as c_double, 255 as c_double, 255 as c_double]
+        };
+
+        unsafe {
+            cvPutText(
+                self.buffer() as *mut CvArr, 
+                s.as_ptr()    as *const c_char,
+                p,
+                & *(font.font) as *const CvFont,
+                sc
+            );
+        }
+    }
 }
 
-#[link(name = "opencv_imgproc")]
-extern {
-    pub fn cvCvtColor(src: *const CvArr, dst: *mut CvArr, code: c_int);
+impl Image for GrayImage {
+    fn buffer(&self) -> *const IplImage { self.iplimage }
+
+    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<ColorPixel> { 
+        
+        unsafe {
+            let img = &(*self.buffer());
+            let off = (y * self.widthstep() + x) as isize;
+
+            if off < 0 || off >= (img.imagesize as isize) { 
+                return None; 
+            }
+            
+            let gr = *img.imagedata.offset(off) as u8;
+
+            Some(ColorPixel {
+                r: gr,
+                g: gr,
+                b: gr
+            })
+        }
+    }
+
+    fn set_pixel_from_rgb(&self, x: usize, y: usize, p: &ColorPixel) {
+
+        let g =
+            0.299 * (p.r as f64) +
+            0.587 * (p.g as f64) +
+            0.114 * (p.b as f64);
+
+        unsafe {
+            let img = &(*self.buffer());
+            let off = (y * self.widthstep() + x) as isize;
+
+            let p = img.imagedata.offset(off) as *mut u8;
+            *p = g as u8;
+        }
+    }
+
+}
+
+impl Image for ColorImage {
+    fn buffer(&self) -> *const IplImage { self.iplimage }
+
+    fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<ColorPixel> { 
+
+        unsafe {
+            let img = &(*self.buffer());
+            let off = (y * self.widthstep() + x * 3) as isize;
+
+            if off < 0 || off + 2 >= (img.imagesize as isize) { 
+                return None; 
+            }
+            
+            Some(ColorPixel {
+                b: *img.imagedata.offset(off) as u8,
+                g: *img.imagedata.offset(off + 1) as u8,
+                r: *img.imagedata.offset(off + 2) as u8
+            })
+        }
+    }
+
+    fn set_pixel_from_rgb(&self, x: usize, y: usize, px: &ColorPixel) {
+
+        unsafe {
+            let img = &(*self.buffer());
+            let off = (y * self.widthstep() + x * 3) as isize;
+
+            let p = img.imagedata.offset(off) as *mut u8;
+            let q = img.imagedata.offset(off + 1) as *mut u8;
+            let r = img.imagedata.offset(off + 2) as *mut u8;
+            *p = px.b;
+            *q = px.g;
+            *r = px.r;
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -101,12 +242,12 @@ impl Window {
         }
     }
 
-    pub fn show_image(&self, img: &GrayImage) -> &Self {
+    pub fn show_image<T: Image>(&self, img: &T) -> &Self {
 
         unsafe {
             cvShowImage(
                 self.name.as_ptr() as *const c_char, 
-                img.iplimage       as *const CvArr
+                img.buffer()       as *const CvArr
             );
         }
         self
@@ -124,7 +265,7 @@ impl Window {
 
 // ----------------------------------------------------------------------------
 
-pub fn grid(images: &Vec<GrayImage>, cols: usize, space: usize) -> Option<GrayImage> {
+pub fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<GrayImage> {
 
     if images.len() == 0 || cols == 0 {
         return None;
@@ -144,6 +285,7 @@ pub fn grid(images: &Vec<GrayImage>, cols: usize, space: usize) -> Option<GrayIm
         width: w as c_int,
         height: h as c_int
     };
+    // TODO GrayImage vs ColorImage
     let mut dst = GrayImage { iplimage: unsafe { cvCreateImage(siz, 8, 1) } };
 
     let mut col = 0;
@@ -153,21 +295,15 @@ pub fn grid(images: &Vec<GrayImage>, cols: usize, space: usize) -> Option<GrayIm
         if img_width != img.width() || img_height != img.height() {
             return None;
         }
-        for y in (0..img_height) {
-            for x in (0..img_width) {
-                dst.set_pixel(
-                    x + col * (img_width + space), y + row * (img_height + space), 
-                    img.pixel(x, y).unwrap().g
-                );
-            }
-        }
+        dst.copy_from(
+            img, 0, 0, img_width, img_height, col * (img_width + space), row * (img_height + space)
+        );
         col += 1;
         if col >= cols {
             col = 0;
             row += 1;
         }
     }
-
     Some(dst)
 }
 
@@ -207,6 +343,17 @@ pub struct ColorImage {
 
 impl ColorImage {
 
+    pub fn new(w: usize, h: usize) -> ColorImage {
+
+        let siz = CvSize {
+            width: w as c_int,
+            height: h as c_int
+        };
+        ColorImage { 
+            iplimage: unsafe { cvCreateImage(siz, 8, 3) } 
+        }
+    }
+
     pub fn from_file(fname: &str) -> Option<ColorImage> {
 
         unsafe {
@@ -235,42 +382,9 @@ impl ColorImage {
         }
     }
 
-    pub fn to_file(&self, fname: &str) -> bool {
-
-        let mut s = fname.to_string();
-        s.push('\0');
-        unsafe {
-            let r = cvSaveImage(
-                s.as_ptr()      as *const c_char, 
-                self.iplimage   as *const CvArr,
-                0               as *const c_int
-            );
-            r != 0
-        }
-    }
-
-    pub fn width(&self) -> usize { unsafe { (*self.iplimage).width as usize } }
-    pub fn height(&self) -> usize { unsafe { (*self.iplimage).height as usize } }
-    pub fn depth(&self) -> usize { unsafe { (*self.iplimage).depth as usize } }
-    pub fn widthstep(&self) -> usize { unsafe { (*self.iplimage).widthstep as usize } }
-    pub fn channels(&self) -> usize { unsafe { (*self.iplimage).nchannels as usize } }
-
     pub fn pixel(&self, x: usize, y: usize) -> Option<ColorPixel> {
 
-        unsafe {
-            let img = &(*self.iplimage);
-            let off = (y * self.widthstep() + x * 3) as isize;
-
-            if off < 0 || off + 2 >= (img.imagesize as isize) { 
-                return None; 
-            }
-            
-            Some(ColorPixel {
-                b: *img.imagedata.offset(off) as u8,
-                g: *img.imagedata.offset(off + 1) as u8,
-                r: *img.imagedata.offset(off + 2) as u8
-            })
-        }
+        self.pixel_as_rgb(x, y)
     }
 
 }
@@ -341,33 +455,23 @@ impl GrayImage {
         }
     }
 
-    pub fn width(&self) -> usize { unsafe { (*self.iplimage).width as usize } }
-    pub fn height(&self) -> usize { unsafe { (*self.iplimage).height as usize } }
-    pub fn depth(&self) -> usize { unsafe { (*self.iplimage).depth as usize } }
-    pub fn widthstep(&self) -> usize { unsafe { (*self.iplimage).widthstep as usize } }
-    pub fn channels(&self) -> usize { unsafe { (*self.iplimage).nchannels as usize } }
-
     pub fn pixel(&self, x: usize, y: usize) -> Option<GrayPixel> {
 
-        unsafe {
-            let img = &(*self.iplimage);
-            let off = (y * self.widthstep() + x) as isize;
-
-            if off < 0 || off >= (img.imagesize as isize) { 
-                return None; 
+        match self.pixel_as_rgb(x, y) {
+            Some(p) => {
+                Some(GrayPixel {
+                    g: p.r
+                })
             }
-            
-            Some(GrayPixel {
-                g: *img.imagedata.offset(off) as u8,
-            })
+            _ => None
         }
     }
 
-    // TODO test + bounce checking
+    // TODO test + bounce checking, duplicated code
     pub fn set_pixel(&mut self, x: usize, y: usize, newval: u8) {
 
         unsafe {
-            let img = &(*self.iplimage);
+            let img = &(*self.buffer());
             let off = (y * self.widthstep() + x) as isize;
 
             let p = img.imagedata.offset(off) as *mut u8;
@@ -386,20 +490,6 @@ impl GrayImage {
                     self.set_pixel(x, y, newval);
                 }
             }
-        }
-    }
-
-    pub fn to_file(&self, fname: &str) -> bool {
-
-        let mut s = fname.to_string();
-        s.push('\0');
-        unsafe {
-            let r = cvSaveImage(
-                s.as_ptr()      as *const c_char, 
-                self.iplimage   as *const CvArr,
-                0               as *const c_int
-            );
-            r != 0
         }
     }
 
@@ -512,14 +602,14 @@ impl Video {
         }
     }
 
-    pub fn color_frame_iter(&self) -> ColorImageIterator {
-        ColorImageIterator {
+    pub fn color_frame_iter(&self) -> VideoColorFrameIterator {
+        VideoColorFrameIterator {
             video: self,
         }
     }
 
-    pub fn gray_frame_iter(&self) -> GrayImageIterator {
-        GrayImageIterator {
+    pub fn gray_frame_iter(&self) -> VideoGrayFrameIterator {
+        VideoGrayFrameIterator {
             video: self,
         }
     }
@@ -532,11 +622,11 @@ impl Drop for Video {
 }
 
 
-pub struct ColorImageIterator<'q> {
+pub struct VideoColorFrameIterator<'q> {
     video: &'q Video,
 }
 
-impl <'q> Iterator for ColorImageIterator<'q> {
+impl <'q> Iterator for VideoColorFrameIterator<'q> {
     type Item = ColorImage;
 
     // TODO return a reference; currently it is dangerous because the pointer
@@ -563,11 +653,11 @@ impl <'q> Iterator for ColorImageIterator<'q> {
     }
 }
 
-pub struct GrayImageIterator<'q> {
+pub struct VideoGrayFrameIterator<'q> {
     video: &'q Video,
 }
 
-impl <'q> Iterator for GrayImageIterator<'q> {
+impl <'q> Iterator for VideoGrayFrameIterator<'q> {
     type Item = GrayImage;
 
     // TODO return a reference; currently it is dangerous because the pointer
@@ -602,6 +692,7 @@ mod tests {
 
     use self::libc::{c_char, c_int};
     use super::*;
+    use super::bindings::*;
 
     #[test]
     fn test_cv_capture_from_file_lowlevel() {
@@ -786,5 +877,25 @@ mod tests {
         // the following test should fail because the directory does not
         // exist
         assert!(!img.to_file("datasets/nulldir/ab.jpg"));
+    }
+
+    #[test]
+    fn test_font() {
+
+        let mut img = ColorImage::new(300, 300);
+        let f = vec![
+            Font::new(FontFace::CvFontHersheySimplex),
+            Font::new(FontFace::CvFontHersheyComplex),
+            Font::new(FontFace::CvFontHersheyComplexSmall),
+            Font::new(FontFace::CvFontHersheyDuplex),
+            Font::new(FontFace::CvFontHersheyPlain),
+            Font::new(FontFace::CvFontHersheyScriptComplex),
+            Font::new(FontFace::CvFontHersheyScriptSimplex),
+            Font::new(FontFace::CvFontHersheyTriplex),
+        ];
+        for i in (0..8) {
+            img.draw_text("hallo", 10, i * 20 + 20, f.get(i).unwrap());
+        }
+        img.to_file("/tmp/blabla.jpg");
     }
 }
