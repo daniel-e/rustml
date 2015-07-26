@@ -1,3 +1,5 @@
+//! Sliding windows for arbitrary dimensions.
+
 extern crate num;
 use self::num::iter;
 
@@ -17,6 +19,42 @@ impl DimensionParameters {
         }
     }
 }
+
+pub struct SlidingWindowBuilder {
+    dimensions: Vec<DimensionParameters>
+}
+
+impl SlidingWindowBuilder {
+
+    pub fn add(&self, area_width: usize, window_width: usize, delta: usize) -> SlidingWindowBuilder {
+
+        let mut v = self.dimensions.clone();
+        v.push(DimensionParameters::new(area_width, window_width, delta));
+        SlidingWindowBuilder {
+            dimensions: v
+        }
+    }
+
+    pub fn to_vec(&self) -> Vec<Vec<usize>> {
+        sliding_window(&self.dimensions)
+    }
+
+    pub fn to_2d(&self) -> Option<Vec<(usize, usize)>> {
+
+        if self.dimensions.len() != 2 {
+            None
+        } else {
+            Some(sliding_window_2d(&self.dimensions[0], &self.dimensions[1]))
+        }
+    }
+}
+
+pub fn builder() -> SlidingWindowBuilder {
+    SlidingWindowBuilder {
+        dimensions: vec![]
+    }
+}
+
 
 pub fn sliding_window(dp: &[DimensionParameters]) -> Vec<Vec<usize>> {
 
