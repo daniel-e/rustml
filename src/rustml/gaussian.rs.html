@@ -254,7 +254,7 @@
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
 
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>num</span>::<span class='ident'>traits</span>::<span class='ident'>Float</span>;
-<span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Mean</span>, <span class='ident'>Var</span>};
+<span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Mean</span>, <span class='ident'>MeanVec</span>, <span class='ident'>Var</span>};
 <span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Dimension</span>, <span class='ident'>Normalization</span>};
 
 
@@ -384,7 +384,7 @@
         <span class='kw'>impl</span> <span class='ident'>GaussianEstimator</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> [<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>] {
             <span class='kw'>fn</span> <span class='ident'>gaussian</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>nrm</span>: <span class='ident'>Normalization</span>) <span class='op'>-&gt;</span> <span class='ident'>Gaussian</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> {
                 <span class='ident'>Gaussian</span> {
-                    <span class='ident'>mean</span>: <span class='self'>self</span>.<span class='ident'>mean</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>),
+                    <span class='ident'>mean</span>: <span class='self'>self</span>.<span class='ident'>mean</span>(),
                     <span class='ident'>var</span>: <span class='self'>self</span>.<span class='ident'>var</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>, <span class='ident'>nrm</span>)
                 }
             }

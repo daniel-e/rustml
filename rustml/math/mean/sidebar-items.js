@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["Mean","Trait to compute the mean of values."]]});
+initSidebarItems({"trait":[["Mean","Trait to compute the mean of values."],["MeanVec",""]]});

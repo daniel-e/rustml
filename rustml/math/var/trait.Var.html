@@ -45,20 +45,94 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-5442' class='srclink' href='../../../src/rustml/math/var.rs.html#9-11' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-5655' class='srclink' href='../../../src/rustml/math/var.rs.html#12-94' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Var&lt;T&gt; {
     fn <a href='#tymethod.var' class='fnname'>var</a>(&amp;self, dim: <a class='enum' href='../../../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>, nrm: <a class='enum' href='../../../rustml/math/enum.Normalization.html' title='rustml::math::Normalization'>Normalization</a>) -&gt; T;
-}</pre><div class='docblock'><p>Trait to compute variance of values.</p>
+}</pre><div class='docblock'><p>Trait to compute the variance of values.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.var' class='method stab '><code>fn <a href='#tymethod.var' class='fnname'>var</a>(&amp;self, dim: <a class='enum' href='../../../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>, nrm: <a class='enum' href='../../../rustml/math/enum.Normalization.html' title='rustml::math::Normalization'>Normalization</a>) -&gt; T</code></h3></div>
+        <h3 id='tymethod.var' class='method stab '><code>fn <a href='#tymethod.var' class='fnname'>var</a>(&amp;self, dim: <a class='enum' href='../../../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>, nrm: <a class='enum' href='../../../rustml/math/enum.Normalization.html' title='rustml::math::Normalization'>Normalization</a>) -&gt; T</code></h3><div class='docblock'><script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+
+<p>If the implementation for a vector is used this method computes the
+variance of the values of that vectors. For vectors only the
+dimension Dimension::Row is valid.</p>
+
+<p>If the implementation for a matrix is used this methods
+computes the variance of all values of each row if the dimension is
+equal to <code>Dimension::Row</code> or each column if the dimension is
+<code>Dimension::Column</code>.</p>
+
+<p>For the parameter <code>Normalization::N</code> the following formula is used to compute the
+variance:
+$$\frac{1}{n} \sum_{i=1}^n (x_i - \mu)^2$$</p>
+
+<p>For the parameter <code>Normalization::MinusOne</code> the following formula is used to compute
+the variance:
+$$\frac{1}{n-1} \sum_{i=1}^n (x_i - \mu)^2$$
+If n is equal to 1 the parameter <code>Normalization::MinusOne</code> behaves like <code>Normalization::N</code>.</p>
+
+<h1 id="compute-the-variance-of-the-values-in-a-vector." class='section-header'><a
+                           href="#compute-the-variance-of-the-values-in-a-vector.">Compute the variance of the values in a vector.</a></h1><pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='op'>*</span>;
+
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.0</span>, <span class='number'>2.0</span>, <span class='number'>1.5</span>, <span class='number'>1.8</span>, <span class='number'>2.2</span>];
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>var</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>, <span class='ident'>Normalization</span>::<span class='ident'>N</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>r</span> <span class='op'>-</span> <span class='number'>0.176</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+
+<span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>var</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>, <span class='ident'>Normalization</span>::<span class='ident'>MinusOne</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>r</span> <span class='op'>-</span> <span class='number'>0.22</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+</pre>
+
+<h1 id="compute-the-variance-for-rows-and-columns-of-a-matrix." class='section-header'><a
+                           href="#compute-the-variance-for-rows-and-columns-of-a-matrix.">Compute the variance for rows and columns of a matrix.</a></h1>
+<p><br>
+Let M be a matrix with the rows $r_1, r_2, \dots$, i.e.</p>
+
+<p>$ M = 
+\begin{bmatrix} -\  r_1 - \\ 
+   -\  r_2 - \\ 
+   \vdots \\
+\end{bmatrix}
+$</p>
+
+<p>Then, the variance of the matrix with the dimension parameter <code>Dimension::Row</code> and
+the normalization parameter <code>x</code> returns the following vector: vec![r1.var(Row, x), r2.var(Row, x), ...]</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='op'>*</span>;
+
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[
+    <span class='number'>1.0f32</span>, <span class='number'>5.0</span>, <span class='number'>3.0</span>, <span class='number'>6.0</span>, <span class='number'>2.0</span>;
+    <span class='number'>2.0</span>, <span class='number'>2.5</span>, <span class='number'>2.2</span>, <span class='number'>1.8</span>, <span class='number'>2.1</span>;
+    <span class='number'>4.0</span>, <span class='number'>9.0</span>, <span class='number'>2.7</span>, <span class='number'>13.0</span>, <span class='number'>1.9</span>
+];
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>var</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>, <span class='ident'>Normalization</span>::<span class='ident'>N</span>);
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.44</span>, <span class='number'>0.05</span>, <span class='number'>17.93</span>];
+<span class='comment'>// check that r is &quot;equal&quot; to e</span>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>e</span>.<span class='ident'>iter</span>()).<span class='ident'>all</span>(<span class='op'>|</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>, <span class='kw-2'>&amp;</span><span class='ident'>b</span>)<span class='op'>|</span> <span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>a</span> <span class='op'>-</span> <span class='ident'>b</span>) <span class='op'>&lt;</span> <span class='number'>0.01</span>));
+
+<span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>var</span>(<span class='ident'>Dimension</span>::<span class='ident'>Column</span>, <span class='ident'>Normalization</span>::<span class='ident'>N</span>);
+<span class='ident'>e</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.56</span>, <span class='number'>7.17</span>, <span class='number'>0.11</span>, <span class='number'>21.34</span>, <span class='number'>0.007</span>];
+<span class='comment'>// check that r is &quot;equal&quot; to e</span>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>e</span>.<span class='ident'>iter</span>()).<span class='ident'>all</span>(<span class='op'>|</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>, <span class='kw-2'>&amp;</span><span class='ident'>b</span>)<span class='op'>|</span> <span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>a</span> <span class='op'>-</span> <span class='ident'>b</span>) <span class='op'>&lt;</span> <span class='number'>0.01</span>));
+</pre>
+</div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
     <li><code>impl <a class='trait' href='../../../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;</code></li>
 <li><code>impl <a class='trait' href='../../../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt; for <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>[<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>]</a></code></li>
+<li><code>impl <a class='trait' href='../../../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;&gt; for <a class='struct' href='../../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>&gt;</code></li>
 <li><code>impl <a class='trait' href='../../../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt; for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;</code></li>
 <li><code>impl <a class='trait' href='../../../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt; for <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>[<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>]</a></code></li>
+<li><code>impl <a class='trait' href='../../../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;&gt; for <a class='struct' href='../../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;</code></li>
 </ul><script type="text/javascript" async
                               src="../../../implementors/rustml/math/var/trait.Var.js">
                       </script></section>

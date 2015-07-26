@@ -45,16 +45,24 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-6126' class='srclink' href='../../src/rustml/ops.rs.html#11-17' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-7497' class='srclink' href='../../src/rustml/ops.rs.html#60-76' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait MatrixScalarOps&lt;T&gt; {
     fn <a href='#tymethod.add_scalar' class='fnname'>add_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;;
+    fn <a href='#tymethod.sub_scalar' class='fnname'>sub_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;;
     fn <a href='#tymethod.mul_scalar' class='fnname'>mul_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;;
+    fn <a href='#tymethod.div_scalar' class='fnname'>div_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;;
 }</pre><div class='docblock'><p>Trait for matrix scalar operations.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.add_scalar' class='method stab '><code>fn <a href='#tymethod.add_scalar' class='fnname'>add_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Adds a scalar to each element of the matrix.</p>
-</div><h3 id='tymethod.mul_scalar' class='method stab '><code>fn <a href='#tymethod.mul_scalar' class='fnname'>mul_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Multiplies each element of the matrix with a scalar.</p>
+        <h3 id='tymethod.add_scalar' class='method stab '><code>fn <a href='#tymethod.add_scalar' class='fnname'>add_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Adds a scalar to each element of the matrix and returns
+the result.</p>
+</div><h3 id='tymethod.sub_scalar' class='method stab '><code>fn <a href='#tymethod.sub_scalar' class='fnname'>sub_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Subtracts a scalar from each element of the matrix and returns
+the result.</p>
+</div><h3 id='tymethod.mul_scalar' class='method stab '><code>fn <a href='#tymethod.mul_scalar' class='fnname'>mul_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Multiplies each element of the matrix with a scalar
+and returns the result.</p>
+</div><h3 id='tymethod.div_scalar' class='method stab '><code>fn <a href='#tymethod.div_scalar' class='fnname'>div_scalar</a>(&amp;self, scalar: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Divides each element of the matrix by a scalar
+and returns the result.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>

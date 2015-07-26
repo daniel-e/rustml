@@ -117,6 +117,19 @@
 <span id="75">75</span>
 <span id="76">76</span>
 <span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Library for doing machine learning with Rust.</span>
 <span class='doccomment'>//!</span>
@@ -165,18 +178,25 @@
 <span class='doccomment'>//! # All examples</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! * [&lt;i&gt;k&lt;/i&gt;-nearest</span>
-<span class='doccomment'>//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs): Classifies the examples of the test set of the MNIST database of handwritten digits with a simple &lt;i&gt;k&lt;/i&gt;-nearest neighbor approach.</span>
+<span class='doccomment'>//! neighbor](https://github.com/daniel-e/rustml/blob/master/examples/mnist_digits.rs): classifies the examples of the test set of the MNIST database of handwritten digits with a simple &lt;i&gt;k&lt;/i&gt;-nearest neighbor approach. (this examples requires an external dataset that has to be downloaded separately (see [here](https://github.com/daniel-e/rustml#datasets))</span>
 <span class='doccomment'>//! * [matrix</span>
-<span class='doccomment'>//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs): Multiplies two 6000x6000 matrices.</span>
+<span class='doccomment'>//! multiplication](https://github.com/daniel-e/rustml/blob/master/examples/matrix_multiplication.rs): multiplies two 6000x6000 matrices.</span>
 <span class='doccomment'>//! * [vector</span>
-<span class='doccomment'>//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs):</span>
-<span class='doccomment'>//! Add vectors.</span>
+<span class='doccomment'>//! addition](https://github.com/daniel-e/rustml/blob/master/examples/vector_addition.rs): add</span>
+<span class='doccomment'>//! vectors</span>
+<span class='doccomment'>//! * [feature scaling](https://github.com/daniel-e/rustml/blob/master/examples/scale_matrix.rs)</span>
+<span class='doccomment'>//! * [feature extraction from all frames of a</span>
+<span class='doccomment'>//! video](https://github.com/daniel-e/rustml/blob/master/examples/video_histogram.rs): this</span>
+<span class='doccomment'>//! examples requires an external dataset that has to be downloaded separately (see</span>
+<span class='doccomment'>//! [here](https://github.com/daniel-e/rustml#datasets)).</span>
 
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>distance</span>::{<span class='ident'>Distance</span>, <span class='ident'>Euclid</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>distance</span>::{<span class='ident'>Distance</span>, <span class='ident'>Euclid</span>, <span class='ident'>DistancePoint2D</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>matrix</span>::{<span class='ident'>HasNan</span>, <span class='ident'>Matrix</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Dimension</span>, <span class='ident'>Normalization</span>, <span class='ident'>Mean</span>, <span class='ident'>Sum</span>, <span class='ident'>Var</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>MatrixScalarOps</span>, <span class='ident'>VectorScalarOps</span>, <span class='ident'>VectorVectorOps</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Dimension</span>, <span class='ident'>Normalization</span>, <span class='ident'>Mean</span>, <span class='ident'>MeanVec</span>, <span class='ident'>Sum</span>, <span class='ident'>Var</span>, <span class='ident'>SumVec</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>MatrixScalarOps</span>, <span class='ident'>VectorScalarOps</span>, <span class='ident'>VectorOps</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ops_inplace</span>::{<span class='ident'>VectorVectorOpsInPlace</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>gaussian</span>::{<span class='ident'>GaussianEstimator</span>, <span class='ident'>GaussianFunctions</span>, <span class='ident'>Gaussian</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>structs</span>::{<span class='ident'>Point2D</span>};
 
 <span class='comment'>// ordering is important because the macro mat! is </span>
 <span class='comment'>// only available for modules which follow #[macro_use]</span>
@@ -195,6 +215,12 @@
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>gaussian</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>ops</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>consts</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>ops_inplace</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>scaling</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>opencv</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>structs</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>dbscan</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>sliding</span>;
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

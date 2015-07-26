@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["MnistDigits","This structure offers access to the MNIST database of handwritten digits."]]});
+initSidebarItems({"fn":[["gaussian_distributed",""]],"struct":[["MnistDigits","This structure offers access to the MNIST database of handwritten digits."]]});

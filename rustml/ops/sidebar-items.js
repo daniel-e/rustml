@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["MatrixScalarOps","Trait for matrix scalar operations."],["VectorScalarOps","Trait for vector scalar operations."],["VectorVectorOps","Trait to add a slice to a vector using the underlying BLAS implementation."]]});
+initSidebarItems({"trait":[["MatrixOps","Trait for operations on matices."],["MatrixScalarOps","Trait for matrix scalar operations."],["MatrixVectorOps","Trait for matrix vector operations."],["VectorOps",""],["VectorScalarOps","Trait for vector scalar operations."],["VectorVectorOps","Trait for vector vector operations."]]});
