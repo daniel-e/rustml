@@ -16,6 +16,7 @@ The documentation of the project with a descprition of the modules can be found 
 * implementation of the DBSCAN clustering algorithm
 * OpenCV binding to read images and videos plus interfaces for simplify feature extraction from images and videos (e.g. select pixels from images or frames of a video via a mask)
 * scaling of feature vectors and matrices
+* multidimensional sliding windows
 * examples
 
 ## Using rustml from scratch - example matrix multplication

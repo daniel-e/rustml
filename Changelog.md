@@ -9,6 +9,7 @@
  * OpenCV integration
  * Point2D
  * DBSCAN clustering algorithm
+ * multidimensional sliding windows
 
 ## 0.0.2
 
