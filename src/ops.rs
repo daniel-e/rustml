@@ -11,6 +11,10 @@ pub trait VectorOps<T> {
         where F: Fn(&T) -> U;
 }
 
+pub trait VectorOpsSigned<T> {
+
+    fn abs(&self) -> Vec<T>;
+}
 
 macro_rules! vector_ops_impl {
     ($($t:ty)*) => ($(
@@ -29,6 +33,19 @@ macro_rules! vector_ops_impl {
 }
 
 vector_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
+
+macro_rules! vector_ops_signed_impl {
+    ($($t:ty)*) => ($(
+
+        impl VectorOpsSigned<$t> for Vec<$t> {
+            fn abs(&self) -> Vec<$t> {
+                self.iter().map(|&x| num::abs(x)).collect()
+            }
+        }
+    )*)
+}
+
+vector_ops_signed_impl!{ isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 
