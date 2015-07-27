@@ -89,8 +89,6 @@ pub fn copy_memory<T: Copy>(dst: &mut [T], src: &[T], n: usize) -> usize {
     c
 }
 
-
-
 #[cfg(test)]
 mod tests {
     extern crate num;
