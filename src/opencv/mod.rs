@@ -279,6 +279,7 @@ pub trait Image {
     /// parameter `space` specifies the number of pixels between each image that
     /// is used to separate them.
     fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<Self>;
+
 }
 
 impl Image for GrayImage {
@@ -337,7 +338,6 @@ impl Image for GrayImage {
             *p = g as u8;
         }
     }
-
 }
 
 impl Image for RgbImage {
@@ -630,7 +630,41 @@ impl GrayImage {
             y: 0,
         }
     }
+
+    pub fn pixel_iter(&self) -> GrayValueIterator {
+
+        GrayValueIterator {
+            x: 0,
+            y: 0,
+            image: self
+        }
+    }
 }
+
+pub struct GrayValueIterator<'t> {
+    x: usize,
+    y: usize,
+    image: &'t GrayImage
+}
+
+impl <'t> Iterator for GrayValueIterator<'t> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<u8> {
+
+        if self.x >= self.image.width() {
+            self.x = 0;
+            self.y += 1;
+        }
+
+        if self.y >= self.image.height() {
+            return None;
+        }
+
+        Some(self.image.pixel(self.x, self.y).unwrap().val)
+    }
+}
+
 
 pub struct MaskIter<'t> {
     src: &'t GrayImage,
