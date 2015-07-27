@@ -652,7 +652,6 @@ impl <'t> Iterator for GrayValueIterator<'t> {
 
     fn next(&mut self) -> Option<u8> {
 
-        self.x += 1;
         if self.x >= self.image.width() {
             self.x = 0;
             self.y += 1;
@@ -662,7 +661,8 @@ impl <'t> Iterator for GrayValueIterator<'t> {
             return None;
         }
 
-        Some(self.image.pixel(self.x, self.y).unwrap().val)
+        self.x += 1;
+        Some(self.image.pixel(self.x - 1, self.y).unwrap().val)
     }
 }
 
