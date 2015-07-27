@@ -585,6 +585,16 @@ impl <T: Clone> Matrix<T> {
             data: self.buf().iter().chain(m.buf().iter()).cloned().collect()
         })
     }
+
+    // TODO tests
+    pub fn find<F>(&self, f: F) -> Vec<(usize, usize)> 
+        where F: Fn(&T) -> bool {
+
+        self.values().enumerate()
+            .filter(|&(_idx, val)| f(val))
+            .map(|(idx, _val)| (idx % self.cols(), idx / self.cols()))
+            .collect()
+    }
 }
 
 // --------------- Iterators ----------------------------------------
