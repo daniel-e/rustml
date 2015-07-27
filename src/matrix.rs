@@ -193,6 +193,19 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    // TODO tests
+    pub fn from_iter<I: Iterator<Item = T>>(iter: I, cols: usize) -> Option<Matrix<T>> {
+
+        let v = iter.collect::<Vec<T>>();
+        let rows = v.len() / cols;
+
+        if rows * cols != v.len() {
+            return None;
+        }
+
+        Matrix::from_vec(v, rows, cols)
+    }
+
     // TODO test
     pub fn from_file<R: FromStr + Clone>(fname: &str) -> Option<Matrix<R>> {
 
@@ -434,6 +447,15 @@ impl <T: Clone> Matrix<T> {
         match self.idx(row, col) {
             None => None,
             Some(p) => self.data.get(p)
+        }
+    }
+
+    // TODO test
+    pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
+
+        match self.idx(row, col) {
+            None => None,
+            Some(p) => self.data.get_mut(p)
         }
     }
 
