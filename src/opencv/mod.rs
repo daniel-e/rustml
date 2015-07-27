@@ -126,9 +126,15 @@ impl Window {
 
     /// Waits for the specified amount of time in milliseconds or until
     /// a key is pressed if `delay` is zero.
-    pub fn wait_key(&self, delay: i32) {
+    pub fn wait_key(&self, delay: i32) -> &Self {
         unsafe {
             cvWaitKey(delay as c_int);
+            self
+        }
+    }
+
+    pub fn destroy(&self) {
+        unsafe {
             cvDestroyWindow(self.name.as_ptr() as *const c_char);
         }
     }
@@ -478,6 +484,30 @@ impl RgbImage {
     pub fn pixel(&self, x: usize, y: usize) -> Option<Rgb> {
 
         self.pixel_as_rgb(x, y)
+    }
+
+    // TODO move this into trait
+    pub fn draw_box(&mut self, x: usize, y: usize, w: usize, h: usize, color: &Rgb) {
+
+        let p1 = CvPoint { x: x as c_int, y: y as c_int };
+        let p2 = CvPoint { x: (x + w - 1) as c_int, y: (y + h - 1) as c_int };
+        let c = CvScalar {
+            val: [color.b as c_double, color.g as c_double, color.r as c_double, 0 as c_double]
+        };
+        unsafe {
+            cvRectangle(
+                self.buffer() as *mut CvArr,
+                p1, p2, c,
+                1 as c_int, 8 as c_int, 0 as c_int
+            );
+        }
+    }
+
+    pub fn dup(&self) -> RgbImage {
+
+        let mut img = RgbImage::new(self.width(), self.height());
+        img.copy_from(self, 0, 0, self.width(), self.height(), 0, 0);
+        img
     }
 
 }

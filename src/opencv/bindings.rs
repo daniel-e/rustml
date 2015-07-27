@@ -107,6 +107,9 @@ extern {
 #[link(name = "opencv_imgproc")]
 extern {
     pub fn cvCvtColor(src: *const CvArr, dst: *mut CvArr, code: c_int);
+
+    pub fn cvRectangle(img: *mut CvArr, p1: CvPoint, p2: CvPoint, color: CvScalar,
+                       thickness: c_int, line_type: c_int, shift: c_int);
 }
 
 
