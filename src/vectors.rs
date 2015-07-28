@@ -13,6 +13,63 @@ use std::mem;
 
 // ------------------------------------------------------------------
 
+use std::io::{Read, BufRead, BufReader, Result, Error, ErrorKind};
+use std::fs::File;
+use std::str::FromStr;
+use std::marker::PhantomData;
+
+pub struct VecReader<B, T> {
+    buf: B,
+    phantom: PhantomData<T>
+}
+
+impl <T: FromStr, B: BufRead> Iterator for VecReader<B, T> {
+    type Item = Result<Vec<T>>;
+
+    fn next(&mut self) -> Option<Result<Vec<T>>> {
+
+        let mut s = String::new();
+        match self.buf.read_line(&mut s) {
+            Ok(0)  => None,
+            Ok(_n) => {
+                if s.ends_with("\n") {
+                    s.pop();
+                }
+                let mut ve: Vec<T> = Vec::new();
+                for i in s.split(" ") {
+                    match i.parse::<T>() {
+                        Ok(i) => ve.push(i),
+                        Err(_e) => return 
+                            Some(
+                                Err(Error::new(ErrorKind::InvalidInput, "parse error"))
+                            )
+                    }
+                }
+                Some(Ok(ve))
+            }
+            Err(e) => Some(Err(e))
+        }
+    }
+}
+
+pub fn from_reader<T: FromStr, R: Read>(f: BufReader<R>) -> VecReader<BufReader<R>, T> {
+
+    VecReader {
+        buf: f,
+        phantom: PhantomData
+    }
+}
+
+pub fn from_file<T: FromStr>(path: &str) -> Result<VecReader<BufReader<File>, T>> {
+
+    Ok(VecReader {
+        buf: BufReader::<File>::new(try!(File::open(path))),
+        phantom: PhantomData
+    })
+}
+
+// ------------------------------------------------------------------
+
 /// Groups equal elements into one element and counts them.
 pub fn group<T: PartialEq + Clone>(v: &Vec<T>) -> Vec<(T, usize)> {
 
