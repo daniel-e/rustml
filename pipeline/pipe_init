@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+
+import subprocess, os, sys
+
+subprocess.call(["cargo", "new", "--bin", "pipeline"])
+
+if not os.path.exists("pipeline"):
+	print "Could not create pipeline. Is 'cargo' in the search path?"
+	sys.exit(1)
+
+# -----------------------------------------------------------
+
+f = open("pipeline/Cargo.toml", "a")
+print >> f, """
+
+[[bin]]
+name = "example"
+path = "bin/example.rs"
+
+[dependencies]
+rustc-serialize = "0.3"
+"""
+f.close()
+
+# -----------------------------------------------------------
+
+os.remove("pipeline/src/main.rs")
+os.makedirs("pipeline/bin")
+f = open("pipeline/bin/example.rs", "w")
+print >> f, """extern crate pipeline;
+
+fn main() {
+    let c = pipeline::read_config().unwrap();
+
+    // filename where the output should be writtein to
+    // and which is the input of another stage
+    println!("target: {}", c.target);
+
+    // my parameters
+    println!("parameters:");
+    for (k, v) in c.params.iter() {
+        println!(" {} = {}", k, v);
+    }
+
+    // dependencies; usually the input files
+    println!("dependencies:");
+    for (k, v) in c.dependencies.iter() {
+        println!(" {} = {}", k, v);
+    }
+}
+"""
+f.close()
+
+# -----------------------------------------------------------
+
+f = open("pipeline/src/lib.rs", "w")
+print >> f, """extern crate rustc_serialize;
+
+use rustc_serialize::json;
+use std::env;
+use std::io::{Result, Read, Error, ErrorKind};
+use std::fs::File;
+use std::collections::BTreeMap;
+
+#[derive(RustcDecodable, RustcEncodable)]
+pub struct Config {
+    pub dependencies: BTreeMap<String, String>,
+    pub params: BTreeMap<String, String>,
+    pub command: String,
+    pub target: String
+}
+
+pub fn read_config() -> Result<Config> {
+
+    match env::var("PIPELINE_CONFIG") {
+        Ok(configpath) => {
+            match File::open(configpath) {
+                Ok(mut f) => {
+                    let mut s = String::new();
+                    match f.read_to_string(&mut s) {
+                    Ok(_n) => {
+                        match json::decode(&s) {
+                        Ok(j)  => Ok(j),
+                        Err(e) => Err(Error::new(ErrorKind::Other, e))
+                        }
+                    }
+                    Err(e) => Err(e)
+                    }
+                }
+                Err(e) => Err(e)
+            }
+        },
+        Err(e) => Err(Error::new(ErrorKind::Other, e))
+    }
+}"""
+f.close()
+

@@ -1,0 +1,29 @@
+{
+	"targets": ["OUTPUT_SORTED"],
+
+	"stages": {
+		"RANDOM_NUMBERS": {
+			"dependencies": {
+				"src": "bin/example.rs"
+			},
+			"params": {
+				"min": "10",
+				"max": "30",
+				"n": "100"
+			},
+			"command": "cargo run --bin example"
+		},
+
+
+		"OUTPUT_SORTED": {
+			"dependencies": {
+				"file1": "RANDOM_NUMBERS"
+			},
+			"params": {
+			},
+			"command": "cat $< | sort > $@",
+			"comment": "$< is the name of the first dependency; WARNING: ordering could be different"
+		}
+	}
+}
+
