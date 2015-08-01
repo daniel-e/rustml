@@ -2,6 +2,7 @@
 
 import subprocess, os, sys
 
+print "calling cargo to create new project pipeline ..."
 subprocess.call(["cargo", "new", "--bin", "pipeline"])
 
 if not os.path.exists("pipeline"):
@@ -10,6 +11,7 @@ if not os.path.exists("pipeline"):
 
 # -----------------------------------------------------------
 
+print "updating pipeline/Cargo.toml ..."
 f = open("pipeline/Cargo.toml", "a")
 print >> f, """
 
@@ -24,35 +26,73 @@ f.close()
 
 # -----------------------------------------------------------
 
+print "removing pipeline/src/main.rs ..."
+print "creating pipeline/bin/example.rs ..."
 os.remove("pipeline/src/main.rs")
 os.makedirs("pipeline/bin")
 f = open("pipeline/bin/example.rs", "w")
 print >> f, """extern crate pipeline;
 
+use std::fs::File;
+use std::io::Write;
+
 fn main() {
     let c = pipeline::read_config().unwrap();
 
-    // filename where the output should be writtein to
-    // and which is the input of another stage
-    println!("target: {}", c.target);
+    // open the file where the result should be written to
+    let mut f = File::create(c.target).unwrap();
 
-    // my parameters
-    println!("parameters:");
-    for (k, v) in c.params.iter() {
-        println!(" {} = {}", k, v);
-    }
+    // read parameters
+    let max = c.params.get("max").unwrap().parse::<usize>().unwrap();
+    let mut seed = c.params.get("seed").unwrap().parse::<usize>().unwrap();
+    let mut n = c.params.get("n").unwrap().parse::<usize>().unwrap();
 
-    // dependencies; usually the input files
-    println!("dependencies:");
-    for (k, v) in c.dependencies.iter() {
-        println!(" {} = {}", k, v);
+    while n > 0 {
+        n -= 1;
+        // pseudo random number
+        seed = (1103515245 * seed + 12345) % 2147483648;
+        writeln!(f, "{}", seed % max).unwrap();
     }
-}
-"""
+}"""
 f.close()
 
 # -----------------------------------------------------------
 
+print "creating pipeline/config.json ..."
+f = open("pipeline/config.json", "w")
+print >> f, """{
+    "targets": ["OUTPUT_SORTED"],
+
+    "stages": {
+        "RANDOM_NUMBERS": {
+            "dependencies": {
+                "src": "bin/example.rs"
+            },
+            "params": {
+                "seed": "314",
+                "max": "30",
+                "n": "10"
+            },
+            "command": "cargo run --bin example"
+        },
+
+
+        "OUTPUT_SORTED": {
+            "dependencies": {
+                "file1": "RANDOM_NUMBERS"
+            },
+            "params": {
+            },
+            "command": "cat $< | sort -n > $@",
+            "comment": "$< is the name of the first dependency; WARNING: ordering could be different"
+        }
+    }
+}"""
+f.close()
+
+# -----------------------------------------------------------
+
+print "creating pipeline/src/lib.rs ..."
 f = open("pipeline/src/lib.rs", "w")
 print >> f, """extern crate rustc_serialize;
 
@@ -95,3 +135,9 @@ pub fn read_config() -> Result<Config> {
 }"""
 f.close()
 
+print "done"
+print
+print "You can now change into the directory 'pipeline' and may execute"
+print "'pipe_config config.json' to create the dependencies. Then type"
+print "'make' to run the pipeline."
+print

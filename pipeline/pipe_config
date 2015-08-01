@@ -57,7 +57,7 @@ for target, v in j["stages"].items():
         " ".join([b for a, b in v["dependencies"].items()]) + " " + config_name
     )
     cpth = os.getcwdu() + "/" + config_name
-    commands.append("PIPELINE_CONFIG=" + cpth + " " + v["command"])
+    commands.append("PIPELINE_CONFIG=" + cpth + " sh -c '" + v["command"] + "'")
 
 # generate Makefile
 print "writing Makefile ..."
