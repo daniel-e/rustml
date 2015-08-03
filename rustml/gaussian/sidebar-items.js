@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Gaussian","Contains all parameters to describe a Gaussian distribution, i.e. the mean and the variance."]],"trait":[["GaussianEstimator","Trait to estimate the mean and the variance of a set of samples."],["GaussianFunctions",""]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["copy_memory","Copies elements from `src` to `dst`."],["group","Groups equal elements into one element and counts them."],["random","Creates a vector with random elements."],["zero","Creates a vector for which all elements are equal to zero."]]});

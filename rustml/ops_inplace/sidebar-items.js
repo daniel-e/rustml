@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["VectorVectorOpsInPlace","Trait to add a slice to a vector using the underlying BLAS implementation."]]});
