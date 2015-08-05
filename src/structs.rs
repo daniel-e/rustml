@@ -1,11 +1,14 @@
+//! Collection of some common data structures.
 use std::fmt;
 
+// A point with two dimensions, `x` and `y`.
 pub struct Point2D<T> {
     pub x: T,
     pub y: T
 }
 
 impl <T> Point2D<T> {
+    // Creates a new point with two dimensions.
     pub fn new(x: T, y: T) -> Point2D<T> {
         Point2D {
             x: x,
