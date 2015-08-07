@@ -1055,5 +1055,19 @@ mod tests {
         assert_eq!(d.row(1).unwrap().to_vec(), vec![10, 11, 12]);
     }
 
+    #[test]
+    fn test_get_mut() {
+
+        let mut a = mat![
+            7, 8, 9;
+            10, 11, 12
+        ];
+
+        {
+            let v = a.get_mut(0, 2).unwrap();
+            *v = 10;
+        }
+        assert_eq!(a.row(0).unwrap().to_vec(), vec![7, 8, 10]);
+    }
 }
 
