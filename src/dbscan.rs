@@ -1,3 +1,5 @@
+//! Implementation of the DBSCAN clustering algorithm.
+
 use std::iter;
 use structs::Point2D;
 use distance::DistancePoint2D;
