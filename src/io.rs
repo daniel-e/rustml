@@ -1,11 +1,13 @@
 //! Functions to read and write files (e.g. gzip compressed files).
 extern crate flate2;
 extern crate libc;
+extern crate regex;
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, BufReader, BufRead, Stdin, stdin};
 use std::io;
 use self::flate2::read::GzDecoder;
+use self::regex::Regex;
 use std::iter::Skip;
 use std::slice::Iter;
 
@@ -82,6 +84,68 @@ impl Read for GzipData {
         Ok(c)
     }
 }
+
+// -------------------------------------------------------------------------
+
+// Read lines from a reader, match the line with a regex and get
+// only those lines which matches.
+pub struct MatchLines<R: Read> {
+    reader: BufReader<R>,
+    r: Regex,
+}
+
+impl <R: Read> Iterator for MatchLines<R> {
+    type Item = io::Result<Vec<String>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let mut buf = String::new();
+            match self.reader.read_line(&mut buf) {
+                Ok(0) => {
+                    return None
+                },
+                Err(e) => {
+                    return Some(Err(e))
+                },
+                Ok(_n) => {
+                    // remove new line from end of line
+                    if buf.ends_with("\n") {
+                        buf.pop();
+                    }
+                    match self.r.captures(&buf) {
+                        Some(cap) => {
+                            return Some(Ok(cap.iter().map(|s| s.unwrap().to_string()).collect()));
+                        },
+                        _ => ()  // skip line and try next line
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+// Returns an instance of `MatchLines` which can be used to read all
+// lines from `stdin`, match each line with the provided regex and 
+// get only those lines which match the regex.
+pub fn match_lines_stdin(r: Regex) -> MatchLines<Stdin> {
+    MatchLines {
+        reader: BufReader::new(stdin()),
+        r: r,
+    }
+}
+
+// Returns an instance of `MatchLines` which can be used to read all
+// lines from the given reader, match each line with the provided regex and 
+// get only those lines which match the regex.
+pub fn match_lines<R: Read>(reader: R, r: Regex) -> MatchLines<R> {
+    MatchLines {
+        reader: BufReader::new(reader),
+        r: r
+    }
+}
+
+// -------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
