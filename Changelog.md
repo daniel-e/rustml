@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.4
+
+ * hash::{simple_hash}: Computes a very simple hash over a bytes.
+ * pipeline: Set of utilities and scripts to create pipelines for machine learning tasks.
+ * io::{match_lines_stdin, match_lines, MatchLines}
+ * sliding::{string_slider, byte_slider, StringSlider, ByteSlider}
+
 ## 0.0.3
 
  * module `ops`
