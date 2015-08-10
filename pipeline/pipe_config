@@ -70,5 +70,6 @@ for i, j in zip(rules, commands):
     print >> f
     print >> f, i
     print >> f, "\t" + j
-
+print >> f, "\nclean:"
+print >> f, "\trm -rf .pipeline"
 
