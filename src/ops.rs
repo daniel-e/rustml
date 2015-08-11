@@ -49,20 +49,40 @@ vector_ops_signed_impl!{ isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 
-/// Trait for operations on matices.
+/// Trait for operations on matrices.
 pub trait MatrixOps<T> {
 
     /// Computes the reciprocal (inverse) of each element of the matrix
-    /// and returns the result.
+    /// and returns the result in a new matrix.
     fn recip(&self) -> Matrix<T>;
+
+    /// Returns the maximum element of the matrix or `None`
+    /// if the matrix is empty.
+    fn max(&self) -> Option<&T>;
 }
 
 macro_rules! matrix_ops_impl {
     ($($t:ty)*) => ($(
 
         impl MatrixOps<$t> for Matrix<$t> {
+
             fn recip(&self) -> Matrix<$t> {
                 self.map(|&x| (1.0 as $t) / x)
+            }
+
+            fn max(&self) -> Option<&$t> {
+                match self.empty() {
+                    true  => None,
+                    false => {
+                        let mut val = self.values().next().unwrap();
+                        for i in self.values() {
+                            if i > val {
+                                val = i;
+                            }
+                        }
+                        Some(val)
+                    }
+                }
             }
         }
     )*)
@@ -292,6 +312,7 @@ mod tests {
     use super::*;
     use matrix::Matrix;
     use math::*;
+    use std::f64;
 
     #[test]
     fn test_matrix_ops() {
@@ -379,6 +400,17 @@ mod tests {
         let v: Vec<u8> = vec![255, 100, 101, 202];
         let m = v.map(|&x| x as u32);
         assert_eq!(m.sum(), 658);
+    }
+
+    #[test]
+    fn test_matrix_max() {
+
+        let m = mat![1.0, 2.0, 1.0];
+        assert_eq!(m.max().unwrap(), &2.0);
+        let n = mat![1.0, f64::NAN, 2.0, 1.0];
+        assert_eq!(n.max().unwrap(), &2.0);
+        let o = mat![1.0, 2.0, f64::NAN, 1.0];
+        assert_eq!(o.max().unwrap(), &2.0);
     }
 }
 
