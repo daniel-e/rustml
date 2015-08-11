@@ -1,13 +1,21 @@
-//! Sliding windows over strings, bytes and over ranges for arbitrary dimensions.
+//! Sliding windows over strings, bytes and ranges for arbitrary dimensions.
 //!
-//! A sliding window is often used in image processing.
+//! A sliding window is often used in image processing, e.g. for object
+//! recognition. It is a technique where a small window is moved over the
+//! image and some image processing is performed on that sub-image, e.g.
+//! to detect objects. A sliding window is also useful for strings to
+//! extract all substrings of a fixed size.
+//! 
 //!
 //! # Examples
 //!
-//! The recommended way to build a sliding window over ranges.
+//! The recommended way to build a sliding window over an arbitrary number of
+//! ranges is to first call the function `builder` and to sequently call the
+//! method `add` of the returned instance for each dimension.
 //!
 //! ```
 //! # #[macro_use] extern crate rustml;
+//! // Example of a sliding window over two dimensions.
 //! use rustml::sliding::*;
 //!
 //! # fn main() {
@@ -24,6 +32,38 @@
 //!     (0, 6), (25, 6), (50, 6), (75, 6),
 //!     (0, 8), (25, 8), (50, 8), (75, 8)
 //! ]);
+//! # }
+//! ```
+//!
+//! ```
+//! # #[macro_use] extern crate rustml;
+//! // Example of a sliding window over one dimensions.
+//! use rustml::sliding::*;
+//!
+//! # fn main() {
+//! assert_eq!(
+//!     builder().add(50, 20, 5).to_1d().unwrap(),
+//!     vec![0, 5, 10, 15, 20, 25, 30]
+//! );
+//! # }
+//! ```
+//!
+//! Sliding window over a string.
+//!
+//! ```
+//! # #[macro_use] extern crate rustml;
+//! use rustml::sliding::*;
+//!
+//! # fn main() {
+//! let s = "hello, world!";
+//! assert_eq!(
+//!     // create a sliding window of size 5
+//!     string_slider(s, 5).unwrap().collect::<Vec<&str>>(),
+//!     vec![
+//!         "hello", "ello,", "llo, ", "lo, w", 
+//!         "o, wo", ", wor", " worl", "world", "orld!"
+//!     ]
+//! );
 //! # }
 //! ```
 
@@ -64,6 +104,20 @@ pub struct SlidingWindowBuilder {
 
 impl SlidingWindowBuilder {
 
+    /// Adds an additional dimension to the sliding window and returns
+    /// the new `SlidingWindowBuilder`.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::sliding::*;
+    ///
+    /// # fn main() {
+    /// assert_eq!(
+    ///     builder().add(10, 3, 2).to_1d().unwrap(),
+    ///     vec![0, 2, 4, 6]
+    /// );
+    /// # }
+    /// ```
     pub fn add(&self, area_width: usize, window_width: usize, delta: usize) -> SlidingWindowBuilder {
 
         let mut v = self.dimensions.clone();
@@ -73,10 +127,40 @@ impl SlidingWindowBuilder {
         }
     }
 
+    /// Returns a vector of the positions of a sliding window with arbitrary dimensions.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::sliding::*;
+    ///
+    /// # fn main() {
+    /// assert_eq!(
+    ///     builder().add(10, 3, 2).add(10, 1, 4).to_vec(),
+    ///     vec![
+    ///         vec![0, 0], vec![2, 0], vec![4, 0], vec![6, 0],
+    ///         vec![0, 4], vec![2, 4], vec![4, 4], vec![6, 4],
+    ///         vec![0, 8], vec![2, 8], vec![4, 8], vec![6, 8]
+    ///     ]
+    /// );
+    /// # }
+    /// ```
     pub fn to_vec(&self) -> Vec<Vec<usize>> {
         sliding_window(&self.dimensions)
     }
 
+    /// Returns a vector of the positions of a one dimensional sliding window.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::sliding::*;
+    ///
+    /// # fn main() {
+    /// assert_eq!(
+    ///     builder().add(10, 3, 2).to_1d().unwrap(),
+    ///     vec![0, 2, 4, 6]
+    /// );
+    /// # }
+    /// ```
     pub fn to_1d(&self) -> Option<Vec<usize>> {
 
         if self.dimensions.len() != 1 {
@@ -86,6 +170,24 @@ impl SlidingWindowBuilder {
         }
     }
 
+    /// Returns a vector of tuples of the positions of a two dimensional
+    /// sliding windoe.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::sliding::*;
+    ///
+    /// # fn main() {
+    /// assert_eq!(
+    ///     builder().add(10, 3, 2).add(10, 1, 4).to_2d().unwrap(),
+    ///     vec![
+    ///         (0, 0), (2, 0), (4, 0), (6, 0),
+    ///         (0, 4), (2, 4), (4, 4), (6, 4),
+    ///         (0, 8), (2, 8), (4, 8), (6, 8)
+    ///     ]
+    /// );
+    /// # }
+    /// ```
     pub fn to_2d(&self) -> Option<Vec<(usize, usize)>> {
 
         if self.dimensions.len() != 2 {
@@ -98,6 +200,9 @@ impl SlidingWindowBuilder {
 
 /// A function to comfortably create a sliding window over an arbitrary number 
 /// of dimensions.
+///
+/// The returned `StringWindowBuilder` can then be used to add dimensions via
+/// its `add` method.
 pub fn builder() -> SlidingWindowBuilder {
     SlidingWindowBuilder {
         dimensions: vec![]
@@ -133,7 +238,7 @@ pub fn sliding_window(dp: &[DimensionParameters]) -> Vec<Vec<usize>> {
 /// Function to create a sliding window over one dimension.
 pub fn sliding_window_1d(dp: &DimensionParameters) -> Vec<usize> {
 
-    sliding_window(&[*dp]).get(0).unwrap().clone()
+    sliding_window(&[*dp]).iter().flat_map(|x| x.iter()).cloned().collect::<Vec<usize>>()
 }
 
 /// Funciton to create a sliding window over two dimensions.
@@ -167,7 +272,28 @@ impl <'a> Iterator for StringSlider<'a> {
     }
 }
 
-/// Create a sliding window of fixed size over a string.
+/// Creates a sliding window of fixed size over a string.
+///
+/// Returns `None` if `winlen` is zero, otherwise a `StringSlider` is
+/// returned that implements `Iterator` to iterate through the
+/// string.
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::sliding::*;
+///
+/// # fn main() {
+/// let s = "hello";
+/// assert_eq!(
+///     string_slider(&s, 3).unwrap().collect::<Vec<&str>>(),
+///     vec![
+///         "hel",
+///         "ell",
+///         "llo"
+///     ]
+/// );
+/// # }
+/// ```
 pub fn string_slider<'a>(s: &'a str, winlen: usize) -> Option<StringSlider<'a>> {
 
     if winlen == 0 {
@@ -205,18 +331,39 @@ impl <'a> Iterator for ByteSlider<'a> {
     }
 }
 
-/// Create a sliding window of fixed size over a string.
+/// Creates a sliding window of fixed size over bytes.
+///
+/// Returns `None` if `winlen` is zero, otherwise a `ByteSlider` is
+/// returned that implements `Iterator` to iterate through the
+/// bytes.
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::sliding::*;
+///
+/// # fn main() {
+/// let v = vec![1, 2, 3, 4, 5, 6];
+/// assert_eq!(
+///     byte_slider(&v, 3).unwrap().collect::<Vec<&[u8]>>(),
+///     vec![
+///         &[1, 2, 3],
+///         &[2, 3, 4],
+///         &[3, 4, 5],
+///         &[4, 5, 6]
+///     ]
+/// );
+/// # }
+/// ```
 pub fn byte_slider<'a>(s: &'a [u8], winlen: usize) -> Option<ByteSlider<'a>> {
 
-    if winlen == 0 {
-        return None;
+    match winlen {
+        0 => None,
+        _ => Some(ByteSlider {
+            s: s,
+            winlen: winlen,
+            pos: 0
+        })
     }
-
-    Some(ByteSlider {
-        s: s,
-        winlen: winlen,
-        pos: 0
-    })
 }
 
 // -------------------------------------------------------------------------
