@@ -241,6 +241,22 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
+    /// Returns `true` if matrix has no rows and no columns, i.e.
+    /// the matrix does not contain an element.
+    ///
+    /// # Example
+    /// ```
+    /// use rustml::Matrix;
+    ///
+    /// let m = Matrix::fill(1, 2, 2);
+    /// assert!(!m.empty());
+    /// let n = Matrix::<f64>::new();
+    /// assert!(n.empty());
+    /// ```
+    pub fn empty(&self) -> bool {
+        self.rows() == 0 && self.cols() == 0
+    }
+
     /// Creates a matrix with random values.
     ///
     /// # Example
