@@ -4,9 +4,9 @@ When doing machine learning it is quite common that you split a big task into a 
 
 This is a typical example of a pipeline:
 ```
-*****************    +-------------+    *****************    +-------+    ********************    +----------+
-* list of files *--->| parse_files |--->* list of words *--->| TFIDF |--->* words with score *--->| keywords |
-*****************    +-------------+    *****************    +-------+    ********************    +----------+
+*****************    +-------------+    *********    +-------+    **********    +----------+
+* list of files *--->| parse_files |--->* words *--->| TFIDF |--->* scores *--->| keywords |
+*****************    +-------------+    *********    +-------+    **********    +----------+
 ```
 The goal of this simplified machine learning task is to create a list of keywords for a list of files. The task is divided into some subtasks. The first task is `parse_files`. This task takes the list of files as input and creates for each file in that list a list of words. The output of the task is a list of list of words. The output can be written into a file or a database or it can be written to stdout. The second task `TFIDF` takes this list of list of words and computes for each word a score (e.g. the TFIDF) which reflects the importance of the word for the appropriate file. This task outputs the words with their score for each file. Finally, the task `keywords` selects the words with the highest score as the keywords of a file.
 
