@@ -58,7 +58,7 @@
 //! [here](https://github.com/daniel-e/rustml#datasets)).
 
 pub use distance::{Distance, Euclid, DistancePoint2D};
-pub use matrix::{HasNan, Matrix};
+pub use matrix::{HasNan, Similar, Matrix};
 pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
 pub use ops::{MatrixScalarOps, VectorScalarOps, VectorOps};
 pub use ops_inplace::{VectorVectorOpsInPlace};

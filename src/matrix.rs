@@ -11,7 +11,7 @@ use std::str::FromStr;
 use std::ops::Mul;
 use std::slice::Iter;
 use self::rand::{thread_rng, Rng, Rand};
-use self::num::traits::Float;
+use self::num::traits::{Float, Signed};
 use self::libc::{c_int, c_double, c_float};
 
 use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
@@ -76,6 +76,8 @@ impl <T: Clone> Clone for Matrix<T> {
     }
 }
 
+// ------------------------------------------------------------------
+
 /// Trait to check if a matrix contains a NaN value.
 pub trait HasNan {
     /// Returns `true` if at least one element that is NaN exists.
@@ -87,6 +89,25 @@ impl <T: Float> HasNan for Matrix<T> {
     /// Returns `true` if the matrix contains at least one element that is NaN.
     fn has_nan(&self) -> bool {
         self.data.iter().any(|&x| x.is_nan())
+    }
+}
+
+// ------------------------------------------------------------------
+
+/// Trait to check if the values of two matrices with the same dimension
+/// differ only up to a small value.
+pub trait Similar<T> {
+    fn similar(&self, e: &Self, epsilon: T) -> Option<bool>;
+}
+
+impl <T: Signed + Clone + Float> Similar<T> for Matrix<T> {
+
+    fn similar(&self, e: &Self, epsilon: T) -> Option<bool> {
+        
+        if self.rows() != e.rows() || self.cols() != e.cols() {
+            return None;
+        }
+        Some(self.values().zip(e.values()).all(|(&x, &y)| num::abs(x - y) <= epsilon))
     }
 }
 
@@ -1084,6 +1105,23 @@ mod tests {
             *v = 10;
         }
         assert_eq!(a.row(0).unwrap().to_vec(), vec![7, 8, 10]);
+    }
+
+    #[test]
+    fn test_similar() {
+
+        let a = mat![
+            7.0, 8.0, 9.0;
+            10.0, 11.0, 12.0
+        ];
+
+        let b = mat![
+            9.0, 8.0, 9.0;
+            10.0, 11.0, 12.0
+        ];
+
+        assert!(!a.similar(&b, 1.0).unwrap()); 
+        assert!(a.similar(&b, 2.0).unwrap()); 
     }
 }
 

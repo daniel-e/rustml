@@ -2,7 +2,7 @@
 extern crate num;
 
 use rustml::Matrix;
-use rustml::scaling::Scaling;
+use rustml::scaling::ScaleMatrix;
 use rustml::gaussian::GaussianFunctions;
 
 fn main() {
