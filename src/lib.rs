@@ -63,7 +63,7 @@ pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
 pub use ops::{MatrixScalarOps, VectorScalarOps, VectorOps};
 pub use ops_inplace::{VectorVectorOpsInPlace};
 pub use gaussian::{GaussianEstimator, GaussianFunctions, Gaussian};
-pub use structs::{Point2D};
+pub use geometry::{Point2D};
 
 // ordering is important because the macro mat! is 
 // only available for modules which follow #[macro_use]
@@ -85,7 +85,7 @@ pub mod consts;
 pub mod ops_inplace;
 pub mod scaling;
 pub mod opencv;
-pub mod structs;
+pub mod geometry;
 pub mod dbscan;
 pub mod sliding;
 pub mod hash;

@@ -1,7 +1,7 @@
 //! Implementation of the DBSCAN clustering algorithm.
 
 use std::iter;
-use structs::Point2D;
+use geometry::Point2D;
 use distance::DistancePoint2D;
 
 pub fn dbscan(data: &Vec<Point2D<f64>>, eps: f64, minpts: usize) -> Vec<isize> {
@@ -107,7 +107,7 @@ impl <'a> ClusterDbscan<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use structs::Point2D;
+    use geometry::Point2D;
 
     #[test]
     fn test_dbscan() {

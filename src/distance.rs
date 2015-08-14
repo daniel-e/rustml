@@ -6,7 +6,7 @@ use self::libc::{c_int, c_double, c_float};
 use matrix::*;
 use norm::{L2Norm, Norm};
 use blas::{cblas_daxpy, cblas_saxpy};
-use structs::Point2D;
+use geometry::Point2D;
 
 pub trait DistancePoint2D<T> {
     fn euclid(&self, other: &Point2D<T>) -> T;
@@ -133,7 +133,7 @@ pub fn all_pair_distances(m: &Matrix<f64>) -> Matrix<f64> {
 mod tests {
     use matrix::*;
     use super::*;
-    use structs::Point2D;
+    use geometry::Point2D;
 
     #[test]
     fn test_euclid() {
