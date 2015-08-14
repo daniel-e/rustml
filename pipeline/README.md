@@ -15,7 +15,7 @@ Each subtask could be implemented in separate binary or script and the binaries 
 ./parse_files.py < list_of_files | ./TFIDF.py | ./keywords.py > result
 ```
 
-The advantage of this approach is that a subtask that implements algorithm A can be simply replaced by a subtask that implements algorithm B. In the example above `TFIDF.py` (which computes the term frequency inverse document frequency) could be replaced by the script `TF.py`, which uses just the term frequencies to compute the score of each word.
+The advantage of this approach is that a subtask that implements algorithm A can be simply replaced by a subtask that implements algorithm B. In the example above `TFIDF.py` (which computes the term frequency inverse document frequency) could be replaced by the script `TF.py`, which simply uses the term frequencies to compute the score of each word.
 
 ## The pipeline in rustml
 
