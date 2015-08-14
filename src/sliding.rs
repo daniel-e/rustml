@@ -6,6 +6,14 @@
 //! to detect objects. A sliding window is also useful for strings to
 //! extract all substrings of a fixed size.
 //! 
+//! A sliding window with a width `w` on an area with width `a` and a
+//! delta `d` returns the following set of numbers (i.e. positions of
+//! the window): 
+//! `{0, d, 2d, ..., w - d + 1}`
+//!
+//! A sliding window on an area with two dimensions returns a set of
+//! tuples of window positions. A sliding window on an area with more
+//! then two dimensions returns a set of vectors of window positions.
 //!
 //! # Examples
 //!
@@ -34,6 +42,30 @@
 //! ]);
 //! # }
 //! ```
+//!
+//! Another way to build a sliding window over an arbitrary number of
+//! ranges is to use the function `sliding_window`.
+//!
+//! ```
+//! # #[macro_use] extern crate rustml;
+//! // Example of a sliding window over two dimensions.
+//! use rustml::sliding::*;
+//!
+//! # fn main() {
+//! let windows = builder().add(100, 10, 25).add(10, 1, 2).to_vec();
+//!
+//! let params = vec![
+//!     param(100, 10, 25),
+//!     param(10, 1, 2)
+//! ];
+//!
+//! assert_eq!(
+//!     sliding_window(&params),
+//!     windows
+//! );
+//! # }
+//! ```
+//!
 //!
 //! ```
 //! # #[macro_use] extern crate rustml;
@@ -71,11 +103,45 @@ extern crate num;
 use self::num::iter;
 
 /// Contains the parameters for one dimensions of a sliding window.
-#[derive(Copy, Clone)]
+///
+/// Usually the function [param](fn.param.html) is used to create a
+/// set of parameters but a set of parameters can be created with the
+/// method `new` as well.
+///
+/// A sliding window with a width `w` on an area with width `a` and a
+/// delta `d` returns the following set of numbers: <br>
+/// `{0, d, 2d, ..., w - d + 1}`
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::sliding::*;
+/// # fn main() {
+/// assert_eq!(
+///     DimensionParameters::new(100, 10, 5),
+///     param(100, 10, 5)
+/// );
+/// # }
+/// ```
+///
+#[derive(Copy, Clone, Debug)]
 pub struct DimensionParameters {
+    /// The size of the area on which the sliding window is moved.
     pub area_width: usize,
+    /// The size of the sliding window.
     pub window_width: usize,
+    /// The increment that is used to move the sliding window.
     pub delta: usize
+}
+
+impl PartialEq<DimensionParameters> for DimensionParameters {
+
+    fn eq(&self, other: &DimensionParameters) -> bool {
+        self.area_width == other.area_width &&
+        self.window_width == other.window_width &&
+        self.delta == other.delta
+    }
 }
 
 impl DimensionParameters {
@@ -89,6 +155,21 @@ impl DimensionParameters {
 }
 
 /// Creates a set of parameters for one dimension of a sliding window.
+///
+/// This is a convenient function which can be used instead of the `new`
+/// method of the [DimensionParameters](struct.DimensionParameters.html) structure.
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::sliding::*;
+/// # fn main() {
+/// assert_eq!(
+///     DimensionParameters::new(100, 10, 5),
+///     param(100, 10, 5)
+/// );
+/// # }
+/// ```
 pub fn param(area_width: usize, window_width: usize, delta: usize) -> DimensionParameters {
     DimensionParameters {
         area_width: area_width,
@@ -250,7 +331,26 @@ pub fn sliding_window_2d(x: &DimensionParameters, y: &DimensionParameters) -> Ve
 
 // -------------------------------------------------------------------------
 
-/// Sliding window of fixed size over a string.
+/// Sliding window iterator of fixed size over a string.
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::sliding::*;
+///
+/// # fn main() {
+/// let s = "hello";
+/// assert_eq!(
+///     string_slider(&s, 3).unwrap().collect::<Vec<&str>>(),
+///     vec![
+///         "hel",
+///         "ell",
+///         "llo"
+///     ]
+/// );
+/// # }
+/// ```
 pub struct StringSlider<'a> {
     s: &'a str,
     winlen: usize,
@@ -309,7 +409,28 @@ pub fn string_slider<'a>(s: &'a str, winlen: usize) -> Option<StringSlider<'a>> 
 
 // -------------------------------------------------------------------------
 
-/// Sliding window of fixed size over bytes.
+/// Sliding window iterator of fixed size over bytes created with the function
+/// [byte_slider](fn.byte_slider.html).
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::sliding::*;
+///
+/// # fn main() {
+/// let v = vec![1, 2, 3, 4, 5, 6];
+/// assert_eq!(
+///     byte_slider(&v, 3).unwrap().collect::<Vec<&[u8]>>(),
+///     vec![
+///         &[1, 2, 3],
+///         &[2, 3, 4],
+///         &[3, 4, 5],
+///         &[4, 5, 6]
+///     ]
+/// );
+/// # }
+/// ```
 pub struct ByteSlider<'a> {
     s: &'a [u8],
     winlen: usize,
@@ -331,7 +452,7 @@ impl <'a> Iterator for ByteSlider<'a> {
     }
 }
 
-/// Creates a sliding window of fixed size over bytes.
+/// Creates a sliding window iterator of fixed size over bytes.
 ///
 /// Returns `None` if `winlen` is zero, otherwise a `ByteSlider` is
 /// returned that implements `Iterator` to iterate through the
