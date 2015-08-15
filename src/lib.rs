@@ -11,7 +11,18 @@
 //! documentation on this topic available
 //! [here](https://github.com/daniel-e/rustml/tree/master/build).
 //!
+//!
+//! # Machine Learning Pipelines with Rustml
+//!
+//! The Rustml pipeline is a small and simple framework to build
+//! and configure machine learning pipelines that have been shown to be a quite
+//! powerful technique when doing machine learning. How pipelines can be
+//! created with Rustml can be seen
+//! [here](https://github.com/daniel-e/rustml/tree/master/pipeline).
+//!
+//!
 //! # Example how to do classifications
+//! 
 //! In the following example a simple k-nearest neighbour algorithm is used to predict
 //! the label of a vector with two features based on the examples in the matrix
 //! `m` (the training set) with their known labels stored in the vector `labels`.
