@@ -23,7 +23,7 @@ def eq(js, config_name):
     return js5.digest() == cn5.digest()
 
 def write_config(target, config):
-    config_name = ".pipeline/config.json." + target
+    config_name = ".pipeline/config.json." + target.replace("/", "_") + ".cfg"
     if "target" in config:
         print "found reserved word 'target' in configuration of " + target
         sys.exit(1)
