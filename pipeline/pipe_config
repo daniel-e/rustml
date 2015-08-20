@@ -22,7 +22,7 @@ def eq(js, config_name):
     cn5.update(cd)
     return js5.digest() == cn5.digest()
 
-def write_config(target, config):
+def write_config(target, config, variables):
     config_name = ".pipeline/config.json." + target.replace("/", "_") + ".cfg"
     if "target" in config:
         print "found reserved word 'target' in configuration of " + target
@@ -37,12 +37,19 @@ def write_config(target, config):
     # update the configuration only if it does not exist or
     # the content has changed
     # this will trigger a new execution of the stage
-    js = json.dumps(config)
+    js = replace_vars(json.dumps(config), variables)
+
     if not os.path.exists(config_name) or not eq(js, config_name):
         print "writing configuration " + config_name + " ..."
         open(config_name, "w").write(js)
 
     return config_name
+
+def replace_vars(s, variables):
+    r = s
+    for key, val in variables.items():
+        r = r.replace("$$" + key + "$$", str(val))
+    return r
 
 
 if not os.path.exists(".pipeline"):
@@ -50,14 +57,16 @@ if not os.path.exists(".pipeline"):
 
 j = json.loads(open(sys.argv[1]).read())
 
+variables = j.get("variables", {})
+
 for target, v in j["stages"].items():
-    config_name = write_config(target, v)
+    config_name = write_config(target, v, variables)
     rules.append(
         target + ": " + 
-        " ".join([b for a, b in v["dependencies"].items()]) + " " + config_name
+        " ".join([replace_vars(b, variables) for a, b in v["dependencies"].items()]) + " " + config_name
     )
     cpth = os.getcwdu() + "/" + config_name
-    commands.append("PIPELINE_CONFIG=" + cpth + " sh -c '" + v["command"] + "'")
+    commands.append("PIPELINE_CONFIG=" + cpth + " sh -c '" + replace_vars(v["command"], variables) + "'")
 
 # generate Makefile
 print "writing Makefile ..."
