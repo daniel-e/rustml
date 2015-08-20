@@ -68,8 +68,8 @@ for target, v in j["stages"].items():
     cpth = os.getcwdu() + "/" + config_name
     cmd = replace_vars(v["command"], variables)
     commands.append(
-        "@echo '\x1b[33;01m'executing target\x1b[0m [" + target + "], " +
-        "'\x1b[33;01m'cmd\x1b[0m [" + cmd + "]\n\t" +
+        "@echo '\x1b[33;01m'executing target\x1b[0m [\"" + target + "\"], " +
+        "'\x1b[33;01m'cmd\x1b[0m [\"" + cmd + "\"]\n\t" +
         "@PIPELINE_CONFIG=" + cpth + " sh -c '" + cmd + "'"
     )
 
