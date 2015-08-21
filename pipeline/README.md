@@ -26,4 +26,7 @@ Rustml offers a simple but very powerful way to build a pipeline that can be eas
 * call `pipe_config` to create a Makefile that contains all dependencies between the subtasks
 * call `make` to build the subtasks (if not up-to-date) and execute the pipeline
 
-The Rustml pipeline uses GNU Make to model the dependencies between the data and the subtasks so that only those parts of the pipeline needs to be rebuild and executed that have changed. This approach helps reducing the execution time of the pipeline by avoiding the execution of subtasks which would produce the same results because nothing has changed.
+The Rustml pipeline uses GNU Make to manage the dependencies between the data and the subtasks so that only those parts of the pipeline needs to be rebuild and executed that have changed. This approach helps reducing the execution time of the pipeline by avoiding the execution of subtasks which would produce the same results because the code of the subtask, its configuration and the input did not changed.
+
+## 
+

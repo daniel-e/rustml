@@ -2,17 +2,43 @@
 
 import subprocess, os, sys
 
-print "calling cargo to create new project pipeline ..."
-subprocess.call(["cargo", "new", "--bin", "pipeline"])
+if len(sys.argv) == 1:
+    p = sys.argv[0].split("/")[-1]
+    print >> sys.stderr, "usage:", p, "[options] pipeline"
+    print >> sys.stderr, ""
+    print >> sys.stderr, "The argument pipeline is the name of pipeline. A directory with"
+    print >> sys.stderr, "the same name is created that is used to store the project."
+    print >> sys.stderr, ""
+    print >> sys.stderr, "  ", p, "help                   print this help message"
+    print >> sys.stderr, "  ", p, "--with-regex           add dependency to regex"
+    print >> sys.stderr, "  ", p, "--with-rustml[=path]   add dependency to rustml"
+    print >> sys.stderr, ""
+    sys.exit(1)
 
-if not os.path.exists("pipeline"):
+pipeline = sys.argv[-1]
+with_regex = False
+with_rustml = False
+rustml_path = ""
+for i in sys.argv[1:]:
+    if i == "--with-regex":
+        with_regex = True
+    if i.startswith("--with-rustml"):
+        with_rustml = True
+        if i.find("=") >= 0:
+            rustml_path = i.split("=")[1]
+
+
+print "calling cargo to create new project " + pipeline + " ..."
+subprocess.call(["cargo", "new", "--bin", pipeline])
+
+if not os.path.exists(pipeline):
 	print "Could not create pipeline. Is 'cargo' in the search path?"
 	sys.exit(1)
 
 # -----------------------------------------------------------
 
-print "updating pipeline/Cargo.toml ..."
-f = open("pipeline/Cargo.toml", "a")
+print "updating " + pipeline + "/Cargo.toml ..."
+f = open(pipeline + "/Cargo.toml", "a")
 print >> f, """
 
 [[bin]]
@@ -20,36 +46,51 @@ name = "example"
 path = "bin/example.rs"
 
 [dependencies]
-rustc-serialize = "0.3"
-"""
+rustc-serialize = "0.3" """
+
+if with_regex:
+    print >> f, 'regex = "0.1.41"'
+
+if with_rustml:
+    if len(rustml_path) > 0:
+        print >> f, '\n[dependencies.rustml]\npath = "' + rustml_path + '"'
+    else:
+        print >> f, 'rustml = "*"'
+
 f.close()
 
 # -----------------------------------------------------------
 
-print "removing pipeline/src/main.rs ..."
-print "creating pipeline/bin/example.rs ..."
-os.remove("pipeline/src/main.rs")
-os.makedirs("pipeline/bin")
-f = open("pipeline/bin/example.rs", "w")
-print >> f, """extern crate pipeline;
+print "removing " + pipeline + "/src/main.rs ..."
+print "creating " + pipeline + "/bin/example.rs ..."
+os.remove(pipeline + "/src/main.rs")
+os.makedirs(pipeline + "/bin")
+f = open(pipeline + "/bin/example.rs", "w")
+print >> f, "extern crate " + pipeline + ";"
 
+if with_regex:
+    print >> f, "extern crate regex;"
+
+if with_rustml:
+    print >> f, "#[macro_use] extern crate rustml;"
+
+print >> f, """
 use std::fs::File;
 use std::io::Write;
 
+// example for a simple pseude random number generator
 fn main() {
-    let c = pipeline::read_config().unwrap();
+    let cfg = """ + pipeline + """::read_config().ok().expect("Could not read config.");
 
     // open the file where the result should be written to
-    let mut f = File::create(c.target).unwrap();
+    let mut f = File::create(&cfg.target).unwrap();
 
-    // read parameters
-    let max = c.params.get("max").unwrap().parse::<usize>().unwrap();
-    let mut seed = c.params.get("seed").unwrap().parse::<usize>().unwrap();
-    let mut n = c.params.get("n").unwrap().parse::<usize>().unwrap();
+    // read a parameter from the config
+    let      max = cfg.param("max").parse::<usize>().unwrap();
+    let mut seed = cfg.param("seed").parse::<usize>().unwrap();
+    let        n = cfg.param("n").parse::<usize>().unwrap();
 
-    while n > 0 {
-        n -= 1;
-        // pseudo random number
+    for _ in (0..n) {
         seed = (1103515245 * seed + 12345) % 2147483648;
         writeln!(f, "{}", seed % max).unwrap();
     }
@@ -58,8 +99,8 @@ f.close()
 
 # -----------------------------------------------------------
 
-print "creating pipeline/config.json ..."
-f = open("pipeline/config.json", "w")
+print "creating " + pipeline + "/config.json ..."
+f = open(pipeline + "/config.json", "w")
 print >> f, """{
     "targets": ["OUTPUT_SORTED"],
 
@@ -70,8 +111,8 @@ print >> f, """{
             },
             "params": {
                 "seed": "314",
-                "max": "30",
-                "n": "10"
+                "n": "10",
+                "max": "30"
             },
             "command": "cargo run --bin example"
         },
@@ -84,7 +125,7 @@ print >> f, """{
             "params": {
             },
             "command": "cat $< | sort -n > $@",
-            "comment": "$< is the name of the first dependency; WARNING: ordering could be different"
+            "comment": "$< is the name of the first dependency; WARNING: ordering is undefined if more then one dependency is given"
         }
     }
 }"""
@@ -92,8 +133,8 @@ f.close()
 
 # -----------------------------------------------------------
 
-print "creating pipeline/src/lib.rs ..."
-f = open("pipeline/src/lib.rs", "w")
+print "creating " + pipeline + "/src/lib.rs ..."
+f = open(pipeline + "/src/lib.rs", "w")
 print >> f, """extern crate rustc_serialize;
 
 use rustc_serialize::json;
@@ -110,6 +151,13 @@ pub struct Config {
     pub target: String
 }
 
+impl Config {
+
+    pub fn param(&self, key: &str) -> String {
+        self.params.get(key).unwrap().clone()
+    }
+}
+
 pub fn read_config() -> Result<Config> {
 
     match env::var("PIPELINE_CONFIG") {
@@ -120,8 +168,8 @@ pub fn read_config() -> Result<Config> {
                     match f.read_to_string(&mut s) {
                     Ok(_n) => {
                         match json::decode(&s) {
-                        Ok(j)  => Ok(j),
-                        Err(e) => Err(Error::new(ErrorKind::Other, e))
+                            Ok(j)  => Ok(j),
+                            Err(e) => Err(Error::new(ErrorKind::Other, e))
                         }
                     }
                     Err(e) => Err(e)
@@ -137,7 +185,12 @@ f.close()
 
 print "done"
 print
-print "You can now change into the directory 'pipeline' and may execute"
-print "'pipe_config config.json' to create the dependencies. Then type"
-print "'make' to run the pipeline."
+print "The pipeline contains a small example (example.rs) in the bin directory."
+print "The example is configured via config.json. The first stage creates random"
+print "numbers. The second stage sorts the numbers."
+print 
+print "next steps:"
+print "- change into the directory '" + pipeline + "'"
+print "- execute 'pipe_config config.json' to generate the Makefile"
+print "- execute 'make' to run the pipeline's example"
 print
