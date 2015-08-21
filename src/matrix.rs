@@ -95,7 +95,7 @@ impl <T: Float> HasNan for Matrix<T> {
 // ------------------------------------------------------------------
 
 /// Trait to check if the values of two matrices with the same dimension
-/// differ only up to a small value.
+/// differ only within a small range.
 pub trait Similar<T> {
     fn similar(&self, e: &Self, epsilon: T) -> Option<bool>;
 }

@@ -1,4 +1,4 @@
-//! Functions to operate on vectors.
+//! Functions for vectors.
 extern crate libc;
 extern crate num;
 extern crate rand;
@@ -18,6 +18,18 @@ use std::fs::File;
 use std::str::FromStr;
 use std::marker::PhantomData;
 
+/// Iterator which reads lines from a reader and converts each line
+/// into a vector with elements of the specified type.
+///
+/// The function `next` returns `None` if the reader's `read_line`
+/// function returns `Ok(0)`. Otherwise a result in a `Some` is returned.
+/// The result contains an error if the reader returns an error or
+/// a vector of elements of type `T`.
+///
+/// It is assumed that the values in a line are separated by a space.
+///
+/// See [from_file](fn.from_file.html) and [from_reader](fn.from_reader.html)
+/// for examples.
 pub struct VecReader<B, T> {
     buf: B,
     phantom: PhantomData<T>
@@ -52,6 +64,21 @@ impl <T: FromStr, B: BufRead> Iterator for VecReader<B, T> {
     }
 }
 
+/// Returns a `VecReader` to read vectors line by line from a reader.
+///
+/// See also [from_file](fn.from_file.html).
+///
+/// # Example
+///
+/// ```
+/// use rustml::vectors::*;
+/// use std::io::Stdin;
+/// # use std::io::BufReader;
+///
+/// let mut i = from_reader::<u32, Stdin>(BufReader::new(std::io::stdin()));
+/// assert!(i.next().is_none());
+/// ```
+///
 pub fn from_reader<T: FromStr, R: Read>(f: BufReader<R>) -> VecReader<BufReader<R>, T> {
 
     VecReader {
@@ -60,6 +87,21 @@ pub fn from_reader<T: FromStr, R: Read>(f: BufReader<R>) -> VecReader<BufReader<
     }
 }
 
+/// Returns a `VecReader` to read vectors line by line from a file.
+///
+/// # Example
+///
+/// ```
+/// use rustml::vectors::*;
+///
+/// // the file contains the following lines:
+/// // 1 2 3
+/// // 4 5 6
+/// let mut i = from_file::<u32>("datasets/testing/vecs.txt").unwrap();
+/// assert_eq!(i.next().unwrap().unwrap(), vec![1, 2, 3]);
+/// assert_eq!(i.next().unwrap().unwrap(), vec![4, 5, 6]);
+/// ```
+///
 pub fn from_file<T: FromStr>(path: &str) -> Result<VecReader<BufReader<File>, T>> {
 
     Ok(VecReader {
@@ -70,7 +112,19 @@ pub fn from_file<T: FromStr>(path: &str) -> Result<VecReader<BufReader<File>, T>
 
 // ------------------------------------------------------------------
 
-/// Groups equal elements into one element and counts them.
+/// Counts and compresses consecutive elements that are equal.
+/// 
+/// # Example
+///
+/// ```
+/// use rustml::vectors::*;
+///
+/// let a = vec![1, 1, 2, 3, 3, 3, 3, 5, 5, 3];
+/// assert_eq!(
+///     group(&a),
+///     vec![(1, 2), (2, 1), (3, 4), (5, 2), (3, 1)]
+/// );
+/// ```
 pub fn group<T: PartialEq + Clone>(v: &Vec<T>) -> Vec<(T, usize)> {
 
     let mut r: Vec<(T, usize)> = Vec::new();
@@ -116,7 +170,19 @@ pub fn zero<T: Num + Clone>(n: usize) -> Vec<T> {
 ///
 /// # Example
 ///
-// TODO
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::vectors::*;
+///
+/// # fn main() {
+/// let r = random::<u32>(100);
+/// assert!(r.iter().any(|&x| x != 0));
+/// # }
+/// ```
+///
+/// # Implemenation details
+///
+/// The function uses `thread_rng` to create the random elements.
 pub fn random<T: Rand + Clone>(n: usize) -> Vec<T> {
 
     thread_rng().gen_iter::<T>().take(n).collect::<Vec<T>>()
@@ -129,6 +195,27 @@ extern {
 }
 
 /// Copies elements from `src` to `dst`.
+///
+/// This function copies at most `n` elements from `src` to `dst`. If
+/// `n` is larger than the size of `src` or `dst` min(src.len(), dst.len()) elements
+/// are copied. The function returns the number of elements that have been
+/// copied.
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::vectors::*;
+///
+/// # fn main() {
+/// let a = vec![1, 2, 3, 4];
+/// let e = vec![1, 2, 3, 0];
+/// let mut b = vec![0, 0, 0, 0];
+///
+/// copy_memory(&mut b, &a, 3);
+/// assert_eq!(b, e);
+/// # }
+/// ```
 ///
 /// # Implementation details
 ///
