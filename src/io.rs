@@ -87,8 +87,18 @@ impl Read for GzipData {
 
 // -------------------------------------------------------------------------
 
-// Read lines from a reader, match the line with a regex and get
-// only those lines which matches.
+/// Read lines from a reader and returns the line if it matches with
+/// a regex.
+///
+/// The call to the method next returns `None` if the function
+/// `read_line` of the buffer from which the lines are read returns
+/// `Ok(0)`. Otherwise a result is returned in a `Some`. The result
+/// is an error if the buffer's `read_line` returns an error.
+/// Otherwise the result contains a vector of captures as strings.
+/// The first element of the vector contains the whole match.
+///
+/// See the functions [match_lines](fn.match_lines.html) and
+/// [match_lines_stdin](fn.match_lines_stdin.html) for details.
 pub struct MatchLines<R: Read> {
     reader: BufReader<R>,
     r: Regex,
@@ -125,9 +135,27 @@ impl <R: Read> Iterator for MatchLines<R> {
 
 }
 
-// Returns an instance of `MatchLines` which can be used to read all
-// lines from `stdin`, match each line with the provided regex and 
-// get only those lines which match the regex.
+/// Returns an instance of `MatchLines` which can be used to read all
+/// lines from `stdin` and match each line with the provided regex. Only
+/// those lines are returned which match the regex.
+///
+/// # Example
+///
+/// ```ignore
+/// #[macro_use] extern crate rustml;
+/// extern crate regex;
+///
+/// use regex::Regex;
+/// use rustml::io::match_lines;
+///
+/// # fn main() {
+/// let r = Regex::new(r"^[a-z]+ (\d+)$").unwrap();
+/// for line in match_lines(r) {
+///     let captures = line.unwrap();
+///     println!("{}", captures[1]);
+/// }
+/// # }
+/// ```
 pub fn match_lines_stdin(r: Regex) -> MatchLines<Stdin> {
     MatchLines {
         reader: BufReader::new(stdin()),
@@ -135,9 +163,36 @@ pub fn match_lines_stdin(r: Regex) -> MatchLines<Stdin> {
     }
 }
 
-// Returns an instance of `MatchLines` which can be used to read all
-// lines from the given reader, match each line with the provided regex and 
-// get only those lines which match the regex.
+/// Returns an instance of `MatchLines` which can be used to read all
+/// lines from the given reader. Each line is matched against the provided regex
+/// and only those lines which match the regex are returned.
+///
+/// # Example
+///
+/// ```
+/// #[macro_use] extern crate rustml;
+/// extern crate regex;
+///
+/// use std::fs::File;
+/// use std::io::BufReader;
+/// use regex::Regex;
+/// use rustml::io::match_lines;
+///
+/// # fn main() {
+/// // the file lines.txt contains the lines:
+/// // line 1
+/// // line 2
+/// // line 3
+/// let f = File::open("datasets/testing/lines.txt").unwrap();
+/// let r = BufReader::new(f);
+/// let mut v = Vec::new();
+/// for line in match_lines(r, Regex::new(r"^[a-z]+ (\d+)$").unwrap()) {
+///     let captures = line.unwrap();
+///     v.push(captures[1].parse::<usize>().unwrap());
+/// }
+/// assert_eq!(v, vec![1, 2, 3]);
+/// # }
+/// ```
 pub fn match_lines<R: Read>(reader: R, r: Regex) -> MatchLines<R> {
     MatchLines {
         reader: BufReader::new(reader),
@@ -149,8 +204,13 @@ pub fn match_lines<R: Read>(reader: R, r: Regex) -> MatchLines<R> {
 
 #[cfg(test)]
 mod tests {
+    extern crate regex;
+
     use super::*;
     use std::io::Read;
+    use self::regex::Regex;
+    use std::fs::File;
+    use std::io::BufReader;
 
     #[test]
     fn test_read_gzip() {
@@ -169,4 +229,18 @@ mod tests {
         assert!(data.read_to_end(&mut v).is_ok());
         assert_eq!(String::from_utf8(v).unwrap(), "hello world".to_string());
     }
+
+    #[test]
+    fn test_match_lines() {
+
+        let f = File::open("datasets/testing/lines.txt").unwrap();
+        let r = BufReader::new(f);
+        let mut v = Vec::new();
+        for line in match_lines(r, Regex::new(r"^[a-z]+ (\d+)$").unwrap()) {
+            let captures = line.unwrap();
+            v.push(captures[1].parse::<usize>().unwrap());
+        }
+        assert_eq!(v, vec![1, 2, 3]);
+    }
+
 }
