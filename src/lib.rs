@@ -71,7 +71,7 @@
 pub use distance::{Distance, Euclid, DistancePoint2D};
 pub use matrix::{HasNan, Similar, Matrix};
 pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
-pub use ops::{MatrixScalarOps, VectorScalarOps, VectorOps};
+pub use ops::{MatrixScalarOps, VectorOps, VectorScalarOps, VectorVectorOps};
 pub use ops_inplace::{VectorVectorOpsInPlace};
 pub use gaussian::{GaussianEstimator, GaussianFunctions, Gaussian};
 pub use geometry::{Point2D};
@@ -100,3 +100,4 @@ pub mod geometry;
 pub mod dbscan;
 pub mod sliding;
 pub mod hash;
+pub mod opt;
