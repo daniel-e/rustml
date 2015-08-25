@@ -1,5 +1,36 @@
 //! Module for optimization.
-
+//!
+//! # Example: Gradient descent
+//!
+//! The following example minimized the function f(x) = (x-2)² with gradient
+//! descent.
+//!
+//! ```
+//! # extern crate rustml;
+//! # extern crate num;
+//! use rustml::opt::*;
+//! use num::pow;
+//!
+//! # fn main() {
+//! let opts = default_opts()
+//!     .iter(10)     // set the number of iterations to 10
+//!     .alpha(0.1)   // set the learning reate
+//!     .eps(0.001);  // stopping criterion
+//!
+//! let r = opt(
+//!     |p| pow(p[0] - 2.0, 2),       // objective to be minimized: (x-2)^2
+//!     |p| vec![2.0 * (p[0] - 2.0)], // derivative
+//!     &[4.0],                       // initial parameters
+//!     opts                          // optimization options
+//! );
+//!
+//! for (iter, i) in r.fvals.iter().enumerate() {
+//!     println!("error after iteration {} was {}", iter + 1, i);
+//! }
+//! println!("solution: {:?}", r.params);
+//! assert!(r.params[0] - 2.0 <= 0.3);
+//! # }
+//! ```
 extern crate num;
 
 use ops::*;
