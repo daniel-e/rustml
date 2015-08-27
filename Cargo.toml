@@ -52,6 +52,10 @@ path = "examples/video_histogram.rs"
 name = "gradient_descent"
 path = "examples/gradient_descent.rs"
 
+[[example]]
+name = "octave_plot"
+path = "examples/octave_plot.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"
