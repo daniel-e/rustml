@@ -1,5 +1,17 @@
+//! Hash functions.
+
 use std::u32;
 
+/// A simple hash functions.
+///
+/// <script type="text/javascript"
+///   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+/// </script>
+/// <script type="text/x-mathjax-config">
+///   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+/// </script>
+///
+/// This functions computes a hash as follows: $h(s) = \sum_{i=0}\^n 31\^{n-i} s_i $
 pub fn simple_hash(s: &[u8]) -> u32 {
 
     let m = u32::MAX as u64;
