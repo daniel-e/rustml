@@ -7,13 +7,14 @@ The documentation of the project with a descprition of the modules can be found 
 ## Features 
 
 * powerful matrix and vector support with BLAS bindings to provide very high performance 
-* classification with k-nearest neighbord
+* k-nearest neighbord classification algorithm
+* DBSCAN clustering algorithm
+* gradient descent for minimizing functions
 * easy access to MNIST database of handwritten digits via an the rustml dataset package
 * parse and create CSV files
 * statistical functions like mean and variance for vectors and matrices
 * reading gzip compressed files
 * distance metrics
-* implementation of the DBSCAN clustering algorithm
 * OpenCV binding to read images and videos plus interfaces for simplify feature extraction from images and videos (e.g. select pixels from images or frames of a video via a mask)
 * scaling of feature vectors and matrices
 * multidimensional sliding windows

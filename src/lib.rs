@@ -67,7 +67,11 @@
 //! video](https://github.com/daniel-e/rustml/blob/master/examples/video_histogram.rs): this
 //! examples requires an external dataset that has to be downloaded separately (see
 //! [here](https://github.com/daniel-e/rustml#datasets)).
-
+//! * [plot with octave](https://github.com/daniel-e/rustml/blob/master/examples/octave_plot.rs):
+//! create plots with Octave
+//! * [gradient descent](https://github.com/daniel-e/rustml/blob/master/examples/gradient_descent.rs): use gradient
+//! to optimize a function with two parameters
+//!
 pub use distance::{Distance, Euclid, DistancePoint2D};
 pub use matrix::{HasNan, Similar, Matrix};
 pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
@@ -101,3 +105,4 @@ pub mod dbscan;
 pub mod sliding;
 pub mod hash;
 pub mod opt;
+pub mod octave;

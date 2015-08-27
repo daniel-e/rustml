@@ -7,6 +7,7 @@
  * io::{match_lines_stdin, match_lines, MatchLines}
  * sliding::{string_slider, byte_slider, StringSlider, ByteSlider}
  * opt: module for optimization problems with an implementation of gradient descent
+ * octave: module to run scripts with octave
 
 ## 0.0.3
 

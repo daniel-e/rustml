@@ -1,4 +1,4 @@
-//! Module for optimization.
+//! Module for optimization with gradient descent.
 //!
 //! # Example: Gradient descent
 //!
@@ -18,24 +18,28 @@
 //!     .eps(0.001);  // stopping criterion
 //!
 //! let r = opt(
-//!     |p| pow(p[0] - 2.0, 2),       // objective to be minimized: (x-2)^2
-//!     |p| vec![2.0 * (p[0] - 2.0)], // derivative
-//!     &[4.0],                       // initial parameters
-//!     opts                          // optimization options
+//!     &|p| pow(p[0] - 2.0, 2),       // objective to be minimized: (x-2)^2
+//!     &|p| vec![2.0 * (p[0] - 2.0)], // derivative
+//!     &[4.0],                        // initial parameters
+//!     opts                           // optimization options
 //! );
 //!
 //! for (iter, i) in r.fvals.iter().enumerate() {
-//!     println!("error after iteration {} was {}", iter + 1, i);
+//!     println!("error after iteration {} was {}", iter + 1, i.1);
 //! }
 //! println!("solution: {:?}", r.params);
 //! assert!(r.params[0] - 2.0 <= 0.3);
 //! # }
 //! ```
+//!
+//! See [here](https://github.com/daniel-e/rustml/blob/master/examples/gradient_descent.rs) for
+//! another example.
 extern crate num;
 
 use ops::*;
 
 /// Creates a container that holds the parameters for an optimization algorithm.
+#[derive(Copy, Clone)]
 pub struct OptParams<T: Clone> {
     /// learning rate
     pub alpha: Option<T>,
@@ -121,8 +125,8 @@ pub fn default_opts() -> OptParams<f64> {
 
 /// The result of an optimization.
 pub struct OptResult<T> {
-    /// The value of the objective function after each iteration.
-    pub fvals: Vec<T>,
+    /// TODO
+    pub fvals: Vec<(Vec<T>, T)>,
     /// The parameters after the last iteration.
     pub params: Vec<T>,
     /// True if the stopping criterion is fulfilled.
@@ -189,20 +193,20 @@ pub struct OptResult<T> {
 /// let opts = default_opts().iter(10);
 ///
 /// let r = opt(
-///     |p| pow(p[0] - 2.0, 2),       // objective to be minimized: (x-2)^2
-///     |p| vec![2.0 * (p[0] - 2.0)], // derivative
-///     &[4.0],                       // initial parameters
-///     opts                          // optimization options
+///     &|p| pow(p[0] - 2.0, 2),       // objective to be minimized: (x-2)^2
+///     &|p| vec![2.0 * (p[0] - 2.0)], // derivative
+///     &[4.0],                        // initial parameters
+///     opts                           // optimization options
 /// );
 ///
 /// for (iter, i) in r.fvals.iter().enumerate() {
-///     println!("error after iteration {} was {}", iter + 1, i);
+///     println!("error after iteration {} was {}", iter + 1, i.1);
 /// }
 /// println!("solution: {:?}", r.params);
 /// assert!(r.params[0] - 2.0 <= 0.3);
 /// # }
 /// ```
-pub fn opt<O, D>(f: O, fd: D, init: &[f64], opts: OptParams<f64>) -> OptResult<f64>
+pub fn opt<O, D>(f: &O, fd: &D, init: &[f64], opts: OptParams<f64>) -> OptResult<f64>
     where O: Fn(&[f64]) -> f64, D: Fn(&[f64]) -> Vec<f64> {
 
     let alpha = opts.alpha.unwrap_or(0.1);
@@ -215,7 +219,7 @@ pub fn opt<O, D>(f: O, fd: D, init: &[f64], opts: OptParams<f64>) -> OptResult<f
 
     for _ in (0..iter) {
         let i = p.sub(&fd(&p).mul_scalar(alpha));
-        r.push(f(&i));
+        r.push((i.clone(), f(&i)));
         stopped = eps.is_some() && i.iter().zip(p.iter()).all(|(&x, &y)| num::abs(x - y) <= eps.unwrap());
         p = i;
         if stopped {
