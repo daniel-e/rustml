@@ -11,7 +11,7 @@ fn main() {
         .add("grid on")
         .add("print -dpng '/tmp/example_plot.png'");
 
-    o.run("/tmp/example_plot.m");
+    o.run("/tmp/example_plot.m").unwrap();
     Window::new()
         .show_image(&RgbImage::from_file("/tmp/example_plot.png").unwrap())
         .wait_key(0);

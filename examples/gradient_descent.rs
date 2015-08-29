@@ -18,7 +18,7 @@ fn main() {
     ];
 
     // set the number of iterations and the learning rate
-    let opts = OptParams::new()
+    let opts = empty_opts()
         .iter(15)
         .alpha(0.04);
 

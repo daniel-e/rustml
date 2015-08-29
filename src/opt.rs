@@ -2,7 +2,7 @@
 //!
 //! # Example: Gradient descent
 //!
-//! The following example minimized the function f(x) = (x-2)² with gradient
+//! The following example minimizes the function f(x) = (x-2)² with gradient
 //! descent.
 //!
 //! ```
@@ -12,7 +12,7 @@
 //! use num::pow;
 //!
 //! # fn main() {
-//! let opts = default_opts()
+//! let opts = empty_opts()
 //!     .iter(10)     // set the number of iterations to 10
 //!     .alpha(0.1)   // set the learning reate
 //!     .eps(0.001);  // stopping criterion
@@ -56,7 +56,7 @@ impl <T: Clone> OptParams<T> {
     /// 
     /// ```
     /// use rustml::opt::*;
-    /// let opts = default_opts();
+    /// let opts = OptParams::<f64>::new();
     /// assert!(opts.alpha.is_none());
     /// ```
     pub fn new() -> OptParams<T> {
@@ -73,7 +73,7 @@ impl <T: Clone> OptParams<T> {
     ///
     /// ```
     /// use rustml::opt::*;
-    /// let opts = default_opts().alpha(0.2);
+    /// let opts = empty_opts().alpha(0.2);
     /// assert_eq!(opts.alpha.unwrap(), 0.2);
     /// ```
     pub fn alpha(&self, val: T) -> OptParams<T> {
@@ -90,7 +90,7 @@ impl <T: Clone> OptParams<T> {
     ///
     /// ```
     /// use rustml::opt::*;
-    /// let opts = default_opts().iter(100);
+    /// let opts = empty_opts().iter(100);
     /// assert_eq!(opts.iter.unwrap(), 100);
     /// ```
     pub fn iter(&self, val: usize) -> OptParams<T> {
@@ -107,7 +107,7 @@ impl <T: Clone> OptParams<T> {
     ///
     /// ```
     /// use rustml::opt::*;
-    /// let opts = default_opts().eps(0.01);
+    /// let opts = empty_opts().eps(0.01);
     /// assert_eq!(opts.eps.unwrap(), 0.01);
     /// ```
     pub fn eps(&self, val: T) -> OptParams<T> {
@@ -119,7 +119,8 @@ impl <T: Clone> OptParams<T> {
     }
 }
 
-pub fn default_opts() -> OptParams<f64> {
+/// Returns an empty set of options for optimization algorithms.
+pub fn empty_opts() -> OptParams<f64> {
     OptParams::new()
 }
 
@@ -190,7 +191,7 @@ pub struct OptResult<T> {
 ///
 /// # fn main() {
 /// // set the number of iterations to 10
-/// let opts = default_opts().iter(10);
+/// let opts = empty_opts().iter(10);
 ///
 /// let r = opt(
 ///     &|p| pow(p[0] - 2.0, 2),       // objective to be minimized: (x-2)^2
