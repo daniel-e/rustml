@@ -56,6 +56,10 @@ path = "examples/gradient_descent.rs"
 name = "octave_plot"
 path = "examples/octave_plot.rs"
 
+[[example]]
+name = "linear_regression"
+path = "examples/linear_regression.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"
