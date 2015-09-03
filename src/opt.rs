@@ -37,6 +37,8 @@
 extern crate num;
 
 use ops::*;
+use regression::*;
+use matrix::Matrix;
 
 /// Creates a container that holds the parameters for an optimization algorithm.
 #[derive(Copy, Clone)]
@@ -235,4 +237,34 @@ pub fn opt<O, D>(f: &O, fd: &D, init: &[f64], opts: OptParams<f64>) -> OptResult
     }
 }
 
+pub fn opt_hypothesis(h: &Hypothesis, x: &Matrix<f64>, y: &[f64], opts: OptParams<f64>) -> OptResult<f64> {
+
+    let alpha = opts.alpha.unwrap_or(0.1);
+    let iter = opts.iter.unwrap_or(1000);
+    let eps = opts.eps;
+
+    let mut r = vec![];
+    let mut p = h.params();
+    let mut stopped = false;
+
+    let mut hx = Hypothesis::from_params(&p);
+
+    for _ in (0..iter) {
+        let d = hx.derivatives(x, y);
+        let i = p.sub(&d.mul_scalar(alpha));
+        hx = Hypothesis::from_params(&i);
+        r.push((i.clone(), hx.error(&x, &y)));
+        stopped = eps.is_some() && i.iter().zip(p.iter()).all(|(&x, &y)| num::abs(x - y) <= eps.unwrap());
+        p = i;
+        if stopped {
+            break;
+        }
+    }
+
+    OptResult {
+        params: p.to_vec(),
+        fvals: r,
+        stopped: stopped
+    }
+}
 
