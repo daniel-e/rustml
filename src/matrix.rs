@@ -58,22 +58,11 @@ use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 /// assert_eq!(c.row(1).unwrap(), &[29.0, 24.0, 13.0, 51.0]);
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct Matrix<T> {
     nrows: usize,
     ncols: usize,
     data: Vec<T>
-}
-
-impl <T: Clone> Clone for Matrix<T> {
-
-    fn clone(&self) -> Self {
-
-        Matrix {
-            nrows: self.nrows.clone(),
-            ncols: self.ncols.clone(),
-            data: self.data.clone()
-        }
-    }
 }
 
 // ------------------------------------------------------------------
@@ -100,14 +89,18 @@ pub trait Similar<T> {
     fn similar(&self, e: &Self, epsilon: T) -> Option<bool>;
 }
 
-impl <T: Signed + Clone + Float> Similar<T> for Matrix<T> {
+impl <T: Clone + Signed + Float> Similar<T> for Matrix<T> {
 
     fn similar(&self, e: &Self, epsilon: T) -> Option<bool> {
-        
-        if self.rows() != e.rows() || self.cols() != e.cols() {
-            return None;
+
+        match self.rows() != e.rows() || self.cols() != e.cols() {
+            true => None,
+            _ => Some(
+                    self.values()
+                    .zip(e.values())
+                    .all(|(&x, &y)| num::abs(x - y) <= epsilon)
+                )
         }
-        Some(self.values().zip(e.values()).all(|(&x, &y)| num::abs(x - y) <= epsilon))
     }
 }
 
@@ -220,11 +213,10 @@ impl <T: Clone> Matrix<T> {
         let v = iter.collect::<Vec<T>>();
         let rows = v.len() / cols;
 
-        if rows * cols != v.len() {
-            return None;
+        match rows * cols != v.len() {
+            true => None,
+            _ => Matrix::from_vec(v, rows, cols)
         }
-
-        Matrix::from_vec(v, rows, cols)
     }
 
     // TODO test
@@ -535,7 +527,7 @@ impl <T: Clone> Matrix<T> {
     ///     5.0, 5.5
     /// ];
     /// {
-    ///     let mut r = m.row_mut(1).unwrap();
+    ///     let r = m.row_mut(1).unwrap();
     ///     r[0] = 4.0;
     ///     r[1] = 3.0;
     /// }
@@ -594,7 +586,7 @@ impl <T: Clone> Matrix<T> {
         }
     }
 
-    pub fn add_row(&mut self, row: &Vec<T>) {
+    pub fn add_row(&mut self, row: &[T]) {
         
         if self.rows() == 0 {
             self.ncols = row.len();
@@ -631,6 +623,56 @@ impl <T: Clone> Matrix<T> {
             .filter(|&(_idx, val)| f(val))
             .map(|(idx, _val)| (idx % self.cols(), idx / self.cols()))
             .collect()
+    }
+
+    /// Inserts a column before the specified column.
+    ///
+    /// Returns `None` if `v.len() != self.rows()`.
+    pub fn insert_column(&self, pos: usize, v: &[T]) -> Option<Matrix<T>> {
+
+        if v.len() != self.rows() {
+            return None;
+        }
+
+        let mut m = Matrix::<T>::new();
+        for (i, r) in self.row_iter().enumerate() {
+            let mut q = r.to_vec();
+            if pos < q.len() {
+                q.insert(pos, v[i].clone());
+            } else {
+                q.push(v[i].clone());
+            }
+            m.add_row(&q);
+        }
+        Some(m)
+    }
+
+    /// Returns a copy of the column at the specified index.
+    pub fn column(&self, pos: usize) -> Option<Vec<T>> {
+
+        if pos >= self.cols() {
+            return None;
+        }
+        Some(self.row_iter().map(|r| r[pos].clone()).collect::<Vec<T>>())
+    }
+
+    pub fn rm_column(&self, pos: usize) -> Option<Matrix<T>> {
+
+        if pos >= self.cols() {
+            return None;
+        }
+
+        let mut m = Matrix::<T>::new();
+        if self.cols() == 1 {
+            return Some(m);
+        }
+
+        for r in self.row_iter() {
+            let mut q = r.to_vec();
+            q.remove(pos);
+            m.add_row(&q);
+        }
+        Some(m)
     }
 }
 
@@ -1122,6 +1164,19 @@ mod tests {
 
         assert!(!a.similar(&b, 1.0).unwrap()); 
         assert!(a.similar(&b, 2.0).unwrap()); 
+    }
+
+    #[test]
+    fn test_insert_column() {
+
+        let a = mat![
+            1, 2, 3;
+            4, 5, 6
+        ];
+        assert_eq!(
+            a.insert_column(0, &[8, 9]).unwrap().buf(),
+            &[8, 1, 2, 3, 9, 4, 5, 6]
+        );
     }
 }
 
