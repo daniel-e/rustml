@@ -10,6 +10,7 @@ The documentation of the project with a descprition of the modules can be found 
 * k-nearest neighbord classification algorithm
 * DBSCAN clustering algorithm
 * gradient descent for minimizing functions
+* linear regression
 * easy access to MNIST database of handwritten digits via an the rustml dataset package
 * parse and create CSV files
 * statistical functions like mean and variance for vectors and matrices

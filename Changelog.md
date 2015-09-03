@@ -8,6 +8,9 @@
  * sliding::{string_slider, byte_slider, StringSlider, ByteSlider}
  * opt: module for optimization problems with an implementation of gradient descent
  * octave: module to run scripts with octave
+ * ops: matrix vector multiplication with BLAS
+ * regression: new module for linear regression
+ * matrix: insert column
 
 ## 0.0.3
 
