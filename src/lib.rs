@@ -1,5 +1,17 @@
 //! Library for doing machine learning with Rust.
 //!
+//! # Features
+//! * highly optimized linear algebra via BLAS integration (i.e. operations on vectors and
+//! matrices)
+//! * gradient descent
+//! * DBSCAN clustering algorithm
+//! * linear regression
+//! * classification with <i>k</i>-nearest neighbours
+//! * sliding windows for arbitrary dimensions (e.g. for image processing)
+//! * standard databases (e.g. MNIST database of handwritten digits)
+//! * feature scaling
+//! * video and image processing via integration of OpenCV
+//!
 //! # Performance
 //!
 //! When it comes to vector and matrix operations rustml makes heavy
@@ -19,7 +31,6 @@
 //! powerful technique when doing machine learning. How pipelines can be
 //! created with Rustml can be seen
 //! [here](https://github.com/daniel-e/rustml/tree/master/pipeline).
-//!
 //!
 //! # Example how to do classifications
 //! 
@@ -106,3 +117,4 @@ pub mod sliding;
 pub mod hash;
 pub mod opt;
 pub mod octave;
+pub mod regression;
