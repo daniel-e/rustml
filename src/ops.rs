@@ -1,5 +1,10 @@
 extern crate num;
+extern crate libc;
 
+use self::libc::{c_int, c_double};
+use std::iter::repeat;
+
+use blas::*;
 use matrix::Matrix;
 use ops_inplace::VectorVectorOpsInPlace;
 
@@ -307,6 +312,128 @@ matrix_vector_ops_impl!{ f32 f64 }
 
 // ----------------------------------------------------------------------------
 
+/// Trait for matrix vector multiplication.
+pub trait MatrixVectorMul<T> {
+
+    /// Multiplies the matrix with the row vector `v`.
+    fn mul_vec(&self, v: &[T]) -> Option<Vec<T>>;
+
+    /// Computes Xv-y
+    fn mul_vec_minus_vec(&self, v: &[T], y: &[T]) -> Vec<T>;
+
+    /// Computes (alpha * Xv + beta * y) or (alpha * X^T * v + beta * y)
+    fn mul_dgemv(&self, trans: bool, alpha: f64, x: &[T], beta: f64, y: &[T]) -> Vec<T>;
+
+    /// Computes (alhpa * Xv) or (alpha * X^T * v)
+    fn mul_scalar_vec(&self, trans: bool, alpha: f64, x: &[T]) -> Vec<T>;
+}
+
+
+impl MatrixVectorMul<f64> for Matrix<f64> {
+
+    fn mul_vec(&self, v: &[f64]) -> Option<Vec<f64>> {
+
+        if self.cols() != v.len() || self.cols() == 0 || self.rows() == 0 {
+            return None;
+        }
+
+        let y: Vec<f64> = repeat(0.0).take(self.rows()).collect();
+        unsafe {
+            cblas_dgemv(
+                Order::RowMajor, 
+                Transpose::NoTrans,
+                self.rows() as c_int,
+                self.cols() as c_int,
+                1.0 as c_double,
+                self.buf().as_ptr() as *const c_double,
+                self.cols() as c_int,
+                v.as_ptr() as *const c_double,
+                1 as c_int,
+                0.0 as c_double,
+                y.as_ptr() as *mut c_double,
+                1 as c_int
+            );
+        }
+        Some(y)
+    }
+
+
+    fn mul_vec_minus_vec(&self, v: &[f64], y: &[f64]) -> Vec<f64> {
+
+        if self.cols() != v.len() || self.rows() != y.len() {
+            panic!("Invalid dimensions.");
+        }
+
+        // this will be modified by cblas_dgemv
+        let targets = y.to_vec();
+
+        unsafe {
+            cblas_dgemv(
+                Order::RowMajor, 
+                Transpose::NoTrans,
+                self.rows() as c_int,
+                self.cols() as c_int,
+                1.0 as c_double,
+                self.buf().as_ptr() as *const c_double,
+                self.cols() as c_int,
+                v.as_ptr() as *const c_double,
+                1 as c_int,
+                -1.0 as c_double,  // beta
+                targets.as_ptr() as *mut c_double,
+                1 as c_int
+            );
+        }
+        targets
+    }
+
+    fn mul_dgemv(&self, trans: bool, alpha: f64, x: &[f64], beta: f64, y: &[f64]) -> Vec<f64> {
+
+        if !trans {
+            if self.cols() != x.len() || self.rows() != y.len() {
+                panic!("Invalid dimensions.");
+            }
+        } else {
+            if self.rows() != x.len() || self.cols() != y.len() {
+                panic!("Invalid dimensions.");
+            }
+        }
+
+        let transpose = if trans { Transpose::Trans } else { Transpose::NoTrans };
+        // this will be modified by cblas_dgemv
+        let r = y.to_vec();
+
+        unsafe {
+            cblas_dgemv(
+                Order::RowMajor, 
+                transpose,
+                self.rows() as c_int,
+                self.cols() as c_int,
+                alpha as c_double,
+                self.buf().as_ptr() as *const c_double,
+                self.cols() as c_int,
+                x.as_ptr() as *const c_double,
+                1 as c_int,
+                beta as c_double,  // beta
+                r.as_ptr() as *mut c_double,
+                1 as c_int
+            );
+        }
+        r
+    }
+
+    /// Computes (alhpa * Xv) or (alpha * X^T * v)
+    fn mul_scalar_vec(&self, trans: bool, alpha: f64, x: &[f64]) -> Vec<f64> {
+
+        let n = if trans { self.cols() } else { self.rows() };
+        self.mul_dgemv(
+            trans, alpha, x, 0.0,
+            &repeat(0.0).take(n).collect::<Vec<f64>>()
+        )
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -411,6 +538,74 @@ mod tests {
         assert_eq!(n.max().unwrap(), &2.0);
         let o = mat![1.0, 2.0, f64::NAN, 1.0];
         assert_eq!(o.max().unwrap(), &2.0);
+    }
+ 
+    #[test]
+    fn test_matrix_vector_mul() {
+        let x = mat![1.0, 2.0, 3.0; 4.0, 2.0, 5.0];
+        let h = [2.0, 6.0, 3.0];
+        let y = x.mul_vec(&h).unwrap();
+        assert_eq!(y, vec![23.0, 35.0]);
+
+        let i = [2.0, 6.0];
+        assert!(x.mul_vec(&i).is_none());
+    }
+
+    #[test]
+    fn test_mul_vec_minus_vec() {
+        let x = mat![
+            1.0, 2.0, 3.0; 
+            4.0, 2.0, 5.0
+        ];
+        let v = [2.0, 6.0, 3.0];
+        let y = [7.0, 2.0];
+
+        assert_eq!(
+            x.mul_vec_minus_vec(&v, &y),
+            vec![16.0, 33.0]
+        );
+    }
+
+    #[test]
+    fn test_mul_dgemv() {
+        let x = mat![
+            1.0, 2.0, 3.0; 
+            4.0, 2.0, 5.0
+        ];
+        let v = [2.0, 6.0, 3.0];
+        let y = [7.0, 2.0];
+
+        assert_eq!(
+            x.mul_dgemv(false, 2.0, &v, -3.0, &y),
+            vec![25.0, 64.0]
+        );
+
+        let a = [8.0, 3.0];
+        let t = [1.0, -4.0, 9.0];
+        assert_eq!(
+            x.mul_dgemv(true, 2.0, &a, -3.0, &t),
+            vec![37.0, 56.0, 51.0]
+        );
+    }
+
+    #[test]
+    fn test_mul_scalar_vec() {
+        let x = mat![
+            1.0, 2.0, 3.0; 
+            4.0, 2.0, 5.0
+        ];
+        let v = [2.0, 6.0, 3.0];
+
+        assert_eq!(
+            x.mul_scalar_vec(false, 2.0, &v),
+            vec![46.0, 70.0]
+        );
+
+        let a = [8.0, 3.0];
+        assert_eq!(
+            x.mul_scalar_vec(true, 2.0, &a),
+            vec![40.0, 44.0, 78.0]
+        );
     }
 }
 
