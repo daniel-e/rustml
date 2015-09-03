@@ -22,7 +22,7 @@ impl OctaveScriptBuilder {
         }
     }
 
-    fn join(&self, v: &Vec<f64>) -> String {
+    fn join(&self, v: &[f64]) -> String {
 
         let mut s = "[".to_string();
 
@@ -44,6 +44,29 @@ impl OctaveScriptBuilder {
         for i in (0..n) {
             let p = format!("${}", i + 1);
             let v = self.join(&vals.iter().map(|ref v| v[i]).collect::<Vec<f64>>());
+            t = t.replace(&p, &v);
+        }
+        self.add(&t)
+    }
+
+    // TODO generic type
+    pub fn add_vector(&self, s: &str, vals: &[f64]) -> OctaveScriptBuilder {
+
+        let mut t = s.to_string();
+        let v = self.join(vals);
+        t = t.replace("$$", &v);
+        self.add(&t)
+    }
+
+    // TODO generic type
+    pub fn add_vals(&self, s: &str, vals: &[f64]) -> OctaveScriptBuilder {
+
+        let mut t = s.to_string();
+        let n = vals.len();
+
+        for i in (0..n) {
+            let p = format!("${}", i + 1);
+            let v = format!("{}", vals[i]);
             t = t.replace(&p, &v);
         }
         self.add(&t)
