@@ -93,5 +93,18 @@ extern {
         beta: c_float,
         C: *mut c_float, ldc: c_int
     );
+
+    pub fn cblas_dgemv(
+        order: Order, transA: Transpose,
+        m: c_int,
+        n: c_int,
+        alpha: c_double,
+        a: *const c_double, lda: c_int,
+        x: *const c_double,
+        incx: c_int,
+        beta: c_double,
+        y: *mut c_double,
+        incy: c_int
+    );
 }
 
