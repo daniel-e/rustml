@@ -14,6 +14,6 @@ fn main() {
     o.run("/tmp/example_plot.m").unwrap();
     Window::new()
         .show_image(&RgbImage::from_file("/tmp/example_plot.png").unwrap())
-        .wait_key(0);
+        .wait_key();
 }
 
