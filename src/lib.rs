@@ -1,11 +1,14 @@
 //! Library for doing machine learning with Rust.
 //!
 //! # Features
-//! * highly optimized linear algebra via BLAS integration (i.e. operations on vectors and
+//! <i>(click on a link to get more details)</i>
+//!
+//! * [highly optimized linear algebra via BLAS integration](blas/index.html) (i.e. operations on vectors and
 //! matrices)
-//! * gradient descent
+//! * gradient descent with debugging capabilities (e.g. with learning curves)
 //! * DBSCAN clustering algorithm
 //! * linear regression
+//! * optimization of linear regression with gradient descent
 //! * classification with <i>k</i>-nearest neighbours
 //! * sliding windows for arbitrary dimensions (e.g. for image processing)
 //! * standard databases (e.g. MNIST database of handwritten digits)
