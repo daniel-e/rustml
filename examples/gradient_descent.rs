@@ -59,5 +59,5 @@ fn main() {
     o.run("/tmp/3dplot.m").unwrap();
     Window::new()
         .show_image(&RgbImage::from_file("/tmp/3dplot.png").unwrap())
-        .wait_key(0);
+        .wait_key();
 }
