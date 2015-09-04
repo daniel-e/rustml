@@ -111,7 +111,7 @@ impl Window {
     /// let img = RgbImage::from_file("datasets/testing/tree.png").unwrap();
     /// Window::new()
     ///     .show_image(&img)
-    ///     .wait_key(0);
+    ///     .wait_key();
     /// # }
     /// ```
     pub fn show_image<T: Image>(&self, img: &T) -> &Self {
@@ -124,11 +124,20 @@ impl Window {
         self
     }
 
-    /// Waits for the specified amount of time in milliseconds or until
-    /// a key is pressed if `delay` is zero.
-    pub fn wait_key(&self, delay: i32) -> &Self {
+    /// Waits for the specified amount of time in milliseconds.
+    pub fn wait(&self, delay: i32) -> &Self {
         unsafe {
-            cvWaitKey(delay as c_int);
+            if delay > 0 {
+                cvWaitKey(delay as c_int);
+            }
+            self
+        }
+    }
+
+    /// Waits until a key is pressed.
+    pub fn wait_key(&self) -> &Self {
+        unsafe {
+            cvWaitKey(0 as c_int);
             self
         }
     }
@@ -852,7 +861,7 @@ mod tests {
     use super::*;
     use super::bindings::*;
 
-    #[test]
+    // #[test]
     fn test_cv_capture_from_file_lowlevel() {
         unsafe {
             // Opening a file that does not exist should result in null.
@@ -884,7 +893,7 @@ mod tests {
         }
     }
 
-    #[test]
+    // #[test] long test
     fn test_cv_capture_pixel_lowlevel() {
         let d = Video::from_file("datasets/testing/colors.mp4").unwrap();
 
@@ -931,7 +940,7 @@ mod tests {
         }
     }
 
-    #[test]
+    //#[test]  TODO long test
     fn test_video() {
         assert!(Video::from_file("xxxxxxxxxxx.mp4").is_none());
 
