@@ -35,10 +35,15 @@
 //! See [here](https://github.com/daniel-e/rustml/blob/master/examples/gradient_descent.rs) for
 //! another example.
 extern crate num;
+extern crate rand;
+
+use self::rand::{thread_rng, Rng};
 
 use ops::*;
 use regression::*;
 use matrix::Matrix;
+use opencv::{Window, RgbImage};
+use octave::builder;
 
 /// Creates a container that holds the parameters for an optimization algorithm.
 #[derive(Copy, Clone)]
@@ -237,6 +242,7 @@ pub fn opt<O, D>(f: &O, fd: &D, init: &[f64], opts: OptParams<f64>) -> OptResult
     }
 }
 
+// TODO duplicated code
 pub fn opt_hypothesis(h: &Hypothesis, x: &Matrix<f64>, y: &[f64], opts: OptParams<f64>) -> OptResult<f64> {
 
     let alpha = opts.alpha.unwrap_or(0.1);
@@ -268,3 +274,40 @@ pub fn opt_hypothesis(h: &Hypothesis, x: &Matrix<f64>, y: &[f64], opts: OptParam
     }
 }
 
+/// Plots the learning curve from an optimization result.
+///
+pub fn plot_learning_curve(r: &OptResult<f64>, w: &Window) -> Result<(String, String), &'static str> {
+
+    let errors = r.fvals.iter().map(|&(_, ref y)| y).cloned().collect::<Vec<f64>>();
+
+    let mut prfx = "/tmp/".to_string();
+    prfx.extend(thread_rng().gen_ascii_chars().take(16));
+
+    let script_file = prfx.clone() + ".m";
+    let image_file = prfx + ".png";
+
+    let r = builder()
+        .add_vector("y = $$", &errors)
+        .add("x = 1:size(y, 2)")
+        .add("plot(x, y, 'linewidth', 2)")
+        .add("grid on")
+        .add("title('learning curve')")
+        .add("xlabel('iteration')")
+        .add("ylabel('error')")
+        .add(&("print -r100 -dpng '".to_string() + &image_file + "'"))
+        .run(&script_file);
+
+    match r {
+        Ok(_) => {
+            let img = RgbImage::from_file(&image_file);
+            match img {
+                Some(i) => {
+                    w.show_image(&i);
+                    Ok((script_file, image_file))
+                },
+                _ => Err("Could not load image.")
+            }
+        },
+        _ => Err("Could not run octave.")
+    }
+}
