@@ -34,7 +34,9 @@
 //!
 //! # Using BLAS for vector and matrix operations
 //!
-//! This module provides low level functions. ...
+//! This module provides low level functions to access the BLAS functions. It is highly recommended
+//! to use the wrappers in the module [ops_inplace](../ops_inplace/index.html) which provide
+//! a more convenient high level interface.
 //! 
 extern crate libc;
 
@@ -72,13 +74,13 @@ extern {
 
     /// Computes `alpha * x + y` and stores the result in `y`.
     ///
-    /// The paramters `alpha` is a f64 scalar and `x` and `y` are 
+    /// The paramters `alpha` is a scalar of type f64 and `x` and `y` are 
     /// vectors with elements of type f64. The parameter `n` specifies
     /// the number of elements in `x` and `y`. The parameters `incx`
     /// and `incy` specify the increments between the elements in 
     /// vector `x` and `y` respectively.
     ///
-    /// For a high level abstraction you should use [d_axpy](../ops_inplace/fn.d_axpy.html)
+    /// For a high level interface you should use [d_axpy](../ops_inplace/fn.d_axpy.html)
     /// in the module [ops_inplace](../ops_inplace/index.html).
     pub fn cblas_daxpy(
         n: c_int, 
@@ -89,12 +91,14 @@ extern {
         incy: c_int
     );
 
-    /// Computes `alpha * op(A) * op(B) + beta * C` and stores the result in `C` where `alpha` and
-    /// `beta` are f64 scalars, `A`, `B`, `C` are a matrices of f64 values and `op(X)` is either
+    /// Computes `alpha * op(A) * op(B) + beta * C` and stores the result in `C`.
+    ///
+    /// The parameters `alpha` and `beta` are scalars of type `f64`, `A`, `B`, `C` are a
+    /// matrices with elements of type `f64` and `op(X)` is either
     /// `op(X) = X` or `op(X) = X^T` (the transpose or conjugate transpose of
     /// the matrix `X`).
     ///
-    /// For a high level abstraction you should use [d_gemm](../ops_inplace/fn.d_gemm.html)
+    /// For a high level interface you should use [d_gemm](../ops_inplace/fn.d_gemm.html)
     /// in the module [ops_inplace](../ops_inplace/index.html).
     pub fn cblas_dgemm(
         order: Order, transA: Transpose, transB: Transpose,
@@ -108,6 +112,29 @@ extern {
         C: *mut c_double, ldc: c_int
     );
 
+    /// Computes `alpha * A * x + beta * y` or `alpha * A^T * x + beta * y` and stores the
+    /// result in `y`.
+    ///
+    /// The parameter `order` specifies the memory layout of the matrix `A`. Matrices 
+    /// in rustml are stored in [`RowMajor`](enum.Order.html) order by default. If the parameter `transA`
+    /// is set to [`Trans`](enum.Transpose.html) the transpose of `A` is used, otherwise `A`. The parameter
+    /// `m` specifies the number of rows of `A`, `n` the number of columns, `lda` should be
+    /// set to the number of columns of `A`.
+    /// 
+    /// For a high level interface you should use [d_gemv](../ops_inplace/fn.d_gemv.html)
+    /// in the module [ops_inplace](../ops_inplace/index.html).
+    pub fn cblas_dgemv(
+        order: Order, transA: Transpose,
+        m: c_int,
+        n: c_int,
+        alpha: c_double,
+        a: *const c_double, lda: c_int,
+        x: *const c_double,
+        incx: c_int,
+        beta: c_double,
+        y: *mut c_double,
+        incy: c_int
+    );
 
     /// Computes the L2 norm of a vector of f64 (doubles).
     pub fn cblas_dnrm2(n: c_int, x: *const c_double, incx: c_int) -> c_double;
@@ -142,17 +169,5 @@ extern {
         C: *mut c_float, ldc: c_int
     );
 
-    pub fn cblas_dgemv(
-        order: Order, transA: Transpose,
-        m: c_int,
-        n: c_int,
-        alpha: c_double,
-        a: *const c_double, lda: c_int,
-        x: *const c_double,
-        incx: c_int,
-        beta: c_double,
-        y: *mut c_double,
-        incy: c_int
-    );
 }
 

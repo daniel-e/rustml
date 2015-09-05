@@ -7,7 +7,7 @@ use matrix::Matrix;
 
 // ----------------------------------------------------------------------------
 
-/// Computes `alpha * x + y` and stores the result in `y`.
+/// Computes `alpha * x + y` and stores the result in `y`. (accelerated via BLAS)
 /// 
 /// d_axpy = double precision alpha times x plus y.
 ///
@@ -41,7 +41,7 @@ pub fn d_axpy(alpha: f64, x: &[f64], y: &mut [f64]) {
     }
 }
 
-/// Computes `alpha * op(A) * op(B) + beta * C` and stores the result in `C`.
+/// Computes `alpha * op(A) * op(B) + beta * C` and stores the result in `C`. (accelerated via BLAS)
 ///
 /// If `transa` is `true` the function `op(A)` returns the transpose of `A`,
 /// otherwise `A` is returned. If `transb` is `true` the function `op(B)` returns the
@@ -52,6 +52,7 @@ pub fn d_axpy(alpha: f64, x: &[f64], y: &mut [f64]) {
 /// ```
 /// # #[macro_use] extern crate rustml;
 /// use rustml::ops_inplace::*;
+/// use rustml::matrix::*;
 ///
 /// # fn main() {
 /// let a = mat![
@@ -110,6 +111,63 @@ pub fn d_gemm(alpha: f64, a: &Matrix<f64>, b: &Matrix<f64>,
             beta              as c_double,
             c.buf().as_ptr()  as *mut c_double,
             ldc               as c_int
+        );
+    }
+}
+
+/// Computes `alpha * A * x + beta * y` or `alpha * A^T * x + beta * y` and stores the
+/// result in `y`. (accelerated via BLAS)
+///
+/// If `trans` is `true` the transpose of `A` is used.
+///
+/// Panics if the dimensions of the matrix and the vector do not match.
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::ops_inplace::*;
+/// use rustml::matrix::*;
+///
+/// # fn main() {
+/// let a = mat![
+///     1.0, 2.0, 3.0; 
+///     4.0, 2.0, 5.0
+/// ];
+/// let x = [2.0, 6.0, 3.0];
+/// let mut y = [7.0, 2.0];
+///
+/// d_gemv(false, 2.0, &a, &x, 3.0, &mut y);
+/// assert_eq!(y, [67.0, 76.0]);
+/// # }
+/// ```
+///
+pub fn d_gemv(trans: bool, alpha: f64, a: &Matrix<f64>, x: &[f64], beta: f64, y: &mut [f64]) {
+
+    if !trans {
+        if a.cols() != x.len() || a.rows() != y.len() {
+            panic!("Invalid dimensions.");
+        }
+    } else {
+        if a.rows() != x.len() || a.cols() != y.len() {
+            panic!("Invalid dimensions.");
+        }
+    }
+
+    let transpose = if trans { Transpose::Trans } else { Transpose::NoTrans };
+
+    unsafe {
+        cblas_dgemv(
+            Order::RowMajor, 
+            transpose,
+            a.rows() as c_int,
+            a.cols() as c_int,
+            alpha as c_double,
+            a.buf().as_ptr() as *const c_double,
+            a.cols() as c_int,
+            x.as_ptr() as *const c_double,
+            1 as c_int,
+            beta as c_double,  // beta
+            y.as_ptr() as *mut c_double,
+            1 as c_int
         );
     }
 }
@@ -374,5 +432,26 @@ mod tests {
         assert_eq!(c.buf(), &vec![41.0, 94.0, 75.0, 88.0, 86.0, 208.0, 180.0, 166.0]);
     }
 
+    #[test]
+    fn test_d_gemv() {
+        let a = mat![
+            1.0, 2.0, 3.0; 
+            4.0, 2.0, 5.0
+        ];
+        let x = [2.0, 6.0, 3.0];
+        let mut y = [7.0, 2.0];
+
+        d_gemv(false, 2.0, &a, &x, 3.0, &mut y);
+        assert_eq!(y, [67.0, 76.0]);
+
+        let aa = mat![
+            1.0, 4.0;
+            2.0, 2.0;
+            3.0, 5.0
+        ];
+        y = [7.0, 2.0];
+        d_gemv(true, 2.0, &aa, &x, 3.0, &mut y);
+        assert_eq!(y, [67.0, 76.0]);
+    }
 }
 
