@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["path_for",""]],"static":[["MNIST_PATH",""]]});

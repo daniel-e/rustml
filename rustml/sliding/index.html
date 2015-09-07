@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `sliding` mod in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, sliding">
+
+    <title>rustml::sliding - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>rustml</a></p><script>window.sidebarCurrent = {name: 'sliding', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustml</a>::<wbr><a class='mod' href=''>sliding</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-20989' class='srclink' href='../../src/rustml/sliding.rs.html#1-488' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Sliding windows over strings, bytes and ranges for arbitrary dimensions.</p>
+
+<p>A sliding window is often used in image processing, e.g. for object
+recognition. It is a technique where a small window is moved over the
+image and some image processing is performed on that sub-image, e.g.
+to detect objects. A sliding window is also useful for strings to
+extract all substrings of a fixed size.</p>
+
+<p>A sliding window with a width <code>w</code> on an area with width <code>a</code> and a
+delta <code>d</code> returns the following set of numbers (i.e. positions of
+the window): 
+<code>{0, d, 2d, ..., w - d + 1}</code></p>
+
+<p>A sliding window on an area with two dimensions returns a set of
+tuples of window positions. A sliding window on an area with more
+then two dimensions returns a set of vectors of window positions.</p>
+
+<h1 id="examples" class='section-header'><a
+                           href="#examples">Examples</a></h1>
+<p>The recommended way to build a sliding window over an arbitrary number of
+ranges is to first call the function <code>builder</code> and to sequently call the
+method <code>add</code> of the returned instance for each dimension.</p>
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// Example of a sliding window over two dimensions.</span>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>sliding</span>::<span class='op'>*</span>;
+
+<span class='comment'>// Create a sliding window over two dimensions. For the first dimension the</span>
+<span class='comment'>// size of the window is 10, the position is incremented by 25 and the</span>
+<span class='comment'>// area over which the window is moved is 100. for the second dimension</span>
+<span class='comment'>// the size of the window is 10, the position is incremented by 2 and the</span>
+<span class='comment'>// area over which the window is moved is 10.</span>
+<span class='kw'>let</span> <span class='ident'>windows</span> <span class='op'>=</span> <span class='ident'>builder</span>().<span class='ident'>add</span>(<span class='number'>100</span>, <span class='number'>10</span>, <span class='number'>25</span>).<span class='ident'>add</span>(<span class='number'>10</span>, <span class='number'>1</span>, <span class='number'>2</span>).<span class='ident'>to_2d</span>().<span class='ident'>unwrap</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>windows</span>, <span class='macro'>vec</span><span class='macro'>!</span>[
+    (<span class='number'>0</span>, <span class='number'>0</span>), (<span class='number'>25</span>, <span class='number'>0</span>), (<span class='number'>50</span>, <span class='number'>0</span>), (<span class='number'>75</span>, <span class='number'>0</span>),
+    (<span class='number'>0</span>, <span class='number'>2</span>), (<span class='number'>25</span>, <span class='number'>2</span>), (<span class='number'>50</span>, <span class='number'>2</span>), (<span class='number'>75</span>, <span class='number'>2</span>),
+    (<span class='number'>0</span>, <span class='number'>4</span>), (<span class='number'>25</span>, <span class='number'>4</span>), (<span class='number'>50</span>, <span class='number'>4</span>), (<span class='number'>75</span>, <span class='number'>4</span>),
+    (<span class='number'>0</span>, <span class='number'>6</span>), (<span class='number'>25</span>, <span class='number'>6</span>), (<span class='number'>50</span>, <span class='number'>6</span>), (<span class='number'>75</span>, <span class='number'>6</span>),
+    (<span class='number'>0</span>, <span class='number'>8</span>), (<span class='number'>25</span>, <span class='number'>8</span>), (<span class='number'>50</span>, <span class='number'>8</span>), (<span class='number'>75</span>, <span class='number'>8</span>)
+]);
+</pre>
+
+<p>Another way to build a sliding window over an arbitrary number of
+ranges is to use the function <code>sliding_window</code>.</p>
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// Example of a sliding window over two dimensions.</span>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>sliding</span>::<span class='op'>*</span>;
+
+<span class='kw'>let</span> <span class='ident'>windows</span> <span class='op'>=</span> <span class='ident'>builder</span>().<span class='ident'>add</span>(<span class='number'>100</span>, <span class='number'>10</span>, <span class='number'>25</span>).<span class='ident'>add</span>(<span class='number'>10</span>, <span class='number'>1</span>, <span class='number'>2</span>).<span class='ident'>to_vec</span>();
+
+<span class='kw'>let</span> <span class='ident'>params</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[
+    <span class='ident'>param</span>(<span class='number'>100</span>, <span class='number'>10</span>, <span class='number'>25</span>),
+    <span class='ident'>param</span>(<span class='number'>10</span>, <span class='number'>1</span>, <span class='number'>2</span>)
+];
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(
+    <span class='ident'>sliding_window</span>(<span class='kw-2'>&amp;</span><span class='ident'>params</span>),
+    <span class='ident'>windows</span>
+);
+</pre>
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// Example of a sliding window over one dimensions.</span>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>sliding</span>::<span class='op'>*</span>;
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(
+    <span class='ident'>builder</span>().<span class='ident'>add</span>(<span class='number'>50</span>, <span class='number'>20</span>, <span class='number'>5</span>).<span class='ident'>to_1d</span>().<span class='ident'>unwrap</span>(),
+    <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>5</span>, <span class='number'>10</span>, <span class='number'>15</span>, <span class='number'>20</span>, <span class='number'>25</span>, <span class='number'>30</span>]
+);
+</pre>
+
+<p>Sliding window over a string.</p>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>sliding</span>::<span class='op'>*</span>;
+
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;hello, world!&quot;</span>;
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(
+    <span class='comment'>// create a sliding window of size 5</span>
+    <span class='ident'>string_slider</span>(<span class='ident'>s</span>, <span class='number'>5</span>).<span class='ident'>unwrap</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>(),
+    <span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='string'>&quot;hello&quot;</span>, <span class='string'>&quot;ello,&quot;</span>, <span class='string'>&quot;llo, &quot;</span>, <span class='string'>&quot;lo, w&quot;</span>, 
+        <span class='string'>&quot;o, wo&quot;</span>, <span class='string'>&quot;, wor&quot;</span>, <span class='string'>&quot; worl&quot;</span>, <span class='string'>&quot;world&quot;</span>, <span class='string'>&quot;orld!&quot;</span>
+    ]
+);
+</pre>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.ByteSlider.html'
+                               title='rustml::sliding::ByteSlider'>ByteSlider</a></td>
+                        <td class='docblock short'>
+                             <p>Sliding window iterator of fixed size over bytes created with the function
+<a href="fn.byte_slider.html">byte_slider</a>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.DimensionParameters.html'
+                               title='rustml::sliding::DimensionParameters'>DimensionParameters</a></td>
+                        <td class='docblock short'>
+                             <p>Contains the parameters for one dimensions of a sliding window.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.SlidingWindowBuilder.html'
+                               title='rustml::sliding::SlidingWindowBuilder'>SlidingWindowBuilder</a></td>
+                        <td class='docblock short'>
+                             <p>A builder to create a sliding window over an arbitrary number of dimensions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.StringSlider.html'
+                               title='rustml::sliding::StringSlider'>StringSlider</a></td>
+                        <td class='docblock short'>
+                             <p>Sliding window iterator of fixed size over a string.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.builder.html'
+                               title='rustml::sliding::builder'>builder</a></td>
+                        <td class='docblock short'>
+                             <p>A function to comfortably create a sliding window over an arbitrary number
+of dimensions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.byte_slider.html'
+                               title='rustml::sliding::byte_slider'>byte_slider</a></td>
+                        <td class='docblock short'>
+                             <p>Creates a sliding window iterator of fixed size over bytes.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.param.html'
+                               title='rustml::sliding::param'>param</a></td>
+                        <td class='docblock short'>
+                             <p>Creates a set of parameters for one dimension of a sliding window.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.sliding_window.html'
+                               title='rustml::sliding::sliding_window'>sliding_window</a></td>
+                        <td class='docblock short'>
+                             <p>Function to create a sliding window over an arbitrary number of dimensions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.sliding_window_1d.html'
+                               title='rustml::sliding::sliding_window_1d'>sliding_window_1d</a></td>
+                        <td class='docblock short'>
+                             <p>Function to create a sliding window over one dimension.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.sliding_window_2d.html'
+                               title='rustml::sliding::sliding_window_2d'>sliding_window_2d</a></td>
+                        <td class='docblock short'>
+                             <p>Funciton to create a sliding window over two dimensions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.string_slider.html'
+                               title='rustml::sliding::string_slider'>string_slider</a></td>
+                        <td class='docblock short'>
+                             <p>Creates a sliding window of fixed size over a string.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustml";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

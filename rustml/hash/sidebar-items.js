@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["simple_hash","A simple hash functions."]]});

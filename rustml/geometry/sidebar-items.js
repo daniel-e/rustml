@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Point2D","A point with two dimensions, `x` and `y`."]]});
