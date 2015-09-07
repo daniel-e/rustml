@@ -45,9 +45,17 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1035' class='srclink' href='../../src/rustml/blas.rs.html#45-52' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub unsafe extern fn cblas_daxpy(n: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>, alpha: <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a>, x: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a></a>, incx: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>, y: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a></a>, incy: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>)</pre><div class='docblock'><p>Computes <code>alpha * x + y</code> where <code>alpha</code> is a f64 scalar and <code>x</code> and <code>y</code> are
-vectors of f64.</p>
+        </span><a id='src-1830' class='srclink' href='../../src/rustml/blas.rs.html#85-92' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub unsafe extern fn cblas_daxpy(n: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>, alpha: <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a>, x: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a></a>, incx: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>, y: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../../libc/types/os/arch/c95/type.c_double.html' title='libc::types::os::arch::c95::c_double'>c_double</a></a>, incy: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a>)</pre><div class='docblock'><p>Computes <code>alpha * x + y</code> and stores the result in <code>y</code>.</p>
+
+<p>The paramters <code>alpha</code> is a scalar of type f64 and <code>x</code> and <code>y</code> are 
+vectors with elements of type f64. The parameter <code>n</code> specifies
+the number of elements in <code>x</code> and <code>y</code>. The parameters <code>incx</code>
+and <code>incy</code> specify the increments between the elements in 
+vector <code>x</code> and <code>y</code> respectively.</p>
+
+<p>For a high level interface you should use <a href="../ops_inplace/fn.d_axpy.html">d_axpy</a>
+in the module <a href="../ops_inplace/index.html">ops_inplace</a>.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

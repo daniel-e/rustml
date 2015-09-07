@@ -45,9 +45,20 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-3136' class='srclink' href='../../src/rustml/vectors.rs.html#1-141' title='goto source code'>[src]</a></span></h1>
-<div class='docblock'><p>Functions to operate on vectors.</p>
-</div><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+        </span><a id='src-4300' class='srclink' href='../../src/rustml/vectors.rs.html#1-283' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Functions for vectors.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.VecReader.html'
+                               title='rustml::vectors::VecReader'>VecReader</a></td>
+                        <td class='docblock short'>
+                             <p>Iterator which reads lines from a reader and converts each line
+into a vector with elements of the specified type.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
                     <tr class=' module-item'>
                         <td><a class='fn' href='fn.copy_memory.html'
@@ -59,10 +70,28 @@
                     </tr>
                 
                     <tr class=' module-item'>
+                        <td><a class='fn' href='fn.from_file.html'
+                               title='rustml::vectors::from_file'>from_file</a></td>
+                        <td class='docblock short'>
+                             <p>Returns a <code>VecReader</code> to read vectors line by line from a file.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.from_reader.html'
+                               title='rustml::vectors::from_reader'>from_reader</a></td>
+                        <td class='docblock short'>
+                             <p>Returns a <code>VecReader</code> to read vectors line by line from a reader.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
                         <td><a class='fn' href='fn.group.html'
                                title='rustml::vectors::group'>group</a></td>
                         <td class='docblock short'>
-                             <p>Groups equal elements into one element and counts them.</p>
+                             <p>Counts and compresses consecutive elements that are equal.</p>
 
                         </td>
                     </tr>

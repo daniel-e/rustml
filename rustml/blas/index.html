@@ -45,8 +45,47 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-987' class='srclink' href='../../src/rustml/blas.rs.html#1-96' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1808' class='srclink' href='../../src/rustml/blas.rs.html#1-172' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Bindings for BLAS/ATLAS for high performance vector and matrix operations.</p>
+
+<p>from <a href="http://www.netlib.org/blas/">here</a>:</p>
+
+<p><i>The BLAS (Basic Linear Algebra Subprograms) are routines that provide standard building blocks
+for performing basic vector and matrix operations. The Level 1 BLAS perform scalar, vector and
+vector-vector operations, the Level 2 BLAS perform matrix-vector operations, and the Level 3
+BLAS perform matrix-matrix operations. Because the BLAS are efficient, portable, and widely
+available, they are commonly used in the development of high quality linear algebra
+software.</i></p>
+
+<p>There are several implementations of BLAS:</p>
+
+<ul>
+<li><a href="http://www.openblas.net/">OpenBLAS</a></li>
+<li><a href="http://math-atlas.sourceforge.net/">ATLAS (automatically tuned linear algebra software)</a></li>
+<li><a href="http://www.netlib.org/blas/">Netlib BLAS</a></li>
+<li><a href="https://software.intel.com/en-us/intel-mkl">Intel MKL</a></li>
+<li>and some more</li>
+</ul>
+
+<p>The Netlib BLAS implementation (reference implementation) is usually required when
+compiling rustml but you can switch to
+any of these implementations without recompiling rustml simply by setting the
+<code>LD_PRELOAD</code> environment variable to the location of the library you want to use
+before running your application.</p>
+
+<p>Example: Let&#39;s assume you have installed ATLAS into <code>/opt/atlas</code> and want to start you
+application with cargo. Then, you can use the
+ATLAS implementation simply by starting your application as follows (depending on your
+installation):</p>
+<pre class='rust rust-example-rendered'>
+<span class='ident'>LD_PRELOAD</span><span class='op'>=</span><span class='op'>/</span><span class='ident'>opt</span><span class='op'>/</span><span class='ident'>atlas</span><span class='op'>/</span><span class='ident'>lib</span><span class='op'>/</span><span class='ident'>libtatlas</span>.<span class='ident'>so</span> <span class='ident'>cargo</span> <span class='ident'>run</span> <span class='ident'>myapp</span>
+</pre>
+
+<h1 id="using-blas-for-vector-and-matrix-operations" class='section-header'><a
+                           href="#using-blas-for-vector-and-matrix-operations">Using BLAS for vector and matrix operations</a></h1>
+<p>This module provides low level functions to access the BLAS functions. It is highly recommended
+to use the wrappers in the module <a href="../ops_inplace/index.html">ops_inplace</a> which provide
+a more convenient and safer high level interface.</p>
 </div><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
                     <tr class=' module-item'>
@@ -74,8 +113,7 @@ operation on it. Required for the <code>cblas_*</code> functions.</p>
                         <td><a class='fn' href='fn.cblas_daxpy.html'
                                title='rustml::blas::cblas_daxpy'>cblas_daxpy</a></td>
                         <td class='docblock short'>
-                             <p>Computes <code>alpha * x + y</code> where <code>alpha</code> is a f64 scalar and <code>x</code> and <code>y</code> are
-vectors of f64.</p>
+                             <p>Computes <code>alpha * x + y</code> and stores the result in <code>y</code>.</p>
 
                         </td>
                     </tr>
@@ -84,10 +122,17 @@ vectors of f64.</p>
                         <td><a class='fn' href='fn.cblas_dgemm.html'
                                title='rustml::blas::cblas_dgemm'>cblas_dgemm</a></td>
                         <td class='docblock short'>
-                             <p>Computes <code>alpha * op(A) * op(B) + beta * C</code> where <code>alpha</code> and
-<code>beta</code> are f64 scalars, <code>A</code>, <code>B</code>, <code>C</code> are a matrices of f64 values and <code>op(X)</code> is either
-<code>op(X) = X</code> or <code>op(X) = X^T</code> (the transpose or conjugate transpose of
-the matrix <code>X</code>).</p>
+                             <p>Computes <code>alpha * op(A) * op(B) + beta * C</code> and stores the result in <code>C</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_dgemv.html'
+                               title='rustml::blas::cblas_dgemv'>cblas_dgemv</a></td>
+                        <td class='docblock short'>
+                             <p>Computes <code>alpha * A * x + beta * y</code> or <code>alpha * A^T * x + beta * y</code> and stores the
+result in <code>y</code>.</p>
 
                         </td>
                     </tr>

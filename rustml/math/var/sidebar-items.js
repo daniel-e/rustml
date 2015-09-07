@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["Var","Trait to compute variance of values."]]});
+initSidebarItems({"trait":[["Var","Trait to compute the variance of values."]]});

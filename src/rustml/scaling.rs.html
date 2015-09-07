@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="Source to the Rust file `src/scaling.rs`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang">
+
+    <title>scaling.rs.html -- source</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+</pre><pre class='rust '>
+<span class='doccomment'>//! Module to scale vectors and matrices.</span>
+
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
+
+<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>num</span>::<span class='ident'>traits</span>::<span class='ident'>Float</span>;
+<span class='kw'>use</span> <span class='ident'>gaussian</span>::{<span class='ident'>Gaussian</span>, <span class='ident'>GaussianFunctions</span>};
+<span class='kw'>use</span> <span class='ident'>matrix</span>::<span class='ident'>Matrix</span>;
+<span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Dimension</span>, <span class='ident'>Normalization</span>, <span class='ident'>Mean</span>, <span class='ident'>Var</span>};
+<span class='kw'>use</span> <span class='ident'>ops_inplace</span>::<span class='ident'>VectorVectorOpsInPlace</span>;
+
+<span class='doccomment'>/// Trait to scale a matrix.</span>
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>ScaleMatrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+
+    <span class='doccomment'>/// Scales the values of the matrix and returns the scaled</span>
+    <span class='doccomment'>/// matrix and the parameters that were used for scaling.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// First the mean and the standard deviation of the values for</span>
+    <span class='doccomment'>/// each column is computed. Then, a new matrix is computed where </span>
+    <span class='doccomment'>/// the element at row `i` and column `j` is the result of</span>
+    <span class='doccomment'>/// `(m(i,j) - mu(j)) / std(j)` where </span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// * m(i,j) is the element at row `i` and column `j` in the original matrix `m`</span>
+    <span class='doccomment'>/// * mu(j) is the mean of the elements in column `j` of `m`</span>
+    <span class='doccomment'>/// * std(j) is the standard deviation of the elements in column `j` of `m`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// If the standard deviation is smaller than 0.0001 then 1.0 is used</span>
+    <span class='doccomment'>/// in the denominator.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Example</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// # #[macro_use] extern crate rustml;</span>
+    <span class='doccomment'>/// use rustml::*;</span>
+    <span class='doccomment'>/// use rustml::scaling::*;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # fn main() {</span>
+    <span class='doccomment'>/// let m = mat![</span>
+    <span class='doccomment'>///     1.0, 100.0;</span>
+    <span class='doccomment'>///     2.0, 150.0;</span>
+    <span class='doccomment'>///     0.6, 110.0</span>
+    <span class='doccomment'>/// ];</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let (scaled, gaussians) = m.scale();</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// // mean and standard deviation of first column</span>
+    <span class='doccomment'>/// assert_eq!(gaussians[0].mean(), 1.2);</span>
+    <span class='doccomment'>/// assert!(gaussians[0].std() - 0.721 &lt; 0.001);</span>
+    <span class='doccomment'>/// // mean and standard deviation of second column</span>
+    <span class='doccomment'>/// assert_eq!(gaussians[1].mean(), 120.0);</span>
+    <span class='doccomment'>/// assert!(gaussians[1].std() - 26.458 &lt; 0.001);</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let e = mat![</span>
+    <span class='doccomment'>///     -0.27735, -0.75593;</span>
+    <span class='doccomment'>///     1.10940, 1.13389;</span>
+    <span class='doccomment'>///     -0.83205, -0.37796</span>
+    <span class='doccomment'>/// ];</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert!(scaled.similar(&amp;e, 0.0001).unwrap())</span>
+    <span class='doccomment'>/// # }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>fn</span> <span class='ident'>scale</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='kw'>Self</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Gaussian</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>);
+}
+
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>scale_mat_impl</span> {
+    ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
+
+        <span class='kw'>impl</span> <span class='ident'>ScaleMatrix</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> {
+
+            <span class='comment'>// TODO normalization, dimension</span>
+            <span class='kw'>fn</span> <span class='ident'>scale</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Gaussian</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;&gt;</span>) {
+
+                <span class='kw'>let</span> <span class='ident'>mean_vec</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>mean</span>(<span class='ident'>Dimension</span>::<span class='ident'>Column</span>);
+                <span class='kw'>let</span> <span class='ident'>var_vec</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>var</span>(<span class='ident'>Dimension</span>::<span class='ident'>Column</span>, <span class='ident'>Normalization</span>::<span class='ident'>MinusOne</span>);
+                <span class='kw'>let</span> <span class='ident'>std_vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>var_vec</span>.<span class='ident'>iter</span>().
+                    <span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>sqrt</span>()).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='kw'>if</span> <span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>x</span>) <span class='op'>&lt;</span> <span class='number'>0.0001</span> { <span class='number'>1</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> } <span class='kw'>else</span> { <span class='ident'>x</span> }).<span class='ident'>collect</span>();
+                <span class='comment'>// TODO 0.000001 is hard coded</span>
+
+                <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>mean_vec</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>var_vec</span>.<span class='ident'>iter</span>()).<span class='ident'>map</span>(<span class='op'>|</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>, <span class='kw-2'>&amp;</span><span class='ident'>y</span>)<span class='op'>|</span> <span class='ident'>Gaussian</span>::<span class='ident'>new</span>(<span class='ident'>x</span>, <span class='ident'>y</span>)).<span class='ident'>collect</span>();
+
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mr</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>clone</span>();
+                <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='ident'>mr</span>.<span class='ident'>rows</span>()) {
+                    <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>mr</span>.<span class='ident'>row_mut</span>(<span class='ident'>i</span>).<span class='ident'>unwrap</span>();
+                    <span class='ident'>r</span>.<span class='ident'>isub</span>(<span class='kw-2'>&amp;</span><span class='ident'>mean_vec</span>);
+                    <span class='ident'>r</span>.<span class='ident'>idiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>std_vec</span>);
+                }
+                (<span class='ident'>mr</span>, <span class='ident'>r</span>)
+            }
+        }
+
+    )<span class='op'>*</span>)
+}
+
+<span class='macro'>scale_mat_impl</span><span class='macro'>!</span>{ <span class='ident'>f32</span> <span class='ident'>f64</span> }
+
+<span class='comment'>// ----------------------------------------------------------------------------</span>
+
+<span class='doccomment'>/// Trait to scale a vector.</span>
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>ScaleVector</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='doccomment'>/// Scales the values of the vector by the parameters provided</span>
+    <span class='doccomment'>/// by the vector `g`.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// For each value the following is done: the value at index `i` is</span>
+    <span class='doccomment'>/// subtracted by the mean</span>
+    <span class='doccomment'>/// of the `Gaussian` at index `i` and the result is divided by the</span>
+    <span class='doccomment'>/// standard deviation of the `Gaussian` at index `i`. This is done</span>
+    <span class='doccomment'>/// for each value in the vector and a new vector is returned with</span>
+    <span class='doccomment'>/// the result.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Example</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// # #[macro_use] extern crate rustml;</span>
+    <span class='doccomment'>/// use rustml::scaling::*;</span>
+    <span class='doccomment'>/// use rustml::gaussian::*;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # fn main() {</span>
+    <span class='doccomment'>/// let gaussians = vec![</span>
+    <span class='doccomment'>///     Gaussian::new(2.0, 4.0),</span>
+    <span class='doccomment'>///     Gaussian::new(5.0, 16.0)</span>
+    <span class='doccomment'>/// ];</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// assert_eq!(</span>
+    <span class='doccomment'>///     [4.0, 7.0].scale_by(&amp;gaussians), </span>
+    <span class='doccomment'>///     vec![</span>
+    <span class='doccomment'>///         (4.0 - 2.0) / 2.0,</span>
+    <span class='doccomment'>///         (7.0 - 5.0) / 4.0</span>
+    <span class='doccomment'>///     ]</span>
+    <span class='doccomment'>/// );</span>
+    <span class='doccomment'>/// # }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>fn</span> <span class='ident'>scale_by</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>g</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Gaussian</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>;
+}
+
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>scaling_vec_impl</span> {
+    ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
+        <span class='kw'>impl</span> <span class='ident'>ScaleVector</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> {
+            <span class='kw'>fn</span> <span class='ident'>scale_by</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>g</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Gaussian</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> {
+                (<span class='self'>self</span>[..]).<span class='ident'>scale_by</span>(<span class='ident'>g</span>)
+            }
+        }
+
+        <span class='kw'>impl</span> <span class='ident'>ScaleVector</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> [<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>] {
+            <span class='kw'>fn</span> <span class='ident'>scale_by</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>g</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Gaussian</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> {
+                <span class='self'>self</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>g</span>.<span class='ident'>iter</span>()).<span class='ident'>map</span>(<span class='op'>|</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>, <span class='kw-2'>ref</span> <span class='ident'>y</span>)<span class='op'>|</span> (<span class='ident'>x</span> <span class='op'>-</span> <span class='ident'>y</span>.<span class='ident'>mean</span>()) <span class='op'>/</span> <span class='ident'>y</span>.<span class='ident'>std</span>()).<span class='ident'>collect</span>()
+            }
+        }
+    )<span class='op'>*</span>)
+}
+
+<span class='macro'>scaling_vec_impl</span><span class='macro'>!</span>{ <span class='ident'>f32</span> <span class='ident'>f64</span> }
+
+<span class='comment'>// ----------------------------------------------------------------------------</span>
+
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
+<span class='kw'>mod</span> <span class='ident'>tests</span> {
+    <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
+
+    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='ident'>matrix</span>::<span class='ident'>Matrix</span>;
+    <span class='kw'>use</span> <span class='ident'>gaussian</span>::{<span class='ident'>Gaussian</span>, <span class='ident'>GaussianFunctions</span>};
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_scale_mat</span>() {
+        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[
+            <span class='number'>1.0</span>, <span class='number'>2.0</span>; 
+            <span class='number'>3.0</span>, <span class='number'>5.0</span>;
+            <span class='number'>4.0</span>, <span class='number'>10.0</span>
+        ];
+        <span class='kw'>let</span> (<span class='ident'>x</span>, <span class='ident'>g</span>) <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>scale</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>g</span>[<span class='number'>0</span>].<span class='ident'>mean</span>() <span class='op'>-</span> <span class='number'>2.6667</span> <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>g</span>[<span class='number'>1</span>].<span class='ident'>mean</span>() <span class='op'>-</span> <span class='number'>5.6667</span> <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>g</span>[<span class='number'>0</span>].<span class='ident'>var</span>() <span class='op'>-</span> <span class='number'>2.3333</span> <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>g</span>[<span class='number'>1</span>].<span class='ident'>var</span>() <span class='op'>-</span> <span class='number'>16.3333</span> <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>g</span>[<span class='number'>0</span>].<span class='ident'>std</span>() <span class='op'>-</span> <span class='number'>1.5275</span> <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>g</span>[<span class='number'>1</span>].<span class='ident'>std</span>() <span class='op'>-</span> <span class='number'>4.0415</span> <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>get</span>(<span class='number'>0</span>, <span class='number'>0</span>).<span class='ident'>unwrap</span>() <span class='op'>-</span> (<span class='op'>-</span><span class='number'>1.09109</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>get</span>(<span class='number'>0</span>, <span class='number'>1</span>).<span class='ident'>unwrap</span>() <span class='op'>-</span> (<span class='op'>-</span><span class='number'>0.90726</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>get</span>(<span class='number'>1</span>, <span class='number'>0</span>).<span class='ident'>unwrap</span>() <span class='op'>-</span> (<span class='number'>0.21822</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>get</span>(<span class='number'>1</span>, <span class='number'>1</span>).<span class='ident'>unwrap</span>() <span class='op'>-</span> (<span class='op'>-</span><span class='number'>0.16496</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>get</span>(<span class='number'>2</span>, <span class='number'>0</span>).<span class='ident'>unwrap</span>() <span class='op'>-</span> (<span class='number'>0.87287</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>get</span>(<span class='number'>2</span>, <span class='number'>1</span>).<span class='ident'>unwrap</span>() <span class='op'>-</span> (<span class='number'>1.07222</span>) <span class='op'>&lt;</span> <span class='number'>0.001</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_scale_mat2</span>() {
+        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[
+            <span class='number'>1.0</span>, <span class='number'>50.0</span>, <span class='number'>1000.0</span>;
+            <span class='number'>0.3</span>, <span class='number'>45.0</span>, <span class='number'>1200.0</span>;
+            <span class='number'>1.9</span>, <span class='number'>44.0</span>, <span class='number'>1150.0</span>;
+            <span class='number'>0.7</span>, <span class='number'>60.0</span>, <span class='number'>1300.0</span>
+        ];
+        <span class='kw'>let</span> (<span class='ident'>s</span>, <span class='ident'>_g</span>) <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>scale</span>();
+        <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[
+            <span class='number'>0.036761</span>, <span class='number'>0.034153</span>, <span class='op'>-</span><span class='number'>1.300000</span>;
+            <span class='op'>-</span><span class='number'>0.992540</span>, <span class='op'>-</span><span class='number'>0.648901</span>, <span class='number'>0.300000</span>;
+            <span class='number'>1.360147</span>, <span class='op'>-</span><span class='number'>0.785512</span>, <span class='op'>-</span><span class='number'>0.100000</span>;
+            <span class='op'>-</span><span class='number'>0.404368</span>, <span class='number'>1.400261</span>, <span class='number'>1.100000</span>
+        ];
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>buf</span>().<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>r</span>.<span class='ident'>buf</span>().<span class='ident'>iter</span>()).<span class='ident'>all</span>(<span class='op'>|</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>, <span class='kw-2'>&amp;</span><span class='ident'>b</span>)<span class='op'>|</span> <span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>a</span> <span class='op'>-</span> <span class='ident'>b</span>) <span class='op'>&lt;</span> <span class='number'>0.01</span>));
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_scale_vec</span>() {
+        <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.0</span>, <span class='number'>2.0</span>, <span class='number'>3.0</span>, <span class='number'>4.0</span>];
+        <span class='kw'>let</span> <span class='ident'>g</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[
+            <span class='ident'>Gaussian</span>::<span class='ident'>new</span>(<span class='number'>2.0</span>, <span class='number'>16.0</span>),
+            <span class='ident'>Gaussian</span>::<span class='ident'>new</span>(<span class='number'>3.0</span>, <span class='number'>4.0</span>),
+            <span class='ident'>Gaussian</span>::<span class='ident'>new</span>(<span class='number'>9.0</span>, <span class='number'>64.0</span>),
+            <span class='ident'>Gaussian</span>::<span class='ident'>new</span>(<span class='number'>5.0</span>, <span class='number'>25.0</span>)
+        ];
+        <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>scale_by</span>(<span class='kw-2'>&amp;</span><span class='ident'>g</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>y</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='op'>-</span><span class='number'>0.25</span>, <span class='op'>-</span><span class='number'>0.5</span>, <span class='op'>-</span><span class='number'>0.75</span>, <span class='op'>-</span><span class='number'>0.2</span>]);
+    }
+
+}
+
+ 
+</pre>
+</section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustml";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

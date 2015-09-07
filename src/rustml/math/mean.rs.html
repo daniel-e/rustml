@@ -180,16 +180,40 @@
 <span id="138">138</span>
 <span id="139">139</span>
 <span id="140">140</span>
-<span id="141">141</span>
-<span id="142">142</span>
-<span id="143">143</span>
 </pre><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
 
 <span class='kw'>use</span> <span class='ident'>matrix</span>::<span class='ident'>Matrix</span>;
-<span class='kw'>use</span> <span class='ident'>ops</span>::<span class='ident'>VectorVectorOps</span>;
+<span class='kw'>use</span> <span class='ident'>ops_inplace</span>::<span class='ident'>VectorVectorOpsInPlace</span>;
 <span class='kw'>use</span> <span class='ident'>math</span>::<span class='ident'>Dimension</span>;
-<span class='kw'>use</span> <span class='ident'>math</span>::<span class='ident'>Sum</span>;
+<span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Sum</span>, <span class='ident'>SumVec</span>};
+
+<span class='comment'>// ----------------------------------------------------------------------------</span>
+
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>MeanVec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>mean</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>;
+}
+
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>mean_vec_impl</span> {
+    ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
+        <span class='kw'>impl</span> <span class='ident'>MeanVec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> {
+
+            <span class='kw'>fn</span> <span class='ident'>mean</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
+                (<span class='kw-2'>&amp;</span><span class='self'>self</span>[..]).<span class='ident'>mean</span>()
+            }
+        }
+
+        <span class='kw'>impl</span> <span class='ident'>MeanVec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> [<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>] {
+
+            <span class='kw'>fn</span> <span class='ident'>mean</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
+                <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> { <span class='number'>1</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> } <span class='kw'>else</span> { <span class='self'>self</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> };
+                <span class='self'>self</span>.<span class='ident'>sum</span>() <span class='op'>/</span> <span class='ident'>n</span>
+            }
+        }
+    )<span class='op'>*</span>)
+}
+
+<span class='macro'>mean_vec_impl</span><span class='macro'>!</span>{ <span class='ident'>usize</span> <span class='ident'>u8</span> <span class='ident'>u16</span> <span class='ident'>u32</span> <span class='ident'>u64</span> <span class='ident'>isize</span> <span class='ident'>i8</span> <span class='ident'>i16</span> <span class='ident'>i32</span> <span class='ident'>i64</span> <span class='ident'>f32</span> <span class='ident'>f64</span> }
 
 <span class='comment'>// ----------------------------------------------------------------------------</span>
 
@@ -206,11 +230,10 @@
     <span class='doccomment'>/// # Examples</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>/// use rustml::math::{Mean, Dimension};</span>
+    <span class='doccomment'>/// use rustml::*;</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// let v = vec![1.0, 5.0, 9.0];</span>
-    <span class='doccomment'>/// assert_eq!(v.mean(Dimension::Row), 5.0);</span>
-    <span class='doccomment'>/// assert_eq!(v.mean(Dimension::Column), 0.0);</span>
+    <span class='doccomment'>/// assert_eq!(v.mean(), 5.0);</span>
     <span class='doccomment'>/// ```</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Implementation details</span>
@@ -220,34 +243,6 @@
     <span class='kw'>fn</span> <span class='ident'>mean</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='ident'>Dimension</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>;
     <span class='comment'>// TODO document matrix</span>
 }
-
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>mean_vec_impl</span> {
-    ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
-        <span class='kw'>impl</span> <span class='ident'>Mean</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> {
-
-            <span class='kw'>fn</span> <span class='ident'>mean</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='ident'>Dimension</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
-                (<span class='kw-2'>&amp;</span><span class='self'>self</span>[..]).<span class='ident'>mean</span>(<span class='ident'>dim</span>)
-            }
-        }
-
-        <span class='kw'>impl</span> <span class='ident'>Mean</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> [<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>] {
-
-            <span class='kw'>fn</span> <span class='ident'>mean</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='ident'>Dimension</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
-                <span class='kw'>match</span> <span class='ident'>dim</span> {
-                    <span class='ident'>Dimension</span>::<span class='ident'>Row</span> <span class='op'>=&gt;</span> {
-                        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>len</span>() {
-                            <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='number'>0</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>,
-                            <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>sum</span>(<span class='ident'>dim</span>) <span class='op'>/</span> (<span class='ident'>n</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>)
-                        }
-                    }
-                    _ <span class='op'>=&gt;</span> <span class='number'>0</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>
-                }
-            }
-        }
-    )<span class='op'>*</span>)
-}
-
-<span class='macro'>mean_vec_impl</span><span class='macro'>!</span>{ <span class='ident'>usize</span> <span class='ident'>u8</span> <span class='ident'>u16</span> <span class='ident'>u32</span> <span class='ident'>u64</span> <span class='ident'>isize</span> <span class='ident'>i8</span> <span class='ident'>i16</span> <span class='ident'>i32</span> <span class='ident'>i64</span> <span class='ident'>f32</span> <span class='ident'>f64</span> }
 
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>mean_impl</span> {
     ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
@@ -264,7 +259,7 @@
                         <span class='comment'>// TODO reimplement when Sum for Matrix is implemented</span>
                         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>values</span>().<span class='ident'>take</span>(<span class='self'>self</span>.<span class='ident'>cols</span>()).<span class='ident'>cloned</span>().<span class='ident'>collect</span>();
                         <span class='kw'>for</span> <span class='ident'>row</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>row_iter_at</span>(<span class='number'>1</span>) {
-                            <span class='ident'>r</span>.<span class='ident'>add</span>(<span class='ident'>row</span>);
+                            <span class='ident'>r</span>.<span class='ident'>iadd</span>(<span class='ident'>row</span>);
                         }
                         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>rows</span>() <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>;
                         <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>r</span>.<span class='ident'>iter_mut</span>() {
@@ -275,7 +270,7 @@
                     <span class='ident'>Dimension</span>::<span class='ident'>Row</span> <span class='op'>=&gt;</span> {
                         <span class='comment'>// TODO reimplement when Sum for Matrix is implemented</span>
                         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>cols</span>() <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>;
-                        <span class='self'>self</span>.<span class='ident'>row_iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>row</span><span class='op'>|</span> <span class='ident'>row</span>.<span class='ident'>sum</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>) <span class='op'>/</span> <span class='ident'>n</span>).<span class='ident'>collect</span>()
+                        <span class='self'>self</span>.<span class='ident'>row_iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>row</span><span class='op'>|</span> <span class='ident'>row</span>.<span class='ident'>sum</span>() <span class='op'>/</span> <span class='ident'>n</span>).<span class='ident'>collect</span>()
                     }
                 }
             }
@@ -297,14 +292,13 @@
     <span class='kw'>fn</span> <span class='ident'>test_mean_vec_f32</span>() {
 
         <span class='kw'>let</span> <span class='ident'>x</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.0</span>, <span class='number'>2.0</span>, <span class='number'>3.0</span>, <span class='number'>4.0</span>];
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>mean</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>), <span class='number'>2.5</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>mean</span>(), <span class='number'>2.5</span>);
 
         <span class='kw'>let</span> <span class='ident'>a</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>a</span>.<span class='ident'>mean</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>), <span class='number'>0.0</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>a</span>.<span class='ident'>mean</span>(<span class='ident'>Dimension</span>::<span class='ident'>Column</span>), <span class='number'>0.0</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>a</span>.<span class='ident'>mean</span>(), <span class='number'>0.0</span>);
 
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> [<span class='number'>1.0f32</span>, <span class='number'>2.0</span>, <span class='number'>3.0</span>, <span class='number'>4.0</span>];
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>mean</span>(<span class='ident'>Dimension</span>::<span class='ident'>Row</span>), <span class='number'>2.5</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>mean</span>(), <span class='number'>2.5</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
