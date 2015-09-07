@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["MnistDigits","This structure offers access to the MNIST database of handwritten digits."]]});

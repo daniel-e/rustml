@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["ScaleMatrix","Trait to scale a matrix."],["ScaleVector","Trait to scale a vector."]]});

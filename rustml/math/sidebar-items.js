@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Dimension","Determines the dimension over which to perform an operation."],["Normalization","Determines the type of normalization used for computing the variance or standard deviation."]],"mod":[["mean",""],["sum",""],["var",""]]});
