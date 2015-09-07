@@ -1,3 +1,21 @@
+//! Provides scalar, vector, vector-vector, vector-matrix and matrix-matrix operations.
+//!
+//! Most of the operations are accelerated using the underlying BLAS implementation.
+//! If BLAS is not used for an operation this is explicitly documented.
+//!
+//! # Examples
+//! 
+//! The following example adds two vectors using BLAS and stores the result in the first
+//! vector.
+//!
+//! ```
+//! use rustml::*;
+//!
+//! let mut a = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+//! let b = [3.0, 6.0, 2.0, 3.0, 6.0, 9.0];
+//! a.iadd(&b);
+//! assert_eq!(a, [4.0, 8.0, 5.0, 7.0, 11.0, 15.0]);
+//! ```
 extern crate libc;
 
 use self::libc::{c_int, c_float, c_double};
@@ -9,8 +27,6 @@ use matrix::Matrix;
 
 /// Computes `alpha * x + y` and stores the result in `y`. (accelerated via BLAS)
 /// 
-/// d_axpy = double precision alpha times x plus y.
-///
 /// Panics if the dimensions of the vectors do not match.
 ///
 /// ```
@@ -174,15 +190,18 @@ pub fn d_gemv(trans: bool, alpha: f64, a: &Matrix<f64>, x: &[f64], beta: f64, y:
 
 // ----------------------------------------------------------------------------
 
-/// Trait to add a slice to a vector using the underlying BLAS implementation.
+/// Trait for inplace vector-vector operations.
 pub trait VectorVectorOpsInPlace<T> {
 
-    /// Adds the given slice `rhs` inplace.
+    /// Adds the given slice `rhs` to self inplace.
     ///
+    /// This operation uses BLAS for high performance for vectors with elements
+    /// of type f32 and f64. Panics if the dimensions of the vectors do not match.
+    /// 
     /// # Example
     ///
     /// ```
-    /// use rustml::ops_inplace::VectorVectorOpsInPlace;
+    /// use rustml::*;
     ///
     /// let mut v = vec![1.0, 2.0];
     /// let y = vec![3.0, 8.0];
@@ -191,12 +210,15 @@ pub trait VectorVectorOpsInPlace<T> {
     /// ```
     fn iadd(&mut self, rhs: &[T]);
 
-    /// Substracts the given slice `rhs` inplace.
+    /// Substracts the given slice `rhs` from self inplace.
     ///
+    /// This operation uses BLAS for high performance for vectors with elements
+    /// of type f32 and f64. Panics if the dimensions of the vectors do not match.
+    /// 
     /// # Example
     ///
     /// ```
-    /// use rustml::ops_inplace::VectorVectorOpsInPlace;
+    /// use rustml::*;
     ///
     /// let mut v = vec![1.0, 2.0];
     /// let y = vec![3.0, 8.0];
@@ -205,7 +227,51 @@ pub trait VectorVectorOpsInPlace<T> {
     /// ```
     fn isub(&mut self, rhs: &[T]);
 
+    /// Computes an element-wise vector-vector multiplication and stores the result
+    /// in self.
+    ///
+    /// Panics if the dimensions of the vectors do not match.
+    ///
+    /// # Implementation details
+    ///
+    /// This operation does not use BLAS. Instead a simple loop is used to compute
+    /// the element-wise vector-vector multiplication.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustml::*;
+    ///
+    /// let mut v = vec![3.0, 2.0];
+    /// let y = vec![3.0, 8.0];
+    /// v.imul(&y);
+    /// assert_eq!(v, vec![9.0, 16.0]);
+    /// ```
     fn imul(&mut self, rhs: &[T]);
+
+    /// Computes an element-wise vector-vector division and stores the result
+    /// in self.
+    ///
+    /// For all elements in `self` the element at index `i` in self is divided
+    /// by the element in `rhs` at the same index.
+    ///
+    /// Panics if the dimensions of the vectors do not match.
+    ///
+    /// # Implementation details
+    ///
+    /// This operation does not use BLAS. Instead a simple loop is used to compute
+    /// the element-wise vector-vector division.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustml::*;
+    ///
+    /// let mut v = vec![3.0, 2.0];
+    /// let y = vec![2.0, 8.0];
+    /// v.idiv(&y);
+    /// assert_eq!(v, vec![1.5, 0.25]);
+    /// ```
     fn idiv(&mut self, rhs: &[T]);
 }
 
@@ -213,22 +279,10 @@ macro_rules! impl_vector_vector_ops_inplace {
     ( $( $x:ty, $y:expr, $z:ty )+ ) => ($(
 
         impl VectorVectorOpsInPlace<$x> for Vec<$x> {
-
-            fn iadd(&mut self, rhs: &[$x]) {
-                (self[..]).iadd(rhs);
-            }
-
-            fn isub(&mut self, rhs: &[$x]) {
-                (self[..]).isub(rhs);
-            }
-
-            fn imul(&mut self, rhs: &[$x]) {
-                (self[..]).imul(rhs);
-            }
-
-            fn idiv(&mut self, rhs: &[$x]) {
-                (self[..]).idiv(rhs);
-            }
+            fn iadd(&mut self, rhs: &[$x]) { (self[..]).iadd(rhs); }
+            fn isub(&mut self, rhs: &[$x]) { (self[..]).isub(rhs); }
+            fn imul(&mut self, rhs: &[$x]) { (self[..]).imul(rhs); }
+            fn idiv(&mut self, rhs: &[$x]) { (self[..]).idiv(rhs); }
         }
 
         impl VectorVectorOpsInPlace<$x> for [$x] {

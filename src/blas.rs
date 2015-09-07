@@ -36,7 +36,7 @@
 //!
 //! This module provides low level functions to access the BLAS functions. It is highly recommended
 //! to use the wrappers in the module [ops_inplace](../ops_inplace/index.html) which provide
-//! a more convenient high level interface.
+//! a more convenient and safer high level interface.
 //! 
 extern crate libc;
 
