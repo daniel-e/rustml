@@ -1,7 +1,7 @@
 [package]
 name = "rustml"
-version = "0.0.3"
-authors = ["Daniel Etzold <detzold@gmail.com>"]
+version = "0.0.4"
+authors = ["Daniel <git.daniele@gmail.com>"]
 readme = "README.md"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/daniel-e/rustml"
@@ -48,9 +48,22 @@ path = "examples/scale_matrix.rs"
 name = "video_histogram"
 path = "examples/video_histogram.rs"
 
+[[example]]
+name = "gradient_descent"
+path = "examples/gradient_descent.rs"
+
+[[example]]
+name = "octave_plot"
+path = "examples/octave_plot.rs"
+
+[[example]]
+name = "linear_regression"
+path = "examples/linear_regression.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"
 num = "*"
 flate2 = "*"
 time = "*"
+regex = "0.1.8"

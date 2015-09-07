@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+
+import json, sys, os, hashlib
+
+if len(sys.argv) < 2:
+    print "You must specify the pipeline configuration as argument."
+    sys.exit(1)
+
+rules = []
+commands = []
+
+def parse_dependencies(j):
+    return [v for k , v, in j.items()]
+
+def eq(js, config_name):
+    f = open(config_name)
+    cd = f.read()
+    f.close()
+    js5 = hashlib.md5()
+    js5.update(js)
+    cn5 = hashlib.md5()
+    cn5.update(cd)
+    return js5.digest() == cn5.digest()
+
+def write_config(target, config, variables):
+    config_name = ".pipeline/config.json." + target.replace("/", "_") + ".cfg"
+    if "target" in config:
+        print "found reserved word 'target' in configuration of " + target
+        sys.exit(1)
+    # add 'target' to the config so that the executed command can
+    # access it
+    config["target"] = target
+    # remove comments so that a change in the command does not result in
+    # the execution of the stage
+    config.pop("comment", "")
+
+    # update the configuration only if it does not exist or
+    # the content has changed
+    # this will trigger a new execution of the stage
+    js = replace_vars(json.dumps(config), variables)
+
+    if not os.path.exists(config_name) or not eq(js, config_name):
+        print "writing configuration " + config_name + " ..."
+        open(config_name, "w").write(js)
+
+    return config_name
+
+def replace_vars(s, variables):
+    r = s
+    for key, val in variables.items():
+        r = r.replace("$$" + key + "$$", str(val))
+    return r
+
+
+if not os.path.exists(".pipeline"):
+    os.makedirs(".pipeline")
+
+j = json.loads(open(sys.argv[1]).read())
+
+variables = j.get("variables", {})
+
+for target, v in j["stages"].items():
+    config_name = write_config(target, v, variables)
+    rules.append(
+        target + ": " + 
+        " ".join([replace_vars(b, variables) for a, b in v["dependencies"].items()]) + " " + config_name
+    )
+    cpth = os.getcwdu() + "/" + config_name
+    cmd = replace_vars(v["command"], variables)
+    commands.append(
+        "@echo '\x1b[33;01m'executing target\x1b[0m [\"" + target + "\"], " +
+        "'\x1b[33;01m'cmd\x1b[0m [\"" + cmd + "\"]\n\t" +
+        "@PIPELINE_CONFIG=" + cpth + " sh -c '" + cmd + "'"
+    )
+
+# generate Makefile
+print "writing Makefile ..."
+f = open("Makefile", "w")
+print >> f, "all: Makefile " + " ".join(j["targets"])
+print >> f
+print >> f, "Makefile: " + sys.argv[1]
+print >> f, "\t" + sys.argv[0] + " " + sys.argv[1]
+for i, j in zip(rules, commands):
+    print >> f
+    print >> f, i
+    print >> f, "\t" + j
+print >> f, "\nclean:"
+print >> f, "\trm -rf .pipeline"
+
