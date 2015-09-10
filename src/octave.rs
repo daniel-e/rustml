@@ -1,8 +1,11 @@
 extern crate num;
 
+use std::fmt;
 use std::fs::File;
 use std::io::{Write, Result};
 use std::process::{Command, Output};
+
+use matrix::Matrix;
 
 static DEFAULT_OCTAVE_BIN: &'static str = "octave";
 
@@ -12,6 +15,9 @@ pub struct OctaveScriptBuilder {
 }
 
 impl OctaveScriptBuilder {
+    /// Adds the string to the Octave script.
+    ///
+    /// At the end of the line a semicolon is appended.
     pub fn add(&self, s: &str) -> OctaveScriptBuilder {
 
         let mut buf = self.buf.clone();
@@ -22,7 +28,7 @@ impl OctaveScriptBuilder {
         }
     }
 
-    fn join(&self, v: &[f64]) -> String {
+    fn join<T: fmt::Display>(&self, v: &[T]) -> String {
 
         let mut s = "[".to_string();
 
@@ -35,22 +41,67 @@ impl OctaveScriptBuilder {
         s + "]"
     }
 
-    // TODO generic type
-    pub fn add_values(&self, s: &str, vals: &[Vec<f64>]) -> OctaveScriptBuilder {
+    /// Adds the string to the Octave script.
+    ///
+    /// At the end of the line a semicolon is appended.
+    /// 
+    /// If the string contains a dollar sign followed by a number `i` (e.g. `$1` or `$12`)
+    /// this placeholder will be replaced by the column if matrix `m` at column
+    /// `i-1` (i.e. $1 is replaced by the first column of `m`).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::octave::*;
+    /// use rustml::matrix::Matrix;
+    ///
+    /// # pub fn main() {
+    /// let m = mat![
+    ///     1, 2, 3;
+    ///     4, 5, 6
+    /// ];
+    /// let s = builder().add_columns("x = $1; y = $2", &m);
+    /// assert_eq!(
+    ///     s.to_string(),
+    ///     "1;\nx = [1,4]; y = [2,5];\n"
+    /// );
+    /// # }
+    /// ```
+    pub fn add_columns<T: fmt::Display + Copy>(&self, s: &str, m: &Matrix<T>) -> OctaveScriptBuilder {
 
         let mut t = s.to_string();
-        let n = vals[0].len();  // TODO error handling if vals is empty
+        let n = m.cols();
 
         for i in (0..n) {
             let p = format!("${}", i + 1);
-            let v = self.join(&vals.iter().map(|ref v| v[i]).collect::<Vec<f64>>());
+            let v = self.join(&m.row_iter().map(|ref v| v[i]).collect::<Vec<T>>());
             t = t.replace(&p, &v);
         }
         self.add(&t)
     }
 
-    // TODO generic type
-    pub fn add_vector(&self, s: &str, vals: &[f64]) -> OctaveScriptBuilder {
+    /// Adds the string to the Octave script.
+    ///
+    /// At the end of the line a semicolon is appended. If the string contains two
+    /// consecutive dollar signed (i.e. `$$` these will be replaced by a vector
+    /// containing the elements of `vals`.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate rustml;
+    /// use rustml::octave::*;
+    ///
+    /// # pub fn main() {
+    /// let s = builder().add_vector("x = $$", &[1, 2, 3]);
+    /// assert_eq!(
+    ///     s.to_string(),
+    ///     "1;\nx = [1,2,3];\n"
+    /// );
+    /// # }
+    /// ```
+    pub fn add_vector<T: fmt::Display>(&self, s: &str, vals: &[T]) -> OctaveScriptBuilder {
 
         let mut t = s.to_string();
         let v = self.join(vals);
@@ -58,8 +109,29 @@ impl OctaveScriptBuilder {
         self.add(&t)
     }
 
-    // TODO generic type
-    pub fn add_vals(&self, s: &str, vals: &[f64]) -> OctaveScriptBuilder {
+    /// Adds the string to the Octave script.
+    ///
+    /// At the end of the line a semicolon is appended.
+    ///
+    /// If the string contains a dollar sign followed by a number `i` (e.g. `$1` or `$12`)
+    /// this placeholder will be replaced by the value that is stored in the vector
+    /// `vals` at index `i-1`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate rustml;
+    /// use rustml::octave::*;
+    ///
+    /// # pub fn main() {
+    /// let s = builder().add_values("x = $1 + $2", &[5, 3]);
+    /// assert_eq!(
+    ///     s.to_string(),
+    ///     "1;\nx = 5 + 3;\n"
+    /// );
+    /// # }
+    /// ```
+    pub fn add_values<T: fmt::Display>(&self, s: &str, vals: &[T]) -> OctaveScriptBuilder {
 
         let mut t = s.to_string();
         let n = vals.len();
