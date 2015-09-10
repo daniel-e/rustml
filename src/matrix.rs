@@ -58,7 +58,7 @@ use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 /// assert_eq!(c.row(1).unwrap(), &[29.0, 24.0, 13.0, 51.0]);
 /// # }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Matrix<T> {
     nrows: usize,
     ncols: usize,
@@ -205,6 +205,47 @@ impl <T: Clone> Matrix<T> {
                 data: vals
             })
         }
+    }
+
+    /// Creates a matrix from a vector of column vectors.
+    pub fn from_col_vectors(v: &[Vec<T>]) -> Option<Matrix<T>> {
+
+        if v.len() == 0 {
+            return Some(Matrix::new());
+        }
+
+        let cols = v.len();
+        let rows = v[0].len();
+
+        let mut m: Matrix<T> = Matrix::new();
+        
+        for i in (0..cols) {
+            if v[i].len() != rows {
+                return None;
+            }
+            m = m.insert_column(m.cols(), &v[i]).unwrap();
+        }
+        Some(m)
+    }
+
+    /// Creates a matrix from a vector of row vectors.
+    pub fn from_row_vectors(v: &[Vec<T>]) -> Option<Matrix<T>> {
+
+        if v.len() == 0 {
+            return Some(Matrix::new());
+        }
+
+        let cols = v[0].len();
+
+        let mut m: Matrix<T> = Matrix::new();
+
+        for r in v.iter() {
+            if r.len() != cols {
+                return None;
+            }
+            m.add_row(r);
+        }
+        Some(m)
     }
 
     // TODO tests
@@ -629,6 +670,10 @@ impl <T: Clone> Matrix<T> {
     ///
     /// Returns `None` if `v.len() != self.rows()`.
     pub fn insert_column(&self, pos: usize, v: &[T]) -> Option<Matrix<T>> {
+
+        if self.empty() {
+            return Matrix::from_vec(v.to_vec(), v.len(), 1);
+        }
 
         if v.len() != self.rows() {
             return None;
@@ -1178,5 +1223,40 @@ mod tests {
             &[8, 1, 2, 3, 9, 4, 5, 6]
         );
     }
+
+    #[test]
+    fn test_eq() {
+
+        let a = mat![1.0, 2.0; 3.0, 4.0];
+        let b = mat![2.0, 1.0; 3.0, 4.0];
+        let c = mat![1.0, 2.0; 3.0, 4.0];
+        assert!(a.eq(&c));
+        assert!(!a.eq(&b));
+    }
+
+    #[test]
+    fn test_from_col_vectors() {
+        
+        let v = [
+            vec![1, 2, 3],
+            vec![4, 5, 6]
+        ];
+        let m = Matrix::from_col_vectors(&v).unwrap();
+        let e = mat![1,4; 2,5; 3,6];
+        assert!(m.eq(&e));
+    }
+
+    #[test]
+    fn test_from_row_vectors() {
+        
+        let v = [
+            vec![1, 2, 3],
+            vec![4, 5, 6]
+        ];
+        let m = Matrix::from_row_vectors(&v).unwrap();
+        let e = mat![1,2,3; 4,5,6];
+        assert!(m.eq(&e));
+    }
+
 }
 
