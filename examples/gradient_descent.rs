@@ -33,13 +33,8 @@ fn main() {
 
     // ---- plot
 
-    let data1 = r1.fvals.iter()
-        .map(|&(ref params, val)| vec![params[0], params[1], val])
-        .collect::<Vec<Vec<f64>>>();
-
-    let data2 = r2.fvals.iter()
-        .map(|&(ref params, val)| vec![params[0], params[1], val])
-        .collect::<Vec<Vec<f64>>>();
+    let data1 = r1.matrix();
+    let data2 = r2.matrix();
 
     let o = builder()
         .add("x = linspace(-7, 7, 80); y = linspace(-7, 7, 80)")
@@ -52,9 +47,9 @@ fn main() {
         .add("hold on")
         .add("hidden off")
         .add("grid off")
-        .add_values("plot3($1, $2, $3, 'linestyle', '-', 'marker', 'o', 'markerfacecolor', 'yellow', 'color', 'red', 'markersize', 5)", &data1)
-        .add_values("plot3($1, $2, $3, 'linestyle', '-', 'marker', 'o', 'markerfacecolor', 'yellow', 'color', 'blue', 'markersize', 5)", &data2)
-        .add("print -dpng /tmp/3dplot.png");
+        .add_columns("plot3($1, $2, $3, 'linestyle', '-', 'marker', 'o', 'markerfacecolor', 'red', 'color', 'red', 'markersize', 5)", &data1)
+        .add_columns("plot3($1, $2, $3, 'linestyle', '-', 'marker', 'o', 'markerfacecolor', 'red', 'color', 'blue', 'markersize', 5)", &data2)
+        .add("print -r50 -dpng /tmp/3dplot.png");
 
     o.run("/tmp/3dplot.m").unwrap();
     Window::new()

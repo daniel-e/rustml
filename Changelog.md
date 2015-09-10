@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.5
+
+ * blas: documentation
+ * ops_inplace: high level interface for the most important BLAS functions
+ * regression: trait to create a design matrix
+ * matrix: PartialEq and Eq for matrices; derive from Debug; from_col_vectors, from_row_vectors
+ * datasets: struct to create normal distributed data
+ * more documentation
+
 ## 0.0.4
 
  * hash::{simple_hash}: Computes a very simple hash over a bytes.

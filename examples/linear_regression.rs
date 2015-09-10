@@ -3,14 +3,14 @@ extern crate rustml;
 use rustml::csv::from_csv_file;
 use rustml::octave::builder;
 use rustml::opencv::{Window, RgbImage};
-use rustml::regression::{Hypothesis, design_matrix};
+use rustml::regression::{Hypothesis, DesignMatrix};
 use rustml::opt::{plot_learning_curve, opt_hypothesis, empty_opts};
 
 fn main() {
 
-    let dm = design_matrix(
-        &from_csv_file("datasets/testing/points.txt", " ").unwrap()
-    );
+    let dm = from_csv_file("datasets/testing/points.txt", " ")
+        .unwrap().design_matrix();
+    
     let y = dm.column(2).unwrap();
     let x = dm.rm_column(2).unwrap();
 
@@ -28,14 +28,15 @@ fn main() {
     // plot the hypothesis with the data points
     builder()
         .add("x = [0, 1]")
-        .add_vals("y = $1 + $2 * x", &result.params)
+        .add_values("y = $1 + $2 * x", &result.params)
         .add("plot(x, y, 'linewidth', 2, 'color', 'red')")
         .add("hold on")
         .add_vector("x = $$", &x.column(1).unwrap())
         .add_vector("y = $$", &y)
         .add("plot(x, y, 'o')")
         .add("grid on")
-        .add("print -r100 -dpng '/tmp/linreg_plot.png'")
+        .add("axis('nolabel')")
+        .add("print -r50 -dpng '/tmp/linreg_plot.png'")
         .run("/tmp/plot_script.m")
         .unwrap();
 

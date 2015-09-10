@@ -60,6 +60,14 @@ path = "examples/octave_plot.rs"
 name = "linear_regression"
 path = "examples/linear_regression.rs"
 
+[[example]]
+name = "image_grid"
+path = "examples/image_grid.rs"
+
+[[example]]
+name = "plots"
+path = "examples/plots.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"
