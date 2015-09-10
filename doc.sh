@@ -11,6 +11,12 @@ fi
 
 echo "Generating doc ..."
 cargo doc
+
+cd $DOCFOLDER
+rm -rf DOCFOLDER/*
+git pull
+cd ../rustml
+
 echo "Syncing ..."
 rsync --delete -r target/doc/* $DOCFOLDER/
 cd $DOCFOLDER
