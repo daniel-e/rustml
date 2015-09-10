@@ -1,3 +1,5 @@
+//! Module for linear regression.
+//!
 extern crate rand;
 extern crate libc;
 
@@ -139,13 +141,51 @@ impl Hypothesis {
     }
 }
 
-/// Creates a design matrix from a matrix with features.
-pub fn design_matrix(m: &Matrix<f64>) -> Matrix<f64> {
-    m.insert_column(0, 
-        &repeat(1.0).take(m.rows()).collect::<Vec<f64>>()
-    ).unwrap()
+/// Trait to create the design matrix of a matrix of features, i.e. a new column is
+/// inserted at the left of the matrix where all elements are equal to one.
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// use rustml::*;
+/// use rustml::regression::DesignMatrix;
+///
+/// # fn main() {
+/// let m = mat![
+///     2.0, 3.0, 4.0;
+///     5.0, 6.0, 7.0
+/// ];
+/// let d = m.design_matrix();
+/// assert!(
+///     d.eq(
+///         &mat![
+///             1.0, 2.0, 3.0, 4.0;
+///             1.0, 5.0, 6.0, 7.0
+///         ]
+///     )
+/// );
+/// # }
+/// ```
+pub trait DesignMatrix<T> {
+    fn design_matrix(&self) -> Self;
 }
 
+impl DesignMatrix<f64> for Matrix<f64> {
+    fn design_matrix(&self) -> Self {
+        self.insert_column(0, 
+            &repeat(1.0).take(self.rows()).collect::<Vec<f64>>()
+        ).unwrap()
+    }
+}
+
+impl DesignMatrix<f32> for Matrix<f32> {
+    fn design_matrix(&self) -> Self {
+        self.insert_column(0, 
+            &repeat(1.0).take(self.rows()).collect::<Vec<f32>>()
+        ).unwrap()
+    }
+}
+
+// ----------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
@@ -175,7 +215,7 @@ mod tests {
             7.0, 2.0, 3.0; 
             4.0, 8.0, 5.0
         ];
-        let y = design_matrix(&x);
+        let y = x.design_matrix();
         assert_eq!(
             y.buf(),
             &[1.0, 7.0, 2.0, 3.0, 1.0, 4.0, 8.0, 5.0]
