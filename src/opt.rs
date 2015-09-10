@@ -141,6 +141,27 @@ pub struct OptResult<T> {
     pub stopped: bool
 }
 
+
+impl <T: Clone + Copy> OptResult<T> {
+
+    /// Creates a matrix from the intermediate parameters and
+    /// values of the objective funciton after each iteration.
+    pub fn matrix(&self) -> Matrix<T> {
+
+        if self.fvals.len() == 0 {
+            return Matrix::new();
+        }
+
+        let mut m: Matrix<T> = Matrix::new();
+        for &(ref v, f) in self.fvals.iter() {
+            let mut x = v.clone();
+            x.push(f);
+            m.add_row(&x);
+        }
+        m
+    }
+}
+
 /// Minimizes an objective using gradient descent.
 ///
 /// The objective `f` is minimized using a standard gradient descent algorithm. The
