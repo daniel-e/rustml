@@ -14,6 +14,7 @@ use self::libc::{c_char, c_int, c_float, c_double};
 use self::rand::{thread_rng, Rng};
 
 use self::bindings::*;
+use matrix::Matrix;
 
 pub enum FontFace {
     CvFontHersheyComplex,
@@ -543,6 +544,10 @@ impl GrayImage {
             }
             Some(GrayImage::from_raw(r))
         }
+    }
+
+    pub fn from_matrix(m: &Matrix<u8>) -> GrayImage {
+        GrayImage::from_slice(m.buf(), m.rows(), m.cols()).unwrap()
     }
 
     pub fn from_slice(v: &[u8], rows: usize, cols: usize) -> Option<GrayImage> {
