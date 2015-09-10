@@ -1,5 +1,17 @@
 //! Module to easily access popular datasets often used to measure the performance of
 //! machine learning algorithms.
+//!
+//! The following image shows an example of 200 handwritten digits from the 
+//! [MNIST database of handwritten digits](http://yann.lecun.com/exdb/mnist/).
+//! Rustml provides a simple interface via 
+//! [MnistDigits](struct.MnistDigits.html) to easily access those digits. The MNIST
+//! database comes with 60,000 examples in a training set and 10,000 examples in
+//! a test set.
+//! 
+//! <div style="align:center"><img style="border:1px solid black;" src="../../digits_grid.png"></div>
+//!
+//! The image has been created with rustml with just a few lines of code. See the example 
+//! [here](https://github.com/daniel-e/rustml/blob/master/examples/image_grid.rs).
 
 extern crate num;
 extern crate time;
@@ -9,6 +21,7 @@ use std::io::Read;
 use std::env::home_dir;
 use std::path::Path;
 use self::rand::distributions::{Normal, IndependentSample};
+use self::rand::{SeedableRng, XorShiftRng};
 
 use io::GzipData;
 use matrix::*;
@@ -119,6 +132,9 @@ impl MnistDigits {
         }
     }
 
+    /// Reads the default MNIST training set.
+    ///
+    /// Each row of the returned matrix represents an image of size 28x28.
     pub fn default_training_set() -> Result<(Matrix<u8>, Vec<u8>), &'static str> {
 
         // tested in tests directory
@@ -136,18 +152,100 @@ impl MnistDigits {
     }
 }
 
+// ----------------------------------------------------------------------------
 
-// TODO tests?
-pub fn gaussian_distributed(n: usize, mean: f64, std: f64) -> Vec<f64> {
-
-    let normal = Normal::new(mean, std);
-    let mut v: Vec<f64> = vec![];
-    for _ in (0..n) {
-        v.push(normal.ind_sample(&mut rand::thread_rng()));
-    }
-    v
+// Generates normal distributed data.
+#[derive(Clone)]
+pub struct NormalData {
+    rng: XorShiftRng,
+    normal: Vec<Normal>
 }
 
+impl NormalData {
+    pub fn add(&self, mean: f64, std: f64) -> NormalData {
+
+        let mut n = self.normal.clone();
+        n.push(Normal::new(mean, std));
+
+        NormalData {
+            rng: self.rng.clone(),
+            normal: n
+        }
+    }
+
+    pub fn len(&self) -> usize { self.normal.len() }
+}
+
+impl Iterator for NormalData {
+    type Item = Vec<f64>;
+    
+    fn next(&mut self) -> Option<Vec<f64>> {
+
+        let n = self.normal.len();
+        let mut v: Vec<f64> = vec![];
+
+        for i in (0..n) {
+            v.push(self.normal[i].ind_sample(&mut self.rng));
+        }
+        Some(v)
+    }
+}
+
+
+pub fn normal_builder(seed: [u32; 4]) -> NormalData {
+    NormalData { 
+        rng: XorShiftRng::from_seed(seed),
+        normal: vec![]
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+pub struct Mixture {
+    normal: Vec<(usize, NormalData)>
+}
+
+impl Mixture {
+
+    // n = number of samples
+    pub fn add(&self, n: usize, data: NormalData) -> Mixture {
+
+        if self.normal.len() > 0 && self.normal[0].1.len() != data.len() {
+            panic!("Invalid length.");
+        }
+
+        let mut v = self.normal.clone();
+        v.push((n, data));
+        Mixture {
+            normal: v
+        }
+    }
+/*
+    pub fn matrix(&self) -> Matrix<f64> {
+
+        let mut m = Matrix::new();
+
+        for (idx, &(n, ref v)) in self.normal.iter_mut().enumerate() {
+            for _ in (0..n) {
+                let mut x = vec![idx as f64];
+                for j in v.next().unwrap() {
+                    x.push(j);
+                }
+                m.add_row(&x);
+            }
+        }
+        m
+    }
+    */
+}
+
+pub fn mixture_builder() -> Mixture {
+    Mixture {
+        normal: vec![]
+    }
+}
+
+// ----------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
@@ -182,4 +280,25 @@ mod tests {
             ((256 * 1 + 2) * 256 + 3) * 256 + 4
         );
     }
+
+    #[test]
+    fn test_normal_data() {
+        let n = normal_builder([1,2,3,4]).add(0.0, 2.0).add(1.0, 1.0);
+
+        let data = n.take(5).collect::<Vec<Vec<f64>>>();
+        assert_eq!(data.len(), 5);
+        assert_eq!(data[0].len(), 2);
+    }
+
+    #[test]
+    fn test_mixture() {
+
+        let seed = [1, 2, 3, 4];
+        let m = mixture_builder()
+            .add(3, normal_builder(seed).add(1.0, 0.5).add(2.0, 1.0))
+            .add(5, normal_builder(seed).add(3.0, 0.5).add(4.0, 1.0))
+            .add(8, normal_builder(seed).add(2.0, 0.5).add(7.0, 1.0));
+        
+    }
+
 }
