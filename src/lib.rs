@@ -1,5 +1,18 @@
 //! Library for doing machine learning with Rust.
 //!
+//! <div style="font-size:80%">
+//! <div style="float:left;text-align:center">
+//! Linear regression<br/><img src="../linreg_plot.png">
+//! </div>
+//! <div style="float:left;text-align:center;padding-left:10px">
+//! MNIST database of handwritten digits<br/><img style="border-top:1px solid black" src="../digits_grid.png">
+//! </div>
+//! <div style="float:left;text-align:center;padding-left:10px">
+//! Gradient descent<br/><img style="border-top:1px solid black" src="../gradient_descent.png">
+//! </div>
+//! <div style="clear:both;"></div>
+//! </div>
+//!
 //! # Features
 //! <i>(click on a link to get more details)</i>
 //!
@@ -11,7 +24,7 @@
 //! * optimization of linear regression with gradient descent
 //! * classification with <i>k</i>-nearest neighbours
 //! * sliding windows for arbitrary dimensions (e.g. for image processing)
-//! * standard databases (e.g. MNIST database of handwritten digits)
+//! * [standard databases](datasets/index.html) (e.g. MNIST database of handwritten digits)
 //! * feature scaling
 //! * video and image processing via integration of OpenCV
 //!
@@ -85,6 +98,8 @@
 //! create plots with Octave
 //! * [gradient descent](https://github.com/daniel-e/rustml/blob/master/examples/gradient_descent.rs): use gradient
 //! to optimize a function with two parameters
+//! * [image grid](https://github.com/daniel-e/rustml/blob/master/examples/image_grid.rs): plot some of the 
+//! handwritten digits of the MNIST database into a grid
 //!
 pub use distance::{Distance, Euclid, DistancePoint2D};
 pub use matrix::{HasNan, Similar, Matrix};
