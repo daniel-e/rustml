@@ -30,7 +30,7 @@ impl OctaveScriptBuilder {
 
     fn join<T: fmt::Display>(&self, v: &[T]) -> String {
 
-        let mut s = "[".to_string();
+        let mut s = String::new();
 
         for (idx, val) in v.iter().enumerate() {
             if idx > 0 {
@@ -38,7 +38,12 @@ impl OctaveScriptBuilder {
             }
             s = s + &format!("{}", val);
         }
-        s + "]"
+        s
+    }
+
+    fn to_vec<T: fmt::Display>(&self, v: &[T]) -> String {
+
+        "[".to_string() + &self.join(v) + "]"
     }
 
     /// Adds the string to the Octave script.
@@ -75,7 +80,7 @@ impl OctaveScriptBuilder {
 
         for i in (0..n) {
             let p = format!("${}", i + 1);
-            let v = self.join(&m.row_iter().map(|ref v| v[i]).collect::<Vec<T>>());
+            let v = self.to_vec(&m.row_iter().map(|ref v| v[i]).collect::<Vec<T>>());
             t = t.replace(&p, &v);
         }
         self.add(&t)
@@ -84,7 +89,7 @@ impl OctaveScriptBuilder {
     /// Adds the string to the Octave script.
     ///
     /// At the end of the line a semicolon is appended. If the string contains two
-    /// consecutive dollar signed (i.e. `$$` these will be replaced by a vector
+    /// consecutive dollar signs (i.e. `$$`) these will be replaced by a vector
     /// containing the elements of `vals`.
     /// 
     /// # Example
@@ -104,9 +109,46 @@ impl OctaveScriptBuilder {
     pub fn add_vector<T: fmt::Display>(&self, s: &str, vals: &[T]) -> OctaveScriptBuilder {
 
         let mut t = s.to_string();
-        let v = self.join(vals);
+        let v = self.to_vec(vals);
         t = t.replace("$$", &v);
         self.add(&t)
+    }
+
+    /// Adds the string to the Octave script.
+    ///
+    /// At the end of the line a semicolon is appended. If the string contains two
+    /// consecutive dollar signs (i.e. `$$`) these will be replaced by the matrix
+    /// `m`.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::octave::*;
+    /// use rustml::*;
+    ///
+    /// # pub fn main() {
+    /// let m = mat![1, 2, 3; 4, 5, 6];
+    /// let s = builder().add_matrix("x = $$", &m);
+    /// assert_eq!(
+    ///     s.to_string(),
+    ///     "1;\nx = [1,2,3;4,5,6];\n"
+    /// );
+    /// # }
+    /// ```
+    pub fn add_matrix<T: fmt::Display + Clone>(&self, t: &str, m: &Matrix<T>) -> OctaveScriptBuilder {
+
+        let mut s = "[".to_string();
+
+        for (idx, r) in m.row_iter().enumerate() {
+            if idx > 0 {
+                s = s + ";";
+            }
+            s = s + &self.join(&r);
+        }
+        s = s + "]";
+
+        self.add(&t.replace("$$", &s))
     }
 
     /// Adds the string to the Octave script.
