@@ -68,7 +68,7 @@ pub fn plot_knn_decision_boundary() {
     let m = 
         mixture_builder()
             .add(100, normal_builder(seed).add(1.0, 2.2).add(2.0, 1.2))
-            .add(100, normal_builder(seed).add(5.0, 2.5).add(6.0, 1.5))
+            .add(100, normal_builder(seed).add(5.0, 2.5).add(6.0, 2.5))
             .add(100, normal_builder(seed).add(6.0, 2.5).add(0.0, 2.5))
             .as_matrix();
 
@@ -105,7 +105,7 @@ pub fn plot_knn_decision_boundary() {
         .add("axis([-2, 10, -5, 10])")
         .add("axis('nolabel')")
         .add("print -r50 -dpng /tmp/plot_knn_boundary.png")
-        .run("/tmp/plot_normal.m")
+        .run("/tmp/plot_knn_boundary.m")
         .unwrap();
 
     Window::new()
