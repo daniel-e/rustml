@@ -1,16 +1,29 @@
 //! Library for doing machine learning with Rust.
 //!
 //! <div style="font-size:80%">
-//! <div style="float:left;text-align:center">
-//! Linear regression<br/><img src="../linreg_plot.png">
-//! </div>
-//! <div style="float:left;text-align:center;padding-left:10px">
-//! MNIST database of handwritten digits<br/><img style="border-top:1px solid black" src="../digits_grid.png">
-//! </div>
-//! <div style="float:left;text-align:center;padding-left:10px">
-//! Gradient descent<br/><img style="border-top:1px solid black" src="../gradient_descent.png">
-//! </div>
-//! <div style="clear:both;"></div>
+//!  <div style="float:left;text-align:center">
+//!   Linear regression<br/><img src="../linreg_plot.png">
+//!  </div>
+//!  <div style="float:left;text-align:center;padding-left:10px">
+//!   MNIST database of handwritten digits<br/><img style="border-top:1px solid black" src="../digits_grid.png">
+//!  </div>
+//!  <div style="float:left;text-align:center;padding-left:10px">
+//!   Gradient descent<br/><img style="border-top:1px solid black" src="../gradient_descent.png">
+//!  </div>
+//!
+//!  <div style="clear:both;"></div>
+//!
+//!  <div style="float:left;text-align:center">
+//!   Generator for normally distributed data<br/><img src="../plot_normal_1.png">
+//!  </div>
+//!  <div style="float:left;text-align:center">
+//!   Toy data: mixture<br/><img src="../plot_mixture.png">
+//!  </div>
+//!  <div style="float:left;text-align:center">
+//!   Decision boundary for knn (k = 5)<br/><img src="../plot_knn_boundary.png">
+//!  </div>
+//!
+//!  <div style="clear:both;"></div>
 //! </div>
 //!
 //! # Features
