@@ -149,3 +149,4 @@ pub mod hash;
 pub mod opt;
 pub mod octave;
 pub mod regression;
+pub mod nn;
