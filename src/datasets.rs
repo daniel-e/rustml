@@ -1,17 +1,33 @@
 //! Module to easily access popular datasets often used to measure the performance of
 //! machine learning algorithms.
 //!
-//! The following image shows an example of 200 handwritten digits from the 
+//! The image on the left shows an example of 200 handwritten digits from the 
 //! [MNIST database of handwritten digits](http://yann.lecun.com/exdb/mnist/).
 //! Rustml provides a simple interface via 
 //! [MnistDigits](struct.MnistDigits.html) to easily access those digits. The MNIST
 //! database comes with 60,000 examples in a training set and 10,000 examples in
-//! a test set.
+//! a test set. The image has been created with rustml with just a few lines of code.
+//! See the example [here](https://github.com/daniel-e/rustml/blob/master/examples/image_grid.rs).
 //! 
-//! <div style="align:center"><img style="border:1px solid black;" src="../../digits_grid.png"></div>
+//! The image in the middle shows an example of 1000 points normally distributed with the
+//! mean at (1, 2) and a standard deviation of 0.3 for the first dimension and 0.4 for
+//! the second dimension.
 //!
-//! The image has been created with rustml with just a few lines of code. See the example 
-//! [here](https://github.com/daniel-e/rustml/blob/master/examples/image_grid.rs).
+//! The image on the right shows a mixture model. A dataset which consists of three sources
+//! which are normally distributed with different parameters.
+//!
+//! <div style="font-size:80%">
+//!  <div style="float:left;text-align:center;">
+//!   MNIST database of handwritten digits<br/><img style="border-top:1px solid black" src="../../digits_grid.png">
+//!  </div>
+//!  <div style="float:left;text-align:center;padding-left:10px">
+//!   Toy data: normally distributed data<br/><img src="../../plot_normal_1.png">
+//!  </div>
+//!  <div style="float:left;text-align:center;padding-left:10px">
+//!   Toy data: mixture<br/><img src="../../plot_mixture.png">
+//!  </div>
+//! </div>
+//! <div style="clear:both;"></div>
 
 extern crate num;
 extern crate time;
@@ -154,7 +170,31 @@ impl MnistDigits {
 
 // ----------------------------------------------------------------------------
 
-// Generates normal distributed data.
+/// Generates multi-dimensional data where each dimension is normally distributed.
+///
+/// # Example
+///
+/// ```
+/// # extern crate rustml;
+/// use rustml::datasets::*;
+///
+/// # fn main() {
+/// let seed = [1, 2, 3, 4];
+/// // create 2-dimensional vectors where the values of the first
+/// // component are normal distributed with the parameters
+/// // mu = 1.0 and std = 0.5 and the values of the second component
+/// // are normal distributed with the parameters mu = 2.0 and
+/// // std = 0.8.
+/// let nd = 
+///     normal_builder(seed)
+///     .add(1.0, 0.5)  // parameters for the 1st dimension
+///     .add(2.0, 0.8); // parameters for the 2nd dimension
+/// for v in nd.take(100) {
+///     // do s.th.
+///     assert_eq!(v.len(), 2);
+/// }
+/// # }
+/// ```
 #[derive(Clone)]
 pub struct NormalData {
     rng: XorShiftRng,
@@ -162,6 +202,8 @@ pub struct NormalData {
 }
 
 impl NormalData {
+    /// Adds a dimension for which the data is normally distributed with
+    /// the given parameters.
     pub fn add(&self, mean: f64, std: f64) -> NormalData {
 
         let mut n = self.normal.clone();
@@ -173,6 +215,7 @@ impl NormalData {
         }
     }
 
+    /// Returns the number of dimensions added via the `add` method.
     pub fn len(&self) -> usize { self.normal.len() }
 }
 
@@ -191,7 +234,7 @@ impl Iterator for NormalData {
     }
 }
 
-
+/// Creates a normally distributed data source.
 pub fn normal_builder(seed: [u32; 4]) -> NormalData {
     NormalData { 
         rng: XorShiftRng::from_seed(seed),
@@ -201,34 +244,87 @@ pub fn normal_builder(seed: [u32; 4]) -> NormalData {
 
 // ----------------------------------------------------------------------------
 
+/// Generates random multi-dimensional data points (a population) from
+/// different normally distributed sources (subpopulations).
+///
+/// # Example
+///
+/// ```
+/// # extern crate rustml;
+/// use rustml::datasets::*;
+///
+/// # fn main() {
+/// let seed = [2, 3, 5, 7];
+/// let m = 
+///     mixture_builder()
+///         .add(100, normal_builder(seed).add(1.0, 1.2).add(2.0, 1.2))
+///         .add(100, normal_builder(seed).add(5.0, 1.5).add(6.0, 1.5))
+///         .add(100, normal_builder(seed).add(6.0, 1.5).add(0.0, 1.5))
+///         .as_matrix();
+/// assert_eq!(m.rows(), 300);
+/// assert_eq!(m.cols(), 3);
+/// # }
+/// ```
 pub struct Mixture {
     normal: Vec<(usize, NormalData)>
 }
 
 impl Mixture {
 
-    // n = number of samples
-    pub fn add(&self, n: usize, data: NormalData) -> Mixture {
+    /// Adds a normally distributed data source (subpopulation) 
+    /// which generates `n` samples.
+    pub fn add(&self, n: usize, src: NormalData) -> Mixture {
 
-        if self.normal.len() > 0 && self.normal[0].1.len() != data.len() {
+        if self.normal.len() > 0 && self.normal[0].1.len() != src.len() {
             panic!("Invalid length.");
         }
 
         let mut v = self.normal.clone();
-        v.push((n, data));
+        v.push((n, src));
         Mixture {
             normal: v
         }
     }
-/*
-    pub fn matrix(&self) -> Matrix<f64> {
+
+    /// Returns a matrix which contains the population consisting of one or
+    /// more subpopulations.
+    ///
+    /// Each row of the matrix represents a sample generated from one of
+    /// the subpopulations. 
+    ///
+    /// The value in the first column of
+    /// a row denotes the subpopulation from which this sample has been generated.
+    /// If the value is 0 this sample has been
+    /// created from the first subpopulation (i.e. the first data source that has
+    /// been added with the `add` method). If the value is 1 this sample has been
+    /// created from the second subpopulation and so on.
+    ///
+    /// The following columns denote the dimensions of the data sources.
+    ///
+    /// # Example
+    ///
+    /// Let's assume you create a mixture model with two data sources
+    /// each with two dimensions as follows:
+    ///
+    /// ```ignore
+    /// let m = 
+    ///     mixture_builder()
+    ///         .add(100, normal_builder(seed).add(1.0, 0.2).add(2.0, 0.2))
+    ///         .add(100, normal_builder(seed).add(5.0, 0.2).add(6.0, 0.2))
+    ///         .as_matrix();
+    /// ```
+    ///
+    /// Then, the matrix could look like:
+    /// 
+    pub fn as_matrix(&mut self) -> Matrix<f64> {
 
         let mut m = Matrix::new();
 
-        for (idx, &(n, ref v)) in self.normal.iter_mut().enumerate() {
+        for (idx, &mut (n, ref mut nd)) in self.normal.iter_mut().enumerate() {
             for _ in (0..n) {
+                let v = nd.next().unwrap().clone();
                 let mut x = vec![idx as f64];
-                for j in v.next().unwrap() {
+                for j in v {
                     x.push(j);
                 }
                 m.add_row(&x);
@@ -236,9 +332,9 @@ impl Mixture {
         }
         m
     }
-    */
 }
 
+/// Creates a mixture model with normally distributed data sources.
 pub fn mixture_builder() -> Mixture {
     Mixture {
         normal: vec![]
@@ -298,7 +394,6 @@ mod tests {
             .add(3, normal_builder(seed).add(1.0, 0.5).add(2.0, 1.0))
             .add(5, normal_builder(seed).add(3.0, 0.5).add(4.0, 1.0))
             .add(8, normal_builder(seed).add(2.0, 0.5).add(7.0, 1.0));
-        
     }
 
 }
