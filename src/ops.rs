@@ -316,7 +316,7 @@ matrix_vector_ops_impl!{ f32 f64 }
 pub trait MatrixVectorMul<T> {
 
     /// Multiplies the matrix with the row vector `v`.
-    fn mul_vec(&self, v: &[T]) -> Option<Vec<T>>;
+    fn mul_vec(&self, v: &[T]) -> Vec<T>;
 
     /// Computes Xv-y
     fn mul_vec_minus_vec(&self, v: &[T], y: &[T]) -> Vec<T>;
@@ -331,11 +331,12 @@ pub trait MatrixVectorMul<T> {
 
 impl MatrixVectorMul<f64> for Matrix<f64> {
 
-    fn mul_vec(&self, v: &[f64]) -> Option<Vec<f64>> {
+    fn mul_vec(&self, v: &[f64]) -> Vec<f64> {
 
-        if self.cols() != v.len() || self.cols() == 0 || self.rows() == 0 {
-            return None;
-        }
+        assert!(
+            self.cols() == v.len() && self.cols() != 0 && self.rows() != 0, 
+            "Dimensions do not match."
+        );
 
         let y: Vec<f64> = repeat(0.0).take(self.rows()).collect();
         unsafe {
@@ -354,7 +355,7 @@ impl MatrixVectorMul<f64> for Matrix<f64> {
                 1 as c_int
             );
         }
-        Some(y)
+        y
     }
 
 
@@ -544,11 +545,16 @@ mod tests {
     fn test_matrix_vector_mul() {
         let x = mat![1.0, 2.0, 3.0; 4.0, 2.0, 5.0];
         let h = [2.0, 6.0, 3.0];
-        let y = x.mul_vec(&h).unwrap();
+        let y = x.mul_vec(&h);
         assert_eq!(y, vec![23.0, 35.0]);
+    }
 
+    #[test]
+    #[should_panic]
+    fn test_matrix_vector_mul_panic() {
+        let x = mat![1.0, 2.0, 3.0; 4.0, 2.0, 5.0];
         let i = [2.0, 6.0];
-        assert!(x.mul_vec(&i).is_none());
+        x.mul_vec(&i);
     }
 
     #[test]
