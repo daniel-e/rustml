@@ -115,7 +115,7 @@ impl Hypothesis {
     /// # }
     /// ```
 
-    pub fn eval(&self, x: &Matrix<f64>) -> Option<Vec<f64>> {
+    pub fn eval(&self, x: &Matrix<f64>) -> Vec<f64> {
         x.mul_vec(&self.thetas)
     }
 
@@ -205,7 +205,7 @@ mod tests {
     fn test_eval() {
         let x = mat![1.0, 2.0, 3.0; 4.0, 2.0, 5.0];
         let h = Hypothesis::from_params(&[2.0, 6.0, 3.0]);
-        let y = h.eval(&x).unwrap();
+        let y = h.eval(&x);
         assert_eq!(y, vec![23.0, 35.0]);
     }
 
