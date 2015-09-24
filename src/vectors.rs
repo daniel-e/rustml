@@ -13,6 +13,56 @@ use std::mem;
 
 // ------------------------------------------------------------------
 
+pub trait Append<T> {
+    fn append(&self, v: &[T]) -> Vec<T>;
+}
+
+impl <T: Clone> Append<T> for Vec<T> {
+
+    fn append(&self, v: &[T]) -> Vec<T> {
+
+        self.iter().chain(v.iter()).cloned().collect::<Vec<T>>()
+    }
+}
+
+impl <T: Clone> Append<T> for [T] {
+
+    fn append(&self, v: &[T]) -> Vec<T> {
+
+        self.iter().chain(v.iter()).cloned().collect::<Vec<T>>()
+    }
+}
+
+// ------------------------------------------------------------------
+
+pub trait Select<T> {
+    fn select(&self, indexes: &[usize]) -> Vec<T>;
+}
+
+impl <T: Clone> Select<T> for Vec<T> {
+
+    fn select(&self, indexes: &[usize]) -> Vec<T> {
+        let mut v: Vec<T> = Vec::new();
+        for idx in indexes {
+            v.push(self[*idx].clone());
+        }
+        v
+    }
+}
+
+impl <T: Clone> Select<T> for [T] {
+
+    fn select(&self, indexes: &[usize]) -> Vec<T> {
+        let mut v: Vec<T> = Vec::new();
+        for idx in indexes {
+            v.push(self[*idx].clone());
+        }
+        v
+    }
+}
+
+// ------------------------------------------------------------------
+
 use std::io::{Read, BufRead, BufReader, Result, Error, ErrorKind};
 use std::fs::File;
 use std::str::FromStr;
@@ -279,6 +329,21 @@ mod tests {
         let d = [5.0, 6.0, 7.9];
         assert_eq!(copy_memory(&mut c, &d, 3), 3);
         assert_eq!(c, d);
+    }
+
+    #[test]
+    fn test_append() {
+
+        let a = [1, 2, 3];
+        let b = [4, 5];
+        assert_eq!(a.append(&b), vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_select() {
+        let a = [3, 5, 4, 1, 7, 3, 4, 9, 5];
+        let b = a.select(&[1, 3, 4, 7]);
+        assert_eq!(b, vec![5, 1, 7, 9]);
     }
 }
 
