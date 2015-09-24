@@ -8,6 +8,8 @@
  * matrix: PartialEq and Eq for matrices; derive from Debug; from_col_vectors, from_row_vectors
  * datasets: struct to create normal distributed data
  * more documentation
+ * nn: module for neural networks
+ * vector: trait to append a vector to another one
 
 ## 0.0.4
 
