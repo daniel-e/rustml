@@ -5,11 +5,20 @@
  * blas: documentation
  * ops_inplace: high level interface for the most important BLAS functions
  * regression: trait to create a design matrix
- * matrix: PartialEq and Eq for matrices; derive from Debug; from_col_vectors, from_row_vectors
+ * matrix: 
+   * PartialEq and Eq for matrices
+   * derive from Debug
+   * from_col_vectors
+   * from_row_vectors
+   * implement the trait Similar for vectors
  * datasets: struct to create normal distributed data
  * more documentation
  * nn: module for neural networks
- * vector: trait to append a vector to another one
+ * vector: 
+   * trait to append a vector to another one
+   * trait to select indexes from a vector
+   * create vector via from_value
+ * fixed some warning introduced by Rust 1.3
 
 ## 0.0.4
 
