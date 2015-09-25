@@ -1,11 +1,9 @@
 extern crate libc;
 use self::libc::{c_char, c_int, c_void, c_float, c_double};
 
-#[repr(C)]
-pub struct CvCapture;
+pub enum CvCapture {}
 
-#[repr(C)]
-pub struct CvArr;
+pub enum CvArr {}
 
 #[repr(C)]
 pub struct CvSize {
