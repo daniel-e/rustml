@@ -17,8 +17,10 @@
 //! assert_eq!(a, [4.0, 8.0, 5.0, 7.0, 11.0, 15.0]);
 //! ```
 extern crate libc;
+extern crate num;
 
 use self::libc::{c_int, c_float, c_double};
+use self::num::traits::{Float, FromPrimitive};
 
 use blas::*;
 use matrix::Matrix;
@@ -406,6 +408,56 @@ pub fn s_gemv(trans: bool, alpha: f32, a: &Matrix<f32>, x: &[f32], beta: f32, y:
             y.as_ptr() as *mut c_float,
             1 as c_int
         );
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+pub trait Functions<T> {
+
+    /// Computes the sigmoid function (i.e. 1/(1+exp(-x))) for each element.
+    fn sigmoid(&mut self);
+
+    /// Computed the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x))) for each element.
+    fn sigmoid_derivative(&mut self);
+}
+
+// TODO is not shown in documentation
+impl <T: Float + FromPrimitive> Functions<T> for T {
+
+    fn sigmoid(&mut self) {
+        *self = T::one() / (T::one() + (T::zero() - *self).exp());
+    }
+
+    fn sigmoid_derivative(&mut self) {
+        let mut x = *self;
+        x.sigmoid();
+        x = T::one() - x;
+        x.sigmoid();
+        *self = x;
+    }
+}
+
+impl <T: Float + FromPrimitive> Functions<T> for Vec<T> {
+
+    fn sigmoid(&mut self) { self[..].sigmoid(); }
+    fn sigmoid_derivative(&mut self) { self[..].sigmoid_derivative(); }
+}
+
+impl <T: Float + FromPrimitive> Functions<T> for [T] {
+
+    fn sigmoid(&mut self) {
+
+        for i in self {
+            i.sigmoid();
+        }
+    }
+
+    fn sigmoid_derivative(&mut self) {
+
+        for i in self {
+            i.sigmoid_derivative();
+        }
     }
 }
 
@@ -829,6 +881,26 @@ mod tests {
     fn test_s_nrm2() {
         let x = [1.0f32, 2.0, 5.0, 9.0];
         assert!(abs(s_nrm2(&x) - 10.536) <= 0.001);
+    }
+
+    #[test]
+    fn test_sigmoid() {
+
+        let mut i = 1.0;
+        i.sigmoid();
+        assert!(num::abs(i - 0.73106) <= 0.00001);
+
+        i = 1.0;
+        i.sigmoid_derivative();
+        assert!(num::abs(i - 0.56682) <= 0.00002);
+
+        let mut a = [1.0, 2.0, 3.0];
+        a.sigmoid();
+        assert!(a.similar(&[0.73106, 0.88080, 0.95257], 0.00001));
+
+        let mut b = [1.0, 2.0];
+        b.sigmoid_derivative();
+        assert!(b.similar(&vec![0.56683, 0.52977], 0.00002));
     }
 }
 
