@@ -495,62 +495,58 @@ pub trait VectorVectorOpsInPlace<T> {
     /// assert_eq!(v, vec![1.5, 0.25]);
     /// ```
     fn idiv(&mut self, rhs: &[T]);
+
+    /// Computes the L2 norm (i.e. the euclidean norm) of the vector.
+    ///
+    /// # Implementation details
+    ///
+    /// This operation is optimized via BLAS.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate num;
+    /// # extern crate rustml;
+    ///
+    /// # use num::abs;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let v = vec![3.0, 2.0, 4.0];
+    /// assert!(num::abs(v.nrm2() - 5.3852) <= 0.0001);
+    /// # }
+    /// ```
+    fn nrm2(&self) -> T;
 }
 
 macro_rules! impl_vector_vector_ops_inplace {
-    ( $( $x:ty, $y:expr, $z:ty )+ ) => ($(
+    ( $( $x:ty, $axpy:expr, $nrm:expr )+ ) => ($(
 
         impl VectorVectorOpsInPlace<$x> for Vec<$x> {
             fn iadd(&mut self, rhs: &[$x]) { (self[..]).iadd(rhs); }
             fn isub(&mut self, rhs: &[$x]) { (self[..]).isub(rhs); }
             fn imul(&mut self, rhs: &[$x]) { (self[..]).imul(rhs); }
             fn idiv(&mut self, rhs: &[$x]) { (self[..]).idiv(rhs); }
+            fn nrm2(&self) -> $x { (self[..]).nrm2() }
         }
 
         impl VectorVectorOpsInPlace<$x> for [$x] {
 
             fn iadd(&mut self, rhs: &[$x]) {
 
-                if self.len() != rhs.len() {
-                    panic!("Vectors must have the same length.");
-                }
-
-                unsafe {
-                    $y(
-                        self.len()    as c_int,
-                        1.0           as $z,
-                        rhs.as_ptr()  as *const $z,
-                        1             as c_int,
-                        self.as_ptr() as *mut $z,
-                        1             as c_int
-                    )
-                }
+                assert!(self.len() == rhs.len(), "Dimensions do not match.");
+                $axpy(1.0, rhs, self);
             }
 
             fn isub(&mut self, rhs: &[$x]) {
 
-                if self.len() != rhs.len() {
-                    panic!("Vectors must have the same length.");
-                }
-
-                unsafe {
-                    $y(
-                        self.len()    as c_int,
-                        -1.0          as $z,
-                        rhs.as_ptr()  as *const $z,
-                        1             as c_int,
-                        self.as_ptr() as *mut $z,
-                        1             as c_int
-                    )
-                }
+                assert!(self.len() == rhs.len(), "Dimensions do not match.");
+                $axpy(-1.0, rhs, self);
             }
 
             fn idiv(&mut self, rhs: &[$x]) {
 
-                if self.len() != rhs.len() {
-                    panic!("Vectors must have the same length.");
-                }
-
+                assert!(self.len() == rhs.len(), "Dimensions do not match.");
                 for (a, b) in self.iter_mut().zip(rhs.iter()) {
                     *a /= *b;
                 }
@@ -558,20 +554,19 @@ macro_rules! impl_vector_vector_ops_inplace {
 
             fn imul(&mut self, rhs: &[$x]) {
 
-                if self.len() != rhs.len() {
-                    panic!("Vectors must have the same length.");
-                }
-
+                assert!(self.len() == rhs.len(), "Dimensions do not match.");
                 for (a, b) in self.iter_mut().zip(rhs.iter()) {
                     *a *= *b;
                 }
             }
+
+            fn nrm2(&self) -> $x { $nrm(self) }
         }
     )*)
 }
 
-impl_vector_vector_ops_inplace!{ f32, cblas_saxpy, c_float }
-impl_vector_vector_ops_inplace!{ f64, cblas_daxpy, c_double }
+impl_vector_vector_ops_inplace!{ f32, s_axpy, s_nrm2 }
+impl_vector_vector_ops_inplace!{ f64, d_axpy, d_nrm2 }
 
 // ----------------------------------------------------------------------------
 
