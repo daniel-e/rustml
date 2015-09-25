@@ -55,7 +55,7 @@ pub trait ScaleMatrix<T> {
     ///     -0.83205, -0.37796
     /// ];
     ///
-    /// assert!(scaled.similar(&e, 0.0001).unwrap())
+    /// assert!(scaled.similar(&e, 0.0001))
     /// # }
     /// ```
     fn scale(&self) -> (Self, Vec<Gaussian<T>>);

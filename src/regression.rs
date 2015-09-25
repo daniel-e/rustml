@@ -109,7 +109,7 @@ impl Hypothesis {
     /// ];
     /// let h = Hypothesis::from_params(&[0.1, 0.2, 0.3]);
     /// assert_eq!(
-    ///     h.eval(&x).unwrap(), 
+    ///     h.eval(&x), 
     ///     vec![0.1 + 0.4 + 0.9, 0.1 + 1.0 + 1.2]
     /// );
     /// # }
