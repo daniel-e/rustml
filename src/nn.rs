@@ -3,11 +3,19 @@ extern crate rand;
 use self::rand::Rng;
 use matrix::Matrix;
 use ops::MatrixVectorMul;
-use vectors::Append;
+use ops_inplace::VectorVectorOpsInPlace;
+use vectors::{Append, from_value};
 
 pub fn sigmoid(v: &[f64]) -> Vec<f64> {
 
-    v.iter().map(|&x| 1.0 / (1.0 + (-x).exp())).collect::<Vec<f64>>()
+    v.iter().map(|&x| 1.0 / (1.0 + (-x).exp())).collect()
+}
+
+pub fn sigmoid_derivative(v: &[f64]) -> Vec<f64> {
+
+    let mut i = from_value(1.0, v.len());
+    i.isub(&sigmoid(&v));
+    sigmoid(&i)
 }
 
 #[derive(Debug)]
@@ -109,16 +117,21 @@ impl NeuralNetwork {
             // t = target vector
 
             // feedforward
-            let mut a = vec![x.to_vec()]; // a^1 (=input vector)
+            let mut av = vec![[1.0].append(x)]; // inputs for the next layer (=sigmoid applied to outputs + bias unit)
+            let mut zv = vec![];                // outputs of previous layer without sigmoid
             for theta in &self.params {
-                let v = [1.0].append(&a.last().unwrap());
-                a.push(sigmoid(&theta.mul_vec(&v)));
+                let net = theta.mul_vec(&av.last().unwrap());
+                zv.push(net.clone());
+                av.push([1.0].append(&sigmoid(&net)));
             }
 
             // delta for the output layer
+            //let mut deltas_per_layer = vec![];
             
+            // remove bias from last layer
             // TODO
         }
+
 
         acc_d
     }
@@ -154,10 +167,14 @@ mod tests {
     #[test]
     fn test_sigmoid() {
 
-        let v = [1.0, 2.0];
-        let s = sigmoid(&v);
-        assert!(num::abs(s[0] - 0.73106) < 0.0001);
-        assert!(num::abs(s[1] - 0.88080) < 0.0001);
+        assert!(sigmoid(&[1.0, 2.0]).similar(&vec![0.73106, 0.88080], 0.0001));
+    }
+
+    #[test]
+    fn test_sigmoid_derivative() {
+
+        let a = [1.0, 2.0];
+        assert!(sigmoid_derivative(&a).similar(&vec![0.56683, 0.52977], 0.00001));
     }
 
     #[test]
