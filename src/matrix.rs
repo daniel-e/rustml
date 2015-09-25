@@ -86,21 +86,32 @@ impl <T: Float> HasNan for Matrix<T> {
 /// Trait to check if the values of two matrices with the same dimension
 /// differ only within a small range.
 pub trait Similar<T> {
-    fn similar(&self, e: &Self, epsilon: T) -> Option<bool>;
+    fn similar(&self, e: &Self, epsilon: T) -> bool;
 }
 
 impl <T: Clone + Signed + Float> Similar<T> for Matrix<T> {
 
-    fn similar(&self, e: &Self, epsilon: T) -> Option<bool> {
+    fn similar(&self, e: &Self, epsilon: T) -> bool {
 
-        match self.rows() != e.rows() || self.cols() != e.cols() {
-            true => None,
-            _ => Some(
-                    self.values()
-                    .zip(e.values())
-                    .all(|(&x, &y)| num::abs(x - y) <= epsilon)
-                )
-        }
+        assert!(self.rows() == e.rows() && self.cols() == e.cols(), "Dimensions do not match.");
+        self.values().zip(e.values()).all(|(&x, &y)| num::abs(x - y) <= epsilon)
+    }
+}
+
+impl <T: Clone + Signed + Float> Similar<T> for Vec<T> {
+
+    fn similar(&self, e: &Self, epsilon: T) -> bool {
+
+        self[..].similar(e, epsilon)
+    }
+}
+
+impl <T: Clone + Signed + Float> Similar<T> for [T] {
+
+    fn similar(&self, e: &Self, epsilon: T) -> bool {
+
+        assert!(self.len() == e.len(), "Dimensions do not match.");
+        self.iter().zip(e.iter()).all(|(&x, &y)| num::abs(x - y) <= epsilon)
     }
 }
 
@@ -1195,7 +1206,7 @@ mod tests {
     }
 
     #[test]
-    fn test_similar() {
+    fn test_similar_matrix() {
 
         let a = mat![
             7.0, 8.0, 9.0;
@@ -1207,8 +1218,15 @@ mod tests {
             10.0, 11.0, 12.0
         ];
 
-        assert!(!a.similar(&b, 1.0).unwrap()); 
-        assert!(a.similar(&b, 2.0).unwrap()); 
+        assert!(!a.similar(&b, 1.0)); 
+        assert!(a.similar(&b, 2.0)); 
+    }
+
+    #[test]
+    fn test_similar_vec() {
+
+        let a = [1.0, 2.0, 3.0];
+        assert!(a.similar(&[1.01, 1.99, 3.0], 0.0100001));
     }
 
     #[test]
