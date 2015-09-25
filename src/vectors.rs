@@ -210,8 +210,13 @@ pub fn group<T: PartialEq + Clone>(v: &Vec<T>) -> Vec<(T, usize)> {
 /// ```
 pub fn zero<T: Num + Clone>(n: usize) -> Vec<T> {
 
+    from_value(T::zero(), n)
+}
+
+pub fn from_value<T: Num + Clone>(val: T, n: usize) -> Vec<T> {
+
     // TODO more efficient implementation
-    iter::repeat(T::zero()).take(n).collect()
+    iter::repeat(val).take(n).collect()
 }
 
 // ------------------------------------------------------------------
@@ -344,6 +349,11 @@ mod tests {
         let a = [3, 5, 4, 1, 7, 3, 4, 9, 5];
         let b = a.select(&[1, 3, 4, 7]);
         assert_eq!(b, vec![5, 1, 7, 9]);
+    }
+
+    #[test]
+    fn test_from_value() {
+        assert_eq!(from_value(2, 3), vec![2, 2, 2]);
     }
 }
 
