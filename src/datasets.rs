@@ -393,7 +393,11 @@ mod tests {
         let m = mixture_builder()
             .add(3, normal_builder(seed).add(1.0, 0.5).add(2.0, 1.0))
             .add(5, normal_builder(seed).add(3.0, 0.5).add(4.0, 1.0))
-            .add(8, normal_builder(seed).add(2.0, 0.5).add(7.0, 1.0));
+            .add(8, normal_builder(seed).add(2.0, 0.5).add(7.0, 1.0))
+            .as_matrix();
+        assert_eq!(m.rows(), 16);
+        assert_eq!(m.cols(), 3);
+        // TODO more tests
     }
 
 }
