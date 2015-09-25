@@ -862,11 +862,13 @@ impl <'q> Iterator for VideoGrayFrameIterator<'q> {
 mod tests {
     extern crate libc;
 
-    use self::libc::{c_char, c_int};
+    //use self::libc::{c_char, c_int};
     use super::*;
-    use super::bindings::*;
+    //use super::bindings::*;
 
-    // #[test]
+    // TODO reorganize long running tests
+    /*
+    #[test]
     fn test_cv_capture_from_file_lowlevel() {
         unsafe {
             // Opening a file that does not exist should result in null.
@@ -898,7 +900,7 @@ mod tests {
         }
     }
 
-    // #[test] long test
+    #[test] long test
     fn test_cv_capture_pixel_lowlevel() {
         let d = Video::from_file("datasets/testing/colors.mp4").unwrap();
 
@@ -945,7 +947,7 @@ mod tests {
         }
     }
 
-    //#[test]  TODO long test
+    #[test]  TODO long test
     fn test_video() {
         assert!(Video::from_file("xxxxxxxxxxx.mp4").is_none());
 
@@ -970,6 +972,7 @@ mod tests {
         }
         assert_eq!(k, 25);
     }
+    */
 
     #[test]
     fn test_colorimage_error() {
