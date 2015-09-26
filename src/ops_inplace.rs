@@ -415,10 +415,12 @@ pub fn s_gemv(trans: bool, alpha: f32, a: &Matrix<f32>, x: &[f32], beta: f32, y:
 
 pub trait Functions {
 
-    /// Computes the sigmoid function (i.e. 1/(1+exp(-x))) for each element.
+    /// Computes the sigmoid function (i.e. 1/(1+exp(-x))) for a scalar or each
+    /// element in a vector or matrix.
     fn sigmoid(&mut self);
 
-    /// Computed the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x))) for each element.
+    /// Computes the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x)))
+    /// for a scalar or each element in a vector or matrix.
     fn sigmoid_derivative(&mut self);
 }
 
