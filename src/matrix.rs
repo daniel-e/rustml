@@ -9,7 +9,7 @@ use std::{iter, fmt, fs};
 use std::io::Read;
 use std::str::FromStr;
 use std::ops::Mul;
-use std::slice::Iter;
+use std::slice::{Iter, IterMut};
 use self::rand::{thread_rng, Rng, Rand};
 use self::num::traits::{Float, Signed};
 use self::libc::{c_int, c_double, c_float};
@@ -403,6 +403,27 @@ impl <T: Clone> Matrix<T> {
     /// ```
     pub fn values(&self) -> Iter<T> {
         self.data.iter()
+    }
+
+    /// Returns a mutable iterator over all elements of the matrix in row-major order.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    ///
+    /// # fn main() {
+    /// let mut m = mat![
+    ///     1.0, 1.5; 
+    ///     2.0, 2.5
+    /// ];
+    /// for i in m.values_mut() {
+    ///     *i = *i * 2.0;
+    /// }
+    /// assert!(m.eq(&mat![2.0, 3.0; 4.0, 5.0]));
+    /// # }
+    /// ```
+    pub fn values_mut(&mut self) -> IterMut<T> {
+        self.data.iter_mut()
     }
 
     /// Returns an iterator over the rows of the matrix.
@@ -1276,5 +1297,16 @@ mod tests {
         assert!(m.eq(&e));
     }
 
+    #[test]
+    fn test_values_mut() {
+        let mut m = mat![
+            1.0, 1.5; 
+            2.0, 2.5
+        ];
+        for i in m.values_mut() {
+            *i = *i * 2.0;
+        }
+        assert!(m.eq(&mat![2.0, 3.0; 4.0, 5.0]));
+    }
 }
 
