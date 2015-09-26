@@ -20,7 +20,7 @@ extern crate libc;
 extern crate num;
 
 use self::libc::{c_int, c_float, c_double};
-use self::num::traits::{Float, FromPrimitive};
+use self::num::traits::Float;
 
 use blas::*;
 use matrix::Matrix;
@@ -413,7 +413,7 @@ pub fn s_gemv(trans: bool, alpha: f32, a: &Matrix<f32>, x: &[f32], beta: f32, y:
 
 // ----------------------------------------------------------------------------
 
-pub trait Functions<T> {
+pub trait Functions {
 
     /// Computes the sigmoid function (i.e. 1/(1+exp(-x))) for each element.
     fn sigmoid(&mut self);
@@ -422,29 +422,35 @@ pub trait Functions<T> {
     fn sigmoid_derivative(&mut self);
 }
 
-// TODO is not shown in documentation
-impl <T: Float + FromPrimitive> Functions<T> for T {
+macro_rules! impl_functions_ops_inplace {
+    ( $( $x:ty )+ ) => ($(
 
-    fn sigmoid(&mut self) {
-        *self = T::one() / (T::one() + (T::zero() - *self).exp());
-    }
+        impl Functions for $x {
 
-    fn sigmoid_derivative(&mut self) {
-        let mut x = *self;
-        x.sigmoid();
-        x = T::one() - x;
-        x.sigmoid();
-        *self = x;
-    }
+            fn sigmoid(&mut self) {
+                *self = 1.0 / (1.0 + (- *self).exp());
+            }
+
+            fn sigmoid_derivative(&mut self) {
+                let mut x = *self;
+                x.sigmoid();
+                x = 1.0 - x;
+                x.sigmoid();
+                *self = x;
+            }
+        }
+    )*)
 }
 
-impl <T: Float + FromPrimitive> Functions<T> for Vec<T> {
+impl_functions_ops_inplace!{ f32 f64 }
+
+impl <T: Functions> Functions for Vec<T> {
 
     fn sigmoid(&mut self) { self[..].sigmoid(); }
     fn sigmoid_derivative(&mut self) { self[..].sigmoid_derivative(); }
 }
 
-impl <T: Float + FromPrimitive> Functions<T> for [T] {
+impl <T: Functions> Functions for [T] {
 
     fn sigmoid(&mut self) {
 
