@@ -413,31 +413,32 @@ pub fn s_gemv(trans: bool, alpha: f32, a: &Matrix<f32>, x: &[f32], beta: f32, y:
 
 // ----------------------------------------------------------------------------
 
-pub trait Functions {
+/// Trait for common mathematical functions for scalars, vectors and matrices.
+pub trait FunctionsInPlace {
 
     /// Computes the sigmoid function (i.e. 1/(1+exp(-x))) for a scalar or each
     /// element in a vector or matrix.
-    fn sigmoid(&mut self);
+    fn isigmoid(&mut self);
 
     /// Computes the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x)))
     /// for a scalar or each element in a vector or matrix.
-    fn sigmoid_derivative(&mut self);
+    fn isigmoid_derivative(&mut self);
 }
 
 macro_rules! impl_functions_ops_inplace {
     ( $( $x:ty )+ ) => ($(
 
-        impl Functions for $x {
+        impl FunctionsInPlace for $x {
 
-            fn sigmoid(&mut self) {
+            fn isigmoid(&mut self) {
                 *self = 1.0 / (1.0 + (- *self).exp());
             }
 
-            fn sigmoid_derivative(&mut self) {
+            fn isigmoid_derivative(&mut self) {
                 let mut x = *self;
-                x.sigmoid();
+                x.isigmoid();
                 x = 1.0 - x;
-                x.sigmoid();
+                x.isigmoid();
                 *self = x;
             }
         }
@@ -446,29 +447,45 @@ macro_rules! impl_functions_ops_inplace {
 
 impl_functions_ops_inplace!{ f32 f64 }
 
-impl <T: Functions> Functions for Vec<T> {
+impl <T: FunctionsInPlace> FunctionsInPlace for Vec<T> {
 
-    fn sigmoid(&mut self) { self[..].sigmoid(); }
-    fn sigmoid_derivative(&mut self) { self[..].sigmoid_derivative(); }
+    fn isigmoid(&mut self) { self[..].isigmoid(); }
+    fn isigmoid_derivative(&mut self) { self[..].isigmoid_derivative(); }
 }
 
-impl <T: Functions> Functions for [T] {
+impl <T: FunctionsInPlace> FunctionsInPlace for [T] {
 
-    fn sigmoid(&mut self) {
+    fn isigmoid(&mut self) {
 
         for i in self {
-            i.sigmoid();
+            i.isigmoid();
         }
     }
 
-    fn sigmoid_derivative(&mut self) {
+    fn isigmoid_derivative(&mut self) {
 
         for i in self {
-            i.sigmoid_derivative();
+            i.isigmoid_derivative();
         }
     }
 }
 
+impl <T: FunctionsInPlace + Clone> FunctionsInPlace for Matrix<T> {
+
+    fn isigmoid(&mut self) {
+
+        for i in self.values_mut() {
+            i.isigmoid();
+        }
+    }
+
+    fn isigmoid_derivative(&mut self) {
+
+        for i in self.values_mut() {
+            i.isigmoid_derivative();
+        }
+    }
+}
 
 // ----------------------------------------------------------------------------
 
@@ -892,22 +909,22 @@ mod tests {
     }
 
     #[test]
-    fn test_sigmoid() {
+    fn test_isigmoid() {
 
         let mut i = 1.0;
-        i.sigmoid();
+        i.isigmoid();
         assert!(num::abs(i - 0.73106) <= 0.00001);
 
         i = 1.0;
-        i.sigmoid_derivative();
+        i.isigmoid_derivative();
         assert!(num::abs(i - 0.56682) <= 0.00002);
 
         let mut a = [1.0, 2.0, 3.0];
-        a.sigmoid();
+        a.isigmoid();
         assert!(a.similar(&[0.73106, 0.88080, 0.95257], 0.00001));
 
         let mut b = [1.0, 2.0];
-        b.sigmoid_derivative();
+        b.isigmoid_derivative();
         assert!(b.similar(&vec![0.56683, 0.52977], 0.00002));
     }
 }
