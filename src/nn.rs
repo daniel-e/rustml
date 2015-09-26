@@ -2,21 +2,8 @@ extern crate rand;
 
 use self::rand::Rng;
 use matrix::Matrix;
-use ops::MatrixVectorMul;
-use ops_inplace::VectorVectorOpsInPlace;
-use vectors::{Append, from_value};
-
-pub fn sigmoid(v: &[f64]) -> Vec<f64> {
-
-    v.iter().map(|&x| 1.0 / (1.0 + (-x).exp())).collect()
-}
-
-pub fn sigmoid_derivative(v: &[f64]) -> Vec<f64> {
-
-    let mut i = from_value(1.0, v.len());
-    i.isub(&sigmoid(&v));
-    sigmoid(&i)
-}
+use ops::{MatrixVectorMul, Functions};
+use vectors::Append;
 
 #[derive(Debug)]
 pub struct NeuralNetwork {
@@ -95,7 +82,7 @@ impl NeuralNetwork {
 
         self.params.iter()
             .fold(input.to_vec(), 
-                  |v, ref params| sigmoid(&params.mul_vec(&[1.0].append(&v)))
+                  |v, ref params| params.mul_vec(&[1.0].append(&v)).sigmoid()
             )
     }
 
@@ -122,7 +109,7 @@ impl NeuralNetwork {
             for theta in &self.params {
                 let net = theta.mul_vec(&av.last().unwrap());
                 zv.push(net.clone());
-                av.push([1.0].append(&sigmoid(&net)));
+                av.push([1.0].append(&net.sigmoid()));
             }
 
             // delta for the output layer
@@ -145,6 +132,7 @@ mod tests {
     use self::num::*;
     use super::*;
     use matrix::*;
+    use ops::Functions;
 
     #[test]
     fn test_nn() {
@@ -167,14 +155,14 @@ mod tests {
     #[test]
     fn test_sigmoid() {
 
-        assert!(sigmoid(&[1.0, 2.0]).similar(&vec![0.73106, 0.88080], 0.0001));
+        assert!(vec![1.0, 2.0].sigmoid().similar(&vec![0.73106, 0.88080], 0.0001));
     }
 
     #[test]
     fn test_sigmoid_derivative() {
 
-        let a = [1.0, 2.0];
-        assert!(sigmoid_derivative(&a).similar(&vec![0.56683, 0.52977], 0.00001));
+        let a = vec![1.0, 2.0];
+        assert!(a.sigmoid_derivative().similar(&vec![0.56683, 0.52977], 0.00001));
     }
 
     #[test]
