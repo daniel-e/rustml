@@ -6,7 +6,69 @@ use std::iter::repeat;
 
 use blas::*;
 use matrix::Matrix;
-use ops_inplace::VectorVectorOpsInPlace;
+use ops_inplace::{VectorVectorOpsInPlace, FunctionsInPlace};
+
+// ----------------------------------------------------------------------------
+
+/// Trait for common mathematical functions for scalars, vectors and matrices.
+pub trait Functions {
+
+    /// Computes the sigmoid function (i.e. 1/(1+exp(-x))) for a scalar or each
+    /// element in a vector or matrix.
+    fn sigmoid(&self) -> Self;
+
+    /// Computes the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x)))
+    /// for a scalar or each element in a vector or matrix.
+    fn sigmoid_derivative(&self) -> Self;
+}
+
+macro_rules! impl_functions {
+    ( $( $x:ty )+ ) => ($(
+
+        impl Functions for $x {
+
+            fn sigmoid(&self) -> $x {
+                1.0 / (1.0 + (- *self).exp())
+            }
+
+            fn sigmoid_derivative(&self) -> $x {
+                (1.0 - self.sigmoid()).sigmoid()
+            }
+        }
+    )*)
+}
+
+impl_functions!{ f32 f64 }
+
+impl <T: Functions + FunctionsInPlace + Clone> Functions for Vec<T> {
+
+    fn sigmoid(&self) -> Self {
+        let mut x = self.clone();
+        x.isigmoid();
+        x
+    }
+
+    fn sigmoid_derivative(&self) -> Self { 
+        let mut x = self.clone();
+        x.isigmoid_derivative();
+        x
+    }
+}
+
+impl <T: Functions + FunctionsInPlace + Clone> Functions for Matrix<T> {
+
+    fn sigmoid(&self) -> Self {
+        let mut x = self.clone();
+        x.isigmoid();
+        x
+    }
+
+    fn sigmoid_derivative(&self) -> Self {
+        let mut x = self.clone();
+        x.isigmoid_derivative();
+        x
+    }
+}
 
 // ----------------------------------------------------------------------------
 
@@ -437,8 +499,11 @@ impl MatrixVectorMul<f64> for Matrix<f64> {
 
 #[cfg(test)]
 mod tests {
+    extern crate num;
+
+    use self::num::abs;
     use super::*;
-    use matrix::Matrix;
+    use matrix::*;
     use math::*;
     use std::f64;
 
@@ -612,6 +677,20 @@ mod tests {
             x.mul_scalar_vec(true, 2.0, &a),
             vec![40.0, 44.0, 78.0]
         );
+    }
+
+    #[test]
+    fn test_sigmoid() {
+
+        assert!(num::abs(1.0.sigmoid() - 0.73106) <= 0.00001);
+
+        assert!(num::abs(1.0.sigmoid_derivative() - 0.56682) <= 0.00002);
+
+        let a = vec![1.0, 2.0, 3.0];
+        assert!(a.sigmoid().similar(&vec![0.73106, 0.88080, 0.95257], 0.00001));
+
+        let b = vec![1.0, 2.0];
+        assert!(b.sigmoid_derivative().similar(&vec![0.56683, 0.52977], 0.00002));
     }
 }
 
