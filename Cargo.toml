@@ -10,6 +10,7 @@ documentation = "http://daniel-e.github.io/rustml/rustml/"
 description = """
 A library for doing maching learning in Rust.
 """
+build = "build.rs"
 
 # Currently we can only upload up to 10MB. So we need to remove
 # everything that is not required for building the library.
