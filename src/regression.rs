@@ -7,7 +7,7 @@ use self::rand::{thread_rng, Rng};
 use std::iter::repeat;
 
 use matrix::*;
-use ops::MatrixVectorMul;
+use ops::{MatrixVectorMul, MatrixVectorOps};
 
 /// Hypothesis for linear regression.
 ///
