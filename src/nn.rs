@@ -1,9 +1,8 @@
 extern crate rand;
 
-use self::rand::Rng;
 use matrix::Matrix;
-use ops::{MatrixVectorMul, Functions};
-use vectors::Append;
+use ops::{MatrixVectorOps, Functions, VectorVectorOps};
+use vectors::{Append, random};
 
 #[derive(Debug)]
 pub struct NeuralNetwork {
@@ -11,7 +10,9 @@ pub struct NeuralNetwork {
     params: Vec<Matrix<f64>>
 }
 
+/// Implementation of a neural network.
 impl NeuralNetwork {
+    /// Creates a new neural network.
     pub fn new() -> NeuralNetwork {
         NeuralNetwork {
             layers: vec![],
@@ -21,20 +22,11 @@ impl NeuralNetwork {
 
     pub fn add_layer(&self, n: usize) -> NeuralNetwork {
 
-        match self.layers.last() {
-            Some(&m) => {
-                let mut rng = rand::thread_rng();
-                let v = rng.gen_iter::<f64>().take((m + 1) * n).collect::<Vec<f64>>();
-                let p = Matrix::from_vec(v, n, m + 1).unwrap();
-
-                NeuralNetwork {
-                    layers: self.layers.iter().chain([n].iter()).cloned().collect::<Vec<usize>>(),
-                    params: self.params.iter().chain([p].iter()).cloned().collect::<Vec<Matrix<f64>>>()
-                }
-            }
-            None => NeuralNetwork {
-                layers: vec![n],
-                params: vec![]
+        NeuralNetwork {
+            layers: self.layers.append(&[n]),
+            params: match self.layers.last() {
+                Some(&m) => self.params.append(&[Matrix::from_vec(random::<f64>((m + 1) * n), n, m + 1).unwrap()]),
+                None => vec![]
             }
         }
     }
@@ -44,13 +36,9 @@ impl NeuralNetwork {
         let mut m = self.params.clone();
 
         match m.get_mut(layer) {
-            None     => {
-                panic!("Layer does not exist."); 
-            }
+            None     => { panic!("Layer does not exist."); }
             Some(mx) => {
-                if mx.rows() != params.rows() || mx.cols() != params.cols() {
-                    panic!("Number of parameters are incompatible.");
-                }
+                assert!(mx.rows() == params.rows() && mx.cols() == params.cols(), "Parameter configuration is incompatible.");
                 *mx = params;
             }
         }
@@ -91,13 +79,15 @@ impl NeuralNetwork {
         assert!(self.layers.len() >= 2, "At least two layers are required.");
         assert!(examples.rows() == targets.rows(), "Number of examples and labels mismatch.");
         assert!(examples.cols() == self.input_size(), "Dimension of input vector does not match.");
-        assert!(self.output_size() == targets.rows(), "Dimension of target values mismatch.");
+        assert!(self.output_size() == targets.cols(), "Dimension of target values mismatch.");
 
         // create accumulator for the deltas
-        let mut acc_d: Vec<Matrix<f64>> = Vec::new();
+        let mut acc_d = Vec::new();
         for m in &self.params {
             acc_d.push(Matrix::fill(0.0, m.rows(), m.cols()));
         }
+
+        // TODO create the $\Delta$s
 
         for (x, t) in examples.row_iter().zip(targets.row_iter()) {
             // x = example
@@ -105,18 +95,33 @@ impl NeuralNetwork {
 
             // feedforward
             let mut av = vec![[1.0].append(x)]; // inputs for the next layer (=sigmoid applied to outputs + bias unit)
-            let mut zv = vec![];                // outputs of previous layer without sigmoid
+            let mut zv = vec![x.to_vec()];      // outputs of previous layer without sigmoid
             for theta in &self.params {
                 let net = theta.mul_vec(&av.last().unwrap());
                 zv.push(net.clone());
                 av.push([1.0].append(&net.sigmoid()));
             }
 
-            // delta for the output layer
-            //let mut deltas_per_layer = vec![];
+            let mut deltas_per_layer = vec![];
+
+            // deltas for output layer
+            {
+                let z = zv.pop().unwrap();
+                deltas_per_layer.push(z.sigmoid().sub(t).mul(&z.sigmoid_derivative()));
+            }
+
+            let mut l = self.params.len() - 1;
+            while zv.len() > 1 {
+                let delta_next = deltas_per_layer.last().unwrap().clone(); // delta of layer l + 1
+                let z = zv.pop().unwrap();
+                let mut b = self.params[l].transp_mul_vec(&delta_next);
+                b.remove(0);
+                deltas_per_layer.push(b.mul(&z.sigmoid_derivative()));
+                l = l - 1;
+            }
+
             
-            // remove bias from last layer
-            // TODO
+            // TODO: add to the  $\Delta$s
         }
 
 
