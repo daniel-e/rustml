@@ -28,7 +28,7 @@ fn try_gcc(lib: &str, msg: &str) {
 fn main() {
     try_gcc("-lblas", "BLAS not found. On Ubuntu try 'sudo apt-get install libblas3' before continuing.");
     try_gcc("-lopencv_highgui", "OpenCV not found. On Ubuntu try 'sudo apt-get install libopencv-highgui2.4' before continuing.");
-    try_gcc("-lopencv_corex", "OpenCV not found. On Ubuntu try 'sudo apt-get install libopencv-core2.4' before continuing.");
+    try_gcc("-lopencv_core", "OpenCV not found. On Ubuntu try 'sudo apt-get install libopencv-core2.4' before continuing.");
     try_gcc("-lopencv_imgproc", "OpenCV not found. On Ubuntu try 'sudo apt-get install libopencv-imgproc2.4' before continuing.");
 }
 
