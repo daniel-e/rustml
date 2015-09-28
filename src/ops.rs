@@ -6,7 +6,8 @@ use std::iter::repeat;
 
 use blas::*;
 use matrix::Matrix;
-use ops_inplace::{VectorVectorOpsInPlace, FunctionsInPlace};
+use ops_inplace::{VectorVectorOpsInPlace, d_gemv, s_gemv, FunctionsInPlace};
+use vectors::zero;
 
 // ----------------------------------------------------------------------------
 
@@ -283,12 +284,15 @@ pub trait VectorVectorOps<T> {
 
     fn add(&self, rhs: &[T]) -> Vec<T>;
 
+    /// Element wise multiplication.
     fn mul(&self, rhs: &[T]) -> Vec<T>;
 
     fn div(&self, rhs: &[T]) -> Vec<T>;
 
     fn mutate<F>(&self, f: F) -> Vec<T>
         where F: Fn(T) -> T;
+
+    fn col_mul_row(&self, rhs: &[T]) -> Matrix<T>;
 }
 
 macro_rules! vector_vector_ops_impl {
@@ -316,6 +320,17 @@ macro_rules! vector_vector_ops_impl {
 
                 self.iter().map(|&x| f(x)).collect()
             }
+
+            fn col_mul_row(&self, rhs: &[$t]) -> Matrix<$t> {
+
+                let mut m = Matrix::fill(0 as $t, self.len(), rhs.len());
+                for r in (0..self.len()) {
+                    for c in (0..rhs.len()) {
+                        *(m.get_mut(r, c).unwrap()) = self[r] * rhs[c];
+                    }
+                }
+                m
+            }
         }
 
         impl VectorVectorOps<$t> for Vec<$t> {
@@ -324,6 +339,7 @@ macro_rules! vector_vector_ops_impl {
             fn mul(&self, v: &[$t])                 -> Vec<$t> { (self[..]).mul(v)    }
             fn div(&self, v: &[$t])                 -> Vec<$t> { (self[..]).div(v)    }
             fn mutate<F: Fn($t) -> $t>(&self, f: F) -> Vec<$t> { (self[..]).mutate(f) }
+            fn col_mul_row(&self, v: &[$t])         -> Matrix<$t> { (self[..]).col_mul_row(v) }
         }
     )*)
 }
@@ -340,10 +356,26 @@ pub trait MatrixVectorOps<T> {
 
     /// Subtracts the given vector from each row of the matrix.
     fn sub_row(&self, rhs: &[T]) -> Matrix<T>;
+
+    /// Multiplies the matrix with a vector (i.e. `X*v`)
+    /// and returns the result.
+    ///
+    /// # Implementation details
+    ///
+    /// This operation is done via the underlying BLAS implementation.
+    fn mul_vec(&self, v: &[T]) -> Vec<T>;
+
+    /// Multiplies the transpose of the matrix with a vector (i.e. X<sup>T</sup> * v)
+    /// and returns the result.
+    ///
+    /// # Implementation details
+    ///
+    /// This operation is done via the underlying BLAS implementation.
+    fn transp_mul_vec(&self, v: &[T]) -> Vec<T>;
 }
 
 macro_rules! matrix_vector_ops_impl {
-    ($($t:ty)*) => ($(
+    ($($t:ty, $gemv:expr)*) => ($(
 
         impl MatrixVectorOps<$t> for Matrix<$t> {
 
@@ -366,19 +398,31 @@ macro_rules! matrix_vector_ops_impl {
                 }
                 m
             }
+
+            fn mul_vec(&self, v: &[$t]) -> Vec<$t> {
+
+                let mut y = zero(self.rows());
+                $gemv(false, 1.0, self, v, 0.0, &mut y);
+                y
+            }
+
+            fn transp_mul_vec(&self, v: &[$t]) -> Vec<$t> {
+
+                let mut y = zero(self.cols());
+                $gemv(true, 1.0, self, v, 0.0, &mut y);
+                y
+            }
         }
     )*)
 }
 
-matrix_vector_ops_impl!{ f32 f64 }
+matrix_vector_ops_impl!{ f32, s_gemv }
+matrix_vector_ops_impl!{ f64, d_gemv }
 
 // ----------------------------------------------------------------------------
 
 /// Trait for matrix vector multiplication.
 pub trait MatrixVectorMul<T> {
-
-    /// Multiplies the matrix with the row vector `v`.
-    fn mul_vec(&self, v: &[T]) -> Vec<T>;
 
     /// Computes Xv-y
     fn mul_vec_minus_vec(&self, v: &[T], y: &[T]) -> Vec<T>;
@@ -392,34 +436,6 @@ pub trait MatrixVectorMul<T> {
 
 
 impl MatrixVectorMul<f64> for Matrix<f64> {
-
-    fn mul_vec(&self, v: &[f64]) -> Vec<f64> {
-
-        assert!(
-            self.cols() == v.len() && self.cols() != 0 && self.rows() != 0, 
-            "Dimensions do not match."
-        );
-
-        let y: Vec<f64> = repeat(0.0).take(self.rows()).collect();
-        unsafe {
-            cblas_dgemv(
-                Order::RowMajor, 
-                Transpose::NoTrans,
-                self.rows() as c_int,
-                self.cols() as c_int,
-                1.0 as c_double,
-                self.buf().as_ptr() as *const c_double,
-                self.cols() as c_int,
-                v.as_ptr() as *const c_double,
-                1 as c_int,
-                0.0 as c_double,
-                y.as_ptr() as *mut c_double,
-                1 as c_int
-            );
-        }
-        y
-    }
-
 
     fn mul_vec_minus_vec(&self, v: &[f64], y: &[f64]) -> Vec<f64> {
 
@@ -615,6 +631,15 @@ mod tests {
     }
 
     #[test]
+    fn test_transp_matrix_vector_mul() {
+        let x = mat![1.0, 2.0; 3.0, 4.0; 2.0, 5.0];
+        let h = [2.0, 6.0, 3.0];
+        let y = x.transp_mul_vec(&h);
+        println!("{:?}", y);
+        assert_eq!(y, vec![26.0, 43.0]);
+    }
+
+    #[test]
     #[should_panic]
     fn test_matrix_vector_mul_panic() {
         let x = mat![1.0, 2.0, 3.0; 4.0, 2.0, 5.0];
@@ -691,6 +716,15 @@ mod tests {
 
         let b = vec![1.0, 2.0];
         assert!(b.sigmoid_derivative().similar(&vec![0.56683, 0.52977], 0.00002));
+    }
+
+    #[test]
+    fn test_col_mul_row() {
+
+        let a = vec![2.0, 3.0, 4.0];
+        let b = vec![5.0, 8.0];
+        let m = a.col_mul_row(&b);
+        assert!(m.eq(&mat![10.0, 16.0; 15.0, 24.0; 20.0, 32.0]));
     }
 }
 
