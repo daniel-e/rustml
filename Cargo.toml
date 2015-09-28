@@ -69,6 +69,10 @@ path = "examples/image_grid.rs"
 name = "plots"
 path = "examples/plots.rs"
 
+[[example]]
+name = "neuralnetwork"
+path = "examples/neuralnetwork.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"
