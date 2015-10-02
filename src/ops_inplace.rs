@@ -489,6 +489,53 @@ impl <T: FunctionsInPlace + Clone> FunctionsInPlace for Matrix<T> {
 
 // ----------------------------------------------------------------------------
 
+pub trait MatrixMatrixOpsInPlace<T> {
+
+    fn iadd(&mut self, rhs: &Matrix<T>);
+
+    fn idiv_scalar(&mut self, val: T);
+
+    fn imul_scalar(&mut self, val: T);
+}
+
+macro_rules! impl_matrix_matrix_ops_inplace {
+    ( $( $x:ty )+ ) => ($(
+
+        impl MatrixMatrixOpsInPlace<$x> for Matrix<$x> {
+
+            fn iadd(&mut self, rhs: &Matrix<$x>) { 
+
+                assert!(self.rows() == rhs.rows() && self.cols() == rhs.cols(), "Dimensions mismatch.");
+
+                for y in (0..self.rows()) {
+                    for x in (0..self.cols()) {
+                        *(self.get_mut(y, x).unwrap()) += *rhs.get(y, x).unwrap();
+                    }
+                }
+            }
+
+            fn idiv_scalar(&mut self, val: $x) {
+
+                for i in self.values_mut() {
+                    *i = *i / val;
+                }
+            }
+
+            fn imul_scalar(&mut self, val: $x) {
+
+                for i in self.values_mut() {
+                    *i = *i * val;
+                }
+            }
+        }
+    )*)
+}
+
+impl_matrix_matrix_ops_inplace!{ f32 }
+impl_matrix_matrix_ops_inplace!{ f64 }
+
+// ----------------------------------------------------------------------------
+
 /// Trait for inplace vector-vector operations.
 pub trait VectorVectorOpsInPlace<T> {
 
@@ -926,6 +973,55 @@ mod tests {
         let mut b = [1.0, 2.0];
         b.isigmoid_derivative();
         assert!(b.similar(&vec![0.56683, 0.52977], 0.00002));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_inplace_iadd() {
+
+        let mut a = mat![
+            1.0, 2.0, 3.0;
+            4.0, 1.0, 7.0
+        ];
+
+        let b = mat![
+            2.0, 5.0, 9.0;
+            1.0, 7.0, 3.0
+        ];
+
+        a.iadd(&b);
+        assert!(a.eq(&mat![
+            3.0, 7.0, 12.0;
+            5.0, 8.0, 10.0
+        ]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_inplace_idiv_scalar() {
+
+        let mut a = mat![
+            1.0, 2.0, 3.0;
+            4.0, 1.0, 7.0
+        ];
+        a.idiv_scalar(2.0);
+        assert!(a.eq(&mat![
+            0.5, 1.0, 1.5;
+            2.0, 0.5, 3.5
+        ]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_inplace_imul_scalar() {
+
+        let mut a = mat![
+            1.0, 2.0, 3.0;
+            4.0, 1.0, 7.0
+        ];
+        a.imul_scalar(2.0);
+        println!("{:?} XXXXXXXXXXXXXXX", a);
+        assert!(a.eq(&mat![
+            2.0, 4.0, 6.0;
+            8.0, 2.0, 14.0
+        ]));
     }
 }
 
