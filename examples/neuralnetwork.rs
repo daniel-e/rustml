@@ -5,6 +5,7 @@ use rustml::octave::builder;
 use rustml::datasets::{mixture_builder, normal_builder};
 use rustml::opencv::{Window, RgbImage};
 use rustml::matrix::Matrix;
+use rustml::ops_inplace::MatrixMatrixOpsInPlace;
 
 // This example trains a neural network to compute
 // the XOR function.
@@ -38,14 +39,28 @@ fn main() {
         .map(|r| compute_xor(r))
         .collect::<Vec<_>>();
 
-    let n = NeuralNetwork::new()
+    let mut n = NeuralNetwork::new()
         .add_layer(2)  // input layer with two units
-        .add_layer(2)  // hidden layer with two units
-        .add_layer(1)  // output layer
-        .derivatives(
+        .add_layer(3)  // hidden layer with two units
+        .add_layer(1);  // output layer
+
+    for i in (0..400) {
+        println!("{}", i);
+        let mut d = n.derivatives(
             &examples.rm_column(0).unwrap(), 
             &Matrix::from_vec(labels.clone(), labels.len(), 1).unwrap()
         );
+        for j in &mut d {
+            j.imul_scalar(-0.1);
+        }
+        println!("{:?}", d[0]);
+        n.update_weights(&d);
+    }
+
+    for row in examples.rm_column(0).unwrap().row_iter() {
+        println!("{:?}", row);
+        println!("{:?}", n.predict(row));
+    }
 
     builder()
         .add_matrix("X = $$", &examples)
