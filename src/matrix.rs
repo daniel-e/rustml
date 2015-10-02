@@ -93,7 +93,7 @@ impl <T: Clone + Signed + Float> Similar<T> for Matrix<T> {
 
     fn similar(&self, e: &Self, epsilon: T) -> bool {
 
-        assert!(self.rows() == e.rows() && self.cols() == e.cols(), "Dimensions do not match.");
+        assert!(self.rows() == e.rows() && self.cols() == e.cols(), "Dimensions of matrices do not match.");
         self.values().zip(e.values()).all(|(&x, &y)| num::abs(x - y) <= epsilon)
     }
 }
@@ -110,7 +110,7 @@ impl <T: Clone + Signed + Float> Similar<T> for [T] {
 
     fn similar(&self, e: &Self, epsilon: T) -> bool {
 
-        assert!(self.len() == e.len(), "Dimensions do not match.");
+        assert!(self.len() == e.len(), "Dimensions of vectors do not match.");
         self.iter().zip(e.iter()).all(|(&x, &y)| num::abs(x - y) <= epsilon)
     }
 }
