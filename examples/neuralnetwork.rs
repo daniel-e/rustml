@@ -32,17 +32,16 @@ fn main() {
 
     let mut n = NeuralNetwork::new()
         .add_layer(2)   // input layer with two units
-        .add_layer(2)   // hidden layer with two units
+        .add_layer(3)   // hidden layer with two units
         .add_layer(1);  // output layer
 
     let y = Matrix::from_vec(labels.clone(), labels.len(), 1).unwrap();
 
     // gradient descent with 500 iterations
-    for _ in (0..2000) {
-        println!("{}", n.error(&x, &y));
+    for _ in (0..500) {
         let mut d = n.derivatives(&x, &y);
         for j in &mut d { // alpha
-            j.imul_scalar(-10.0);
+            j.imul_scalar(-20.0);
         }
         n.update_weights(&d);
     }
