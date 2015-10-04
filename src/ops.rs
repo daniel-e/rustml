@@ -18,7 +18,7 @@ pub trait Functions {
     /// element in a vector or matrix.
     fn sigmoid(&self) -> Self;
 
-    /// Computes the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x)))
+    /// Computes the derivative of the sigmoid function (i.e. sigmoid(x) * (1 - sigmoid(x)))
     /// for a scalar or each element in a vector or matrix.
     fn sigmoid_derivative(&self) -> Self;
 
