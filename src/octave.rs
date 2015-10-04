@@ -4,6 +4,7 @@ use std::fmt;
 use std::fs::File;
 use std::io::{Write, Result};
 use std::process::{Command, Output};
+use std::iter::Iterator;
 
 use matrix::Matrix;
 
@@ -112,6 +113,33 @@ impl OctaveScriptBuilder {
         let v = self.to_vec(vals);
         t = t.replace("$$", &v);
         self.add(&t)
+    }
+
+    /// Adds the string to the Octave script.
+    ///
+    /// At the end of the line a semicolon is appended. If the string contains two
+    /// consecutive dollar signs (i.e. `$$`) these will be replaced by a vector
+    /// containing the elements of iterator `vals`.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate rustml;
+    /// use rustml::octave::*;
+    ///
+    /// # pub fn main() {
+    /// let v = vec![1, 2, 3];
+    /// let s = builder().add_vector_iter("x = $$", v.iter());
+    /// assert_eq!(
+    ///     s.to_string(),
+    ///     "1;\nx = [1,2,3];\n"
+    /// );
+    /// # }
+    /// ```
+    pub fn add_vector_iter<T: fmt::Display, I: Iterator<Item = T>>(&self, s: &str, vals: I) -> OctaveScriptBuilder {
+
+        let v = vals.collect::<Vec<_>>();
+        self.add_vector(s, &v)
     }
 
     /// Adds the string to the Octave script.
