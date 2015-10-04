@@ -421,7 +421,7 @@ pub trait FunctionsInPlace {
     /// element in a vector or matrix.
     fn isigmoid(&mut self);
 
-    /// Computes the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x)))
+    /// Computes the derivative of the sigmoid function (i.e. sigmoid(x) * (1 - sigmoid(x)))
     /// for a scalar or each element in a vector or matrix.
     fn isigmoid_derivative(&mut self);
 
@@ -506,13 +506,74 @@ impl <T: FunctionsInPlace + Clone> FunctionsInPlace for Matrix<T> {
 
 // ----------------------------------------------------------------------------
 
-pub trait MatrixMatrixOpsInPlace<T> {
+/// Trait for matrix-scalar operations.
+pub trait MatrixScalarOpsInPlace<T> {
 
-    fn iadd(&mut self, rhs: &Matrix<T>);
-
+    /// Divides each element of the matrix by the scalar `val`.
+    ///
+    /// Not accelerated via BLAS.
     fn idiv_scalar(&mut self, val: T);
 
+    /// Multiplies each element of the matrix with the scalar `val`.
+    ///
+    /// Not accelerated via BLAS.
     fn imul_scalar(&mut self, val: T);
+
+    /// Adds the scalar `val` to each element of the matrix.
+    ///
+    /// Not accelerated via BLAS.
+    fn iadd_scalar(&mut self, val: T);
+
+    /// Subtracts the scalar `val` from each element of the matrix.
+    ///
+    /// Not accelerated via BLAS.
+    fn isub_scalar(&mut self, val: T);
+}
+
+macro_rules! impl_matrix_scalar_ops_inplace {
+    ( $( $x:ty )+ ) => ($(
+
+        impl MatrixScalarOpsInPlace<$x> for Matrix<$x> {
+
+            fn idiv_scalar(&mut self, val: $x) {
+                for i in self.values_mut() {
+                    *i = *i / val;
+                }
+            }
+
+            fn imul_scalar(&mut self, val: $x) {
+                for i in self.values_mut() {
+                    *i = *i * val;
+                }
+            }
+
+            fn iadd_scalar(&mut self, val: $x) {
+                for i in self.values_mut() {
+                    *i = *i + val;
+                }
+            }
+
+            fn isub_scalar(&mut self, val: $x) {
+                for i in self.values_mut() {
+                    *i = *i - val;
+                }
+            }
+        }
+    )*)
+}
+
+impl_matrix_scalar_ops_inplace!{ f32 }
+impl_matrix_scalar_ops_inplace!{ f64 }
+
+// ----------------------------------------------------------------------------
+
+/// Trait for matrix-matrix operations.
+pub trait MatrixMatrixOpsInPlace<T> {
+
+    /// Adds the matrix `rhs` to this matrix inplace.
+    ///
+    /// Not accelarated via BLAS.
+    fn iadd(&mut self, rhs: &Matrix<T>);
 }
 
 macro_rules! impl_matrix_matrix_ops_inplace {
@@ -523,26 +584,12 @@ macro_rules! impl_matrix_matrix_ops_inplace {
             fn iadd(&mut self, rhs: &Matrix<$x>) { 
 
                 assert!(self.rows() == rhs.rows() && self.cols() == rhs.cols(), "Dimensions mismatch.");
-
-                for y in (0..self.rows()) {
-                    for x in (0..self.cols()) {
-                        *(self.get_mut(y, x).unwrap()) += *rhs.get(y, x).unwrap();
-                    }
-                }
-            }
-
-            fn idiv_scalar(&mut self, val: $x) {
-
-                for i in self.values_mut() {
-                    *i = *i / val;
-                }
-            }
-
-            fn imul_scalar(&mut self, val: $x) {
-
-                for i in self.values_mut() {
-                    *i = *i * val;
-                }
+                for i in (0..self.rows()) {
+                    self.row_mut(i).unwrap().iadd(&rhs.row(i).unwrap());
+                }/*
+                for (i, j) in self.values_mut().zip(rhs.values()) {
+                    *i = *i + j;
+                }*/
             }
         }
     )*)
@@ -714,6 +761,7 @@ impl_vector_vector_ops_inplace!{ f64, d_axpy, d_nrm2 }
 #[cfg(test)]
 mod tests {
     extern crate num;
+    extern crate time;
 
     use super::*;
     use matrix::*;
@@ -1041,6 +1089,34 @@ mod tests {
     }
 
     #[test]
+    fn test_matrix_matrix_ops_inplace_iadd_scalar() {
+
+        let mut a = mat![
+            1.0, 2.0, 3.0;
+            4.0, 1.0, 7.0
+        ];
+        a.iadd_scalar(2.0);
+        assert!(a.eq(&mat![
+            3.0, 4.0, 5.0;
+            6.0, 3.0, 9.0
+        ]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_inplace_isub_scalar() {
+
+        let mut a = mat![
+            1.0, 2.0, 3.0;
+            4.0, 1.0, 7.0
+        ];
+        a.isub_scalar(2.0);
+        assert!(a.eq(&mat![
+            -1.0, 0.0, 1.0;
+            2.0, -1.0, 5.0
+        ]));
+    }
+
+    #[test]
     fn test_recip() {
         let mut a = 2.0;
         a.irecip();
@@ -1052,5 +1128,20 @@ mod tests {
         c.irecip();
         assert_eq!(c, mat![0.5, 0.1; 0.25, 0.2]);
     }
+/*
+    #[test]
+    fn test_iadd_perf() {
+
+        let mut m1 = Matrix::<f64>::random::<f64>(100, 500);
+        let m2 = Matrix::<f64>::random::<f64>(100, 500);
+
+        let t1 = time::now();
+        for _ in (0..1000) {
+            m1.iadd(&m2);
+        }
+        let t2 = time::now();
+
+        println!("dt = {}", t2 - t1);
+    }*/
 }
 
