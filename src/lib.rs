@@ -13,8 +13,11 @@
 //!
 //!  <div style="clear:both;"></div>
 //!
-//!  <div style="float:left;text-align:center">
+//!  <!-- <div style="float:left;text-align:center">
 //!   Generator for normally distributed data<br/><img src="../plot_normal_1.png">
+//!  </div> -->
+//!  <div style="float:left;text-align:center">
+//!   Neural networks<br/><img src="../nn.png">
 //!  </div>
 //!  <div style="float:left;text-align:center">
 //!   Toy data: mixture<br/><img src="../plot_mixture.png">

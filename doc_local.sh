@@ -13,6 +13,7 @@ function gen {
 	convert -trim /tmp/plot_normal_1.png doc_data/plot_normal_1.png
 	convert -trim /tmp/plot_mixture.png doc_data/plot_mixture.png
 	convert -trim /tmp/plot_knn_boundary.png doc_data/plot_knn_boundary.png
+	convert -trim /tmp/nn.png doc_data/nn.png
 }
 
 echo "Generating doc ..."
