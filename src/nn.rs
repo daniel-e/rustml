@@ -100,6 +100,15 @@ impl NeuralNetwork {
             .iter().skip(1).cloned().collect() // skip the bias unit TODO more elegant way?
     }
 
+    pub fn error(&self, examples: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
+
+        let mut err = 0.0;
+        for (ref row, t) in examples.row_iter().zip(targets.row_iter()) {
+            let v = self.predict(row).sub(t);
+            err += v.iter().fold(0.0, |acc, val| acc + val * val);
+        }
+        err / (2.0 * examples.rows() as f64)
+    }
 
     fn feedforward(&self, x: &[f64]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
 
@@ -201,6 +210,9 @@ impl NeuralNetwork {
 
 #[cfg(test)]
 mod tests {
+    extern crate num;
+
+    use self::num::abs;
     use super::*;
     use matrix::*;
     use ops::Functions;
@@ -410,5 +422,45 @@ mod tests {
             0.21, 0.24, 0.06
         ], 0.01));
     }
+
+    #[test]
+    fn test_errror() {
+
+        // parameters
+        let params1 = mat![
+            0.1, 0.2, 0.4;
+            0.2, 0.1, 2.0
+        ];
+
+        let params2 = mat![
+            0.8, 1.2, 0.6;
+            0.4, 0.5, 0.8;
+            1.4, 1.5, 2.0
+        ];
+
+        let n = NeuralNetwork::new()
+            .add_layer(3)
+            .add_layer(2)
+            .add_layer(3)
+            .set_params(0, params1)
+            .set_params(1, params2);
+
+        let x = mat![
+            0.5, 1.2, 1.5;
+            1.0, 2.0, 1.0;
+            3.0, 1.4, 4.2
+        ];
+
+        let t = mat![
+            0.4, 1.0, 0.8;
+            1.2, 0.4, 0.2;
+            0.6, 0.3, 1.1
+        ];
+        let e = n.error(&x, &t);
+
+        println!("er {}", e);
+        assert!(num::abs(e - 0.26807) <= 0.0001);
+    }
+
 }
 
