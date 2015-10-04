@@ -3,7 +3,7 @@ extern crate rand;
 use matrix::Matrix;
 use ops::{MatrixVectorOps, Functions, VectorVectorOps, MatrixScalarOps};
 use vectors::{Append, random};
-use ops_inplace::{MatrixMatrixOpsInPlace};
+use ops_inplace::{MatrixMatrixOpsInPlace, MatrixScalarOpsInPlace};
 use opt::OptParams;
 
 #[derive(Debug, Clone)]
