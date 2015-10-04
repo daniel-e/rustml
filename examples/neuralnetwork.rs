@@ -8,6 +8,7 @@ use rustml::datasets::{mixture_builder, normal_builder};
 use rustml::opencv::{Window, RgbImage};
 use rustml::matrix::Matrix;
 use rustml::ops_inplace::MatrixMatrixOpsInPlace;
+use rustml::vectors::Linspace;
 
 // This example trains a neural network to compute
 // the XOR function.
@@ -29,15 +30,14 @@ fn main() {
         .collect::<Vec<_>>();
 
     let mut n = NeuralNetwork::new()
-        .add_layer(2)  // input layer with two units
-        .add_layer(3)  // hidden layer with two units
+        .add_layer(2)   // input layer with two units
+        .add_layer(3)   // hidden layer with two units
         .add_layer(1);  // output layer
 
     let x = examples.rm_column(0).unwrap();
     let y = Matrix::from_vec(labels.clone(), labels.len(), 1).unwrap();
 
-    for i in (0..1000) {
-        println!("{} {}", i, n.error(&x, &y));
+    for _ in (0..500) {
         let mut d = n.derivatives(&x, &y);
         for j in &mut d { // alpha
             j.imul_scalar(-20.0);
@@ -45,23 +45,21 @@ fn main() {
         n.update_weights(&d);
     }
 
+    // create the matrix for the contour plot
     let mut p = Matrix::<f64>::new();
-    for y in (-30..60) {
-        for x in (-30..60) {
-            let px = x as f64 / 30.0;
-            let py = y as f64 / 30.0;
-            let v = n.predict(&[px, py]);
-            p.add_row(&[px, py, v[0]]);
+    for y in (-1.0).linspace(2.0, 90) {
+        for x in (-1.0).linspace(2.0, 90) {
+            p.add_row(&[x, y, *n.predict(&[x, y]).first().unwrap()]);
         }
     }
 
     builder()
+        // contour plot
         .add_matrix("P = $$", &p)
-        .add("A = P(P(:, 3) < 0.5, 1:2)")
-        .add("B = P(P(:, 3) >= 0.5, 1:2)")
-        .add("scatter(A(:,1), A(:,2), 6, [1, 1, 0.7], 'filled')")
+        .add("tx = ty = linspace(-1, 1.96666666, 90)")
+        .add("contour(tx, ty, reshape(P(:,3), 90, 90))")
         .add("hold on")
-        .add("scatter(B(:,1), B(:,2), 6, [0.7, 0.7, 1], 'filled')")
+        // examples
         .add_matrix("X = $$", &examples)
         .add_vector("y = $$", &labels)
         .add("plot(X(y == 0, 2), X(y == 0, 3), 'd', 'markersize', 6, 'markerfacecolor', 'yellow', 'color', 'black')")
