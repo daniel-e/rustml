@@ -6,6 +6,7 @@ use rustml::nn::NeuralNetwork;
 use rustml::octave::builder;
 use rustml::opencv::{Window, RgbImage};
 use rustml::*;
+use rustml::opt::empty_opts;
 
 // This example trains a neural network to compute
 // the XOR function.
@@ -27,33 +28,25 @@ fn main() {
             repeat(0.0).take(2 * n).chain(repeat(1.0).take(2 * n)), 1
         ).unwrap();
 
-    let mut n = NeuralNetwork::new()
+    let n = NeuralNetwork::new()
         .add_layer(2)   // input layer with two units
         .add_layer(3)   // hidden layer with two units
-        .add_layer(1);  // output layer
-
-    // gradient descent with 500 iterations
-    for _ in (0..500) {
-        let mut d = n.derivatives(&x, &labels);
-        for j in &mut d { // alpha
-            j.imul_scalar(-20.0);
-        }
-        n.update_weights(&d);
-    }
-
-    // create the matrix for the contour plot
-    let mut p = Matrix::<f64>::new();
+        .add_layer(1)   // output layer
+        .optimize(&x, &labels, empty_opts().alpha(20.0).iter(500));
+        
+    // create the values for the contour plot
+    let mut p = vec![];
     for y in (-1.0).linspace(2.0, 100) {
         for x in (-1.0).linspace(2.0, 100) {
-            p.add_row(&[x, y, *n.predict(&[x, y]).first().unwrap()]);
+            p.push(*n.predict(&[x, y]).first().unwrap());
         }
     }
 
     builder()
         // contour plot
-        .add_matrix("P = $$", &p)
+        .add_vector("P = $$", &p)
         .add("tx = ty = linspace(-1, 2, 100)")
-        .add("contour(tx, ty, reshape(P(:, 3), 10, 10))")
+        .add("contour(tx, ty, reshape(P, 100, 100))")
         .add("hold on")
         // examples
         .add_matrix("X = $$", &x)

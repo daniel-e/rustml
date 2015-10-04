@@ -1,11 +1,12 @@
 extern crate rand;
 
 use matrix::Matrix;
-use ops::{MatrixVectorOps, Functions, VectorVectorOps};
+use ops::{MatrixVectorOps, Functions, VectorVectorOps, MatrixScalarOps};
 use vectors::{Append, random};
 use ops_inplace::{MatrixMatrixOpsInPlace};
+use opt::OptParams;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NeuralNetwork {
     layers: Vec<usize>,
     params: Vec<Matrix<f64>>
@@ -59,7 +60,8 @@ impl NeuralNetwork {
         match m.get_mut(layer) {
             None     => { panic!("Layer does not exist."); }
             Some(mx) => {
-                assert!(mx.rows() == params.rows() && mx.cols() == params.cols(), "Parameter configuration is incompatible.");
+                assert!(mx.rows() == params.rows() && 
+                    mx.cols() == params.cols(), "Parameter configuration is incompatible.");
                 *mx = params;
             }
         }
@@ -72,19 +74,33 @@ impl NeuralNetwork {
 
     /// Returns the number of input units.
     pub fn input_size(&self) -> usize {
+
         assert!(self.layers.len() != 0, "No input layer defined.");
         *self.layers.first().unwrap()
     }
 
     /// Returns the number of output units.
     pub fn output_size(&self) -> usize {
+
         assert!(self.layers.len() != 0, "No output layer defined.");
         *self.layers.last().unwrap()
     }
 
     /// Returns the number of layers.
     pub fn layers(&self) -> usize {
+
         self.layers.len()
+    }
+
+    /// Computes the error of the net.
+    pub fn error(&self, examples: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
+
+        let mut err = 0.0;
+        for (row, t) in examples.row_iter().zip(targets.row_iter()) {
+            let v = self.predict(row).sub(t);
+            err += v.iter().fold(0.0, |acc, val| acc + val * val);
+        }
+        err / (2.0 * examples.rows() as f64)
     }
 
     /// Computes the output of the neural network for the given input.
@@ -100,14 +116,16 @@ impl NeuralNetwork {
             .iter().skip(1).cloned().collect() // skip the bias unit TODO more elegant way?
     }
 
-    pub fn error(&self, examples: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
+    pub fn optimize(&self, x: &Matrix<f64>, labels: &Matrix<f64>, p: OptParams<f64>) -> NeuralNetwork {
 
-        let mut err = 0.0;
-        for (ref row, t) in examples.row_iter().zip(targets.row_iter()) {
-            let v = self.predict(row).sub(t);
-            err += v.iter().fold(0.0, |acc, val| acc + val * val);
+        let a = p.alpha.unwrap();
+        let mut n = self.clone();
+
+        for _ in (0..p.iter.unwrap()) {
+            let v = n.derivatives(x, labels).iter().map(|x| x.mul_scalar(-a)).collect::<Vec<_>>();
+            n.update_params(&v);
         }
-        err / (2.0 * examples.rows() as f64)
+        n
     }
 
     fn feedforward(&self, x: &[f64]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
@@ -196,15 +214,25 @@ impl NeuralNetwork {
         // TODO tests
     }
 
-    pub fn update_weights(&mut self, deltas: &Vec<Matrix<f64>>) {
+    /// Updates the parameters of the network.
+    ///
+    /// Each matrix in `deltas` is added to the corresponding matrix
+    /// of parameters of the network, i.e. the first matrix which
+    /// contains the parameters from the first layer to the second layer,
+    /// the second matrix is added to the parameters which contains the
+    /// parameters from the second layer to the third layer and so on.
+    pub fn update_params(&mut self, deltas: &[Matrix<f64>]) {
 
         assert!(self.params.len() == deltas.len(), "Dimensions do not match.");
         for i in (0..self.params.len()) {
             self.params[i].iadd(&deltas[i]);
         }
-        // TODO tests
     }
 
+    /// Returns the parameters of the network.
+    pub fn params(&self) -> Vec<Matrix<f64>> {
+        self.params.clone()
+    }
 }
 
 
@@ -462,5 +490,51 @@ mod tests {
         assert!(num::abs(e - 0.26807) <= 0.0001);
     }
 
+    #[test]
+    fn test_update_params() {
+        
+        let params1 = mat![ 0.1, 0.2, 0.4; 0.2, 0.1, 2.0 ];
+        let params2 = mat![ 0.8, 1.2, 0.6; 0.4, 0.5, 0.8;
+            1.4, 1.5, 2.0
+        ];
+
+        let mut n = NeuralNetwork::new()
+            .add_layer(3)
+            .add_layer(2)
+            .add_layer(3)
+            .set_params(0, params1)
+            .set_params(1, params2);
+
+        let d1 = mat![ 0.5, 0.3, 0.2; 0.5, 0.9, 1.4 ];
+        let d2 = mat![ 0.1, 1.0, 1.2; 0.1, 0.4, 1.1;
+            1.0, 2.0, 3.0
+        ];
+
+        n.update_params(&[d1, d2]);
+        assert!(n.params[0].similar(&mat![
+            0.6, 0.5, 0.6; 0.7, 1.0, 3.4
+        ], 0.001));
+        assert!(n.params[1].similar(&mat![
+            0.9, 2.2, 1.8; 0.5, 0.9, 1.9; 2.4, 3.5, 5.0
+        ], 0.001));
+    }
+
+    #[test]
+    fn test_params() {
+
+        let params1 = mat![ 0.1, 0.2, 0.4; 0.2, 0.1, 2.0 ];
+        let params2 = mat![ 0.8, 1.2, 0.6; 0.4, 0.5, 0.8;
+            1.4, 1.5, 2.0
+        ];
+        let n = NeuralNetwork::new()
+            .add_layer(3)
+            .add_layer(2)
+            .add_layer(3)
+            .set_params(0, params1.clone())
+            .set_params(1, params2.clone());
+        let p = n.params();
+        assert!(p[0].eq(&params1));
+        assert!(p[1].eq(&params2));
+    }
 }
 
