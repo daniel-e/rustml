@@ -482,16 +482,16 @@ impl <T: Clone> Matrix<T> {
             idx: n
         }
     }
-/*
-    // XXX
+
+    /*
     pub fn row_iter_at_mut(&mut self, n: usize) -> RowIterMut<T> {
 
         RowIterMut {
             m: self,
             idx: n
         }
-    }
-*/
+    }*/
+
     /// Returns an iterator over the rows of the matrix with the specified
     /// indexes in `rows`.
     ///
@@ -790,7 +790,7 @@ pub struct RowIterMut<'q, T: 'q> {
 impl <'q, T: Clone> Iterator for RowIterMut<'q, T> {
     type Item = &'q mut [T];
 
-    fn next(&mut self) -> Option<&'q mut [T]> {
+    fn next(&mut self) -> Option<Self::Item> {
         self.idx += 1;
         match self.idx > self.m.rows() {
             true => None,
