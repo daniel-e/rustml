@@ -22,6 +22,7 @@ extern crate num;
 use self::libc::{c_int, c_float, c_double};
 use self::num::traits::Float;
 
+use ops::Functions;
 use blas::*;
 use matrix::Matrix;
 
@@ -435,11 +436,7 @@ macro_rules! impl_functions_ops_inplace {
             }
 
             fn isigmoid_derivative(&mut self) {
-                let mut x = *self;
-                x.isigmoid();
-                x = 1.0 - x;
-                x.isigmoid();
-                *self = x;
+                *self = self.sigmoid() * (1.0 - self.sigmoid());
             }
         }
     )*)
@@ -964,7 +961,7 @@ mod tests {
 
         i = 1.0;
         i.isigmoid_derivative();
-        assert!(num::abs(i - 0.56682) <= 0.00002);
+        assert!(num::abs(i - 0.19661) <= 0.00001);
 
         let mut a = [1.0, 2.0, 3.0];
         a.isigmoid();
@@ -972,7 +969,7 @@ mod tests {
 
         let mut b = [1.0, 2.0];
         b.isigmoid_derivative();
-        assert!(b.similar(&vec![0.56683, 0.52977], 0.00002));
+        assert!(b.similar(&vec![0.19661, 0.10499], 0.00002));
     }
 
     #[test]

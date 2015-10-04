@@ -130,7 +130,7 @@ impl NeuralNetwork {
         assert!(av_zv.0.len() == self.layers(), "Invalid dimension of vectors in av_zv.");
         assert!(av_zv.1.len() == self.layers(), "Invalid dimension of vectors in av_zv.");
 
-        let ref av = av_zv.0;
+        //let ref av = av_zv.0;
         let ref zv = av_zv.1;
         let mut deltas = vec![];
 
@@ -201,9 +201,6 @@ impl NeuralNetwork {
 
 #[cfg(test)]
 mod tests {
-    extern crate num;
-
-    use self::num::*;
     use super::*;
     use matrix::*;
     use ops::Functions;
@@ -255,7 +252,7 @@ mod tests {
     fn test_sigmoid_derivative() {
 
         let a = vec![1.0, 2.0];
-        assert!(a.sigmoid_derivative().similar(&vec![0.56683, 0.52977], 0.00001));
+        assert!(a.sigmoid_derivative().similar(&vec![0.19661, 0.10499], 0.00001));
     }
 
     #[test]
@@ -366,8 +363,8 @@ mod tests {
         assert!(a[2].similar(&vec![0.90270, 0.82108, 0.98771], 0.00001));
 
         let d = n.backprop(&a[2].clone(), &[2.7, 3.1, 1.5], &(a, z));
-        assert!(d[0].similar(&vec![-0.94233, -1.24112, -0.25772], 0.00001));
-        assert!(d[1].similar(&vec![-1.2235, -1.0568], 0.0001));
+        assert!(d[0].similar(&vec![-0.1578584, -0.3347843, -0.0062193], 0.0000002));
+        assert!(d[1].similar(&vec![-0.075561, -0.013853], 0.000002));
 
         // TODO: test a 4 layer network
     }
@@ -376,12 +373,12 @@ mod tests {
     #[test]
     fn test_update() {
 
-        let mut m1 = mat![
+        let m1 = mat![
             0.0, 0.0, 0.0;
             0.0, 0.0, 0.0
         ];
 
-        let mut m2 = mat![
+        let m2 = mat![
             0.0, 0.0, 0.0;
             0.0, 0.0, 0.0;
             0.0, 0.0, 0.0;

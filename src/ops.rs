@@ -33,7 +33,7 @@ macro_rules! impl_functions {
             }
 
             fn sigmoid_derivative(&self) -> $x {
-                (1.0 - self.sigmoid()).sigmoid()
+                self.sigmoid() * (1.0 - self.sigmoid())
             }
         }
     )*)
@@ -709,13 +709,13 @@ mod tests {
 
         assert!(num::abs(1.0.sigmoid() - 0.73106) <= 0.00001);
 
-        assert!(num::abs(1.0.sigmoid_derivative() - 0.56682) <= 0.00002);
+        assert!(num::abs(1.0.sigmoid_derivative() - 0.196612) <= 0.00002);
 
         let a = vec![1.0, 2.0, 3.0];
         assert!(a.sigmoid().similar(&vec![0.73106, 0.88080, 0.95257], 0.00001));
 
         let b = vec![1.0, 2.0];
-        assert!(b.sigmoid_derivative().similar(&vec![0.56683, 0.52977], 0.00002));
+        assert!(b.sigmoid_derivative().similar(&vec![0.19661, 0.10499], 0.00002));
     }
 
     #[test]
