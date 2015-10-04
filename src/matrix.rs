@@ -259,16 +259,23 @@ impl <T: Clone> Matrix<T> {
         Some(m)
     }
 
-    // TODO tests
+    /// Creates a matrix from the values of an iterator.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustml::Matrix;
+    ///
+    /// let v = vec![1, 2, 3, 4, 5, 6];
+    /// let a = Matrix::from_iter(v.iter(), 3).unwrap();
+    /// assert_eq!(a.rows(), 2);
+    /// assert_eq!(a.cols(), 3);
+    /// ```
     pub fn from_iter<I: Iterator<Item = T>>(iter: I, cols: usize) -> Option<Matrix<T>> {
 
         let v = iter.collect::<Vec<T>>();
-        let rows = v.len() / cols;
-
-        match rows * cols != v.len() {
-            true => None,
-            _ => Matrix::from_vec(v, rows, cols)
-        }
+        let l = v.len();
+        Matrix::from_vec(v, l / cols, cols)
     }
 
     // TODO test
@@ -1307,6 +1314,18 @@ mod tests {
             *i = *i * 2.0;
         }
         assert!(m.eq(&mat![2.0, 3.0; 4.0, 5.0]));
+    }
+
+    #[test]
+    fn test_from_iter() {
+
+        let v = vec![1, 2, 3, 4, 5, 6];
+        let a = Matrix::from_iter(v.iter(), 3).unwrap();
+        assert_eq!(a.rows(), 2);
+        assert_eq!(a.cols(), 3);
+        let b = Matrix::from_iter(v.iter(), 2).unwrap();
+        assert_eq!(b.cols(), 2);
+        assert_eq!(b.rows(), 3);
     }
 }
 
