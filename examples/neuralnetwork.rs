@@ -4,11 +4,8 @@ use std::iter::repeat;
 
 use rustml::nn::NeuralNetwork;
 use rustml::octave::builder;
-use rustml::datasets::{mixture_builder, normal_builder};
 use rustml::opencv::{Window, RgbImage};
-use rustml::matrix::Matrix;
-use rustml::ops_inplace::MatrixMatrixOpsInPlace;
-use rustml::vectors::Linspace;
+use rustml::*;
 
 // This example trains a neural network to compute
 // the XOR function.
