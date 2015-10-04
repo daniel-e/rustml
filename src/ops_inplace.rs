@@ -1014,7 +1014,6 @@ mod tests {
             4.0, 1.0, 7.0
         ];
         a.imul_scalar(2.0);
-        println!("{:?} XXXXXXXXXXXXXXX", a);
         assert!(a.eq(&mat![
             2.0, 4.0, 6.0;
             8.0, 2.0, 14.0
