@@ -3,13 +3,14 @@ extern crate libc;
 extern crate num;
 extern crate rand;
 
-use std::cmp::{PartialEq, min};
 use self::libc::{c_void, size_t};
-use std::marker::Copy;
 use self::num::traits::Num;
-use std::iter;
 use self::rand::{thread_rng, Rng, Rand};
+use std::marker::Copy;
+use std::cmp::{PartialEq, min};
+use std::iter;
 use std::mem;
+
 
 // ------------------------------------------------------------------
 
@@ -58,6 +59,43 @@ impl <T: Clone> Select<T> for [T] {
             v.push(self[*idx].clone());
         }
         v
+    }
+}
+
+// ------------------------------------------------------------------
+
+/// Linearly spaced elements.
+pub trait Linspace <T> {
+
+    /// Returns a vector with `n` linearly separated elements
+    /// between `self` and `limit` (including `self` and
+    /// `limit`).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustml::vectors::*;
+    ///
+    /// assert_eq!(1.0.linspace(5.0, 3), vec![1.0, 3.0, 5.0]);
+    /// ```
+    fn linspace(&self, limit: T, n: usize) -> Vec<T>;
+}
+
+impl Linspace<f64> for f64 {
+
+    fn linspace(&self, limit: f64, n: usize) -> Vec<f64> {
+
+        if n <= 1 {
+            vec![limit]
+        } else {
+            let mut v = vec![];
+                let s = *self;
+                let d = (limit - *self) / (n - 1) as f64;
+                for i in (0..n) {
+                    v.push(s + i as f64 * d);
+                }
+            v
+        }
     }
 }
 
@@ -292,6 +330,7 @@ pub fn copy_memory<T: Copy>(dst: &mut [T], src: &[T], n: usize) -> usize {
 mod tests {
     extern crate num;
     use super::*;
+    use matrix::Similar;
 
     #[test]
     fn test_zero() {
@@ -354,6 +393,24 @@ mod tests {
     #[test]
     fn test_from_value() {
         assert_eq!(from_value(2, 3), vec![2, 2, 2]);
+    }
+
+    #[test]
+    fn test_linspace() {
+
+        assert!(1.0.linspace(5.0, 1).similar(&vec![5.0], 0.0001));
+        assert!(1.0.linspace(5.0, 0).similar(&vec![5.0], 0.0001));
+        assert!(1.0.linspace(5.0, 2).similar(&vec![1.0, 5.0], 0.0001));
+        assert!(1.0.linspace(5.0, 3).similar(&vec![1.0, 3.0, 5.0], 0.0001));
+        assert!(1.0.linspace(5.0, 5).similar(&vec![1.0, 2.0, 3.0, 4.0, 5.0], 0.0001));
+
+        assert!(5.0.linspace(1.0, 5).similar(&vec![5.0, 4.0, 3.0, 2.0, 1.0], 0.0001));
+        assert!(5.0.linspace(1.0, 1).similar(&vec![1.0], 0.0001));
+
+        assert!(5.0.linspace(5.0, 3).similar(&vec![5.0, 5.0, 5.0], 0.0001));
+
+        assert!((-1.0).linspace(1.0, 3).similar(&vec![-1.0, 0.0, 1.0], 0.0001));
+        assert!(1.0.linspace(-1.0, 3).similar(&vec![1.0, 0.0, -1.0], 0.0001));
     }
 }
 
