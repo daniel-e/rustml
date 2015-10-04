@@ -424,6 +424,9 @@ pub trait FunctionsInPlace {
     /// Computes the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x)))
     /// for a scalar or each element in a vector or matrix.
     fn isigmoid_derivative(&mut self);
+
+    /// Takes the reciprocal.
+    fn irecip(&mut self);
 }
 
 macro_rules! impl_functions_ops_inplace {
@@ -438,6 +441,10 @@ macro_rules! impl_functions_ops_inplace {
             fn isigmoid_derivative(&mut self) {
                 *self = self.sigmoid() * (1.0 - self.sigmoid());
             }
+
+            fn irecip(&mut self) {
+                *self = self.recip();
+            }
         }
     )*)
 }
@@ -448,6 +455,7 @@ impl <T: FunctionsInPlace> FunctionsInPlace for Vec<T> {
 
     fn isigmoid(&mut self) { self[..].isigmoid(); }
     fn isigmoid_derivative(&mut self) { self[..].isigmoid_derivative(); }
+    fn irecip(&mut self) { self[..].irecip(); }
 }
 
 impl <T: FunctionsInPlace> FunctionsInPlace for [T] {
@@ -465,6 +473,12 @@ impl <T: FunctionsInPlace> FunctionsInPlace for [T] {
             i.isigmoid_derivative();
         }
     }
+
+    fn irecip(&mut self) {
+        for i in self {
+            i.irecip();
+        }
+    }
 }
 
 impl <T: FunctionsInPlace + Clone> FunctionsInPlace for Matrix<T> {
@@ -480,6 +494,12 @@ impl <T: FunctionsInPlace + Clone> FunctionsInPlace for Matrix<T> {
 
         for i in self.values_mut() {
             i.isigmoid_derivative();
+        }
+    }
+
+    fn irecip(&mut self) {
+        for i in self.values_mut() {
+            i.irecip();
         }
     }
 }
@@ -1018,6 +1038,19 @@ mod tests {
             2.0, 4.0, 6.0;
             8.0, 2.0, 14.0
         ]));
+    }
+
+    #[test]
+    fn test_recip() {
+        let mut a = 2.0;
+        a.irecip();
+        assert_eq!(a, 0.5);
+        let mut b = vec![2.0, 10.0];
+        b.irecip();
+        assert_eq!(b, vec![0.5, 0.1]);
+        let mut c = mat![2.0, 10.0; 4.0, 5.0];
+        c.irecip();
+        assert_eq!(c, mat![0.5, 0.1; 0.25, 0.2]);
     }
 }
 

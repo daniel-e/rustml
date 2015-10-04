@@ -21,6 +21,10 @@ pub trait Functions {
     /// Computes the derivative of the sigmoid function (i.e. sigmoid(1 - sigmoid(x)))
     /// for a scalar or each element in a vector or matrix.
     fn sigmoid_derivative(&self) -> Self;
+
+    /// Computes the reciprocal (inverse) of each element of the matrix
+    /// and returns the result in a new matrix.
+    fn recip(&self) -> Self;
 }
 
 macro_rules! impl_functions {
@@ -34,6 +38,10 @@ macro_rules! impl_functions {
 
             fn sigmoid_derivative(&self) -> $x {
                 self.sigmoid() * (1.0 - self.sigmoid())
+            }
+
+            fn recip(&self) -> $x {
+                1.0 / *self
             }
         }
     )*)
@@ -54,6 +62,12 @@ impl <T: Functions + FunctionsInPlace + Clone> Functions for Vec<T> {
         x.isigmoid_derivative();
         x
     }
+
+    fn recip(&self) -> Self {
+        let mut x = self.clone();
+        x.irecip();
+        x
+    }
 }
 
 impl <T: Functions + FunctionsInPlace + Clone> Functions for Matrix<T> {
@@ -69,25 +83,31 @@ impl <T: Functions + FunctionsInPlace + Clone> Functions for Matrix<T> {
         x.isigmoid_derivative();
         x
     }
+
+    fn recip(&self) -> Self {
+        let mut x = self.clone();
+        x.irecip();
+        x
+    }
 }
 
 // ----------------------------------------------------------------------------
 
-pub trait VectorOps<T> {
+pub trait Ops<T> {
 
     fn map<F, U>(&self, f: F) -> Vec<U>
         where F: Fn(&T) -> U;
 }
 
-pub trait VectorOpsSigned<T> {
+pub trait OpsSigned<T> {
 
     fn abs(&self) -> Vec<T>;
 }
 
-macro_rules! vector_ops_impl {
+macro_rules! ops_impl {
     ($($t:ty)*) => ($(
 
-        impl VectorOps<$t> for Vec<$t> {
+        impl Ops<$t> for Vec<$t> {
             fn map<F, U>(&self, f: F) -> Vec<U> 
                 where F: Fn(& $t) -> U {
                 let mut v: Vec<U> = Vec::new();
@@ -100,12 +120,12 @@ macro_rules! vector_ops_impl {
     )*)
 }
 
-vector_ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
+ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
 
-macro_rules! vector_ops_signed_impl {
+macro_rules! ops_signed_impl {
     ($($t:ty)*) => ($(
 
-        impl VectorOpsSigned<$t> for Vec<$t> {
+        impl OpsSigned<$t> for Vec<$t> {
             fn abs(&self) -> Vec<$t> {
                 self.iter().map(|&x| num::abs(x)).collect()
             }
@@ -113,51 +133,7 @@ macro_rules! vector_ops_signed_impl {
     )*)
 }
 
-vector_ops_signed_impl!{ isize i8 i16 i32 i64 f32 f64 }
-
-// ----------------------------------------------------------------------------
-
-/// Trait for operations on matrices.
-pub trait MatrixOps<T> {
-
-    /// Computes the reciprocal (inverse) of each element of the matrix
-    /// and returns the result in a new matrix.
-    fn recip(&self) -> Matrix<T>;
-
-    /// Returns the maximum element of the matrix or `None`
-    /// if the matrix is empty.
-    fn max(&self) -> Option<&T>;
-}
-
-macro_rules! matrix_ops_impl {
-    ($($t:ty)*) => ($(
-
-        impl MatrixOps<$t> for Matrix<$t> {
-
-            fn recip(&self) -> Matrix<$t> {
-                self.map(|&x| (1.0 as $t) / x)
-            }
-
-            fn max(&self) -> Option<&$t> {
-                match self.empty() {
-                    true  => None,
-                    false => {
-                        let mut val = self.values().next().unwrap();
-                        for i in self.values() {
-                            if i > val {
-                                val = i;
-                            }
-                        }
-                        Some(val)
-                    }
-                }
-            }
-        }
-    )*)
-}
-
-matrix_ops_impl!{ f32 f64 }
-
+ops_signed_impl!{ isize i8 i16 i32 i64 f32 f64 }
 
 // ----------------------------------------------------------------------------
 
@@ -521,7 +497,6 @@ mod tests {
     use super::*;
     use matrix::*;
     use math::*;
-    use std::f64;
 
     #[test]
     fn test_matrix_ops() {
@@ -611,17 +586,6 @@ mod tests {
         assert_eq!(m.sum(), 658);
     }
 
-    #[test]
-    fn test_matrix_max() {
-
-        let m = mat![1.0, 2.0, 1.0];
-        assert_eq!(m.max().unwrap(), &2.0);
-        let n = mat![1.0, f64::NAN, 2.0, 1.0];
-        assert_eq!(n.max().unwrap(), &2.0);
-        let o = mat![1.0, 2.0, f64::NAN, 1.0];
-        assert_eq!(o.max().unwrap(), &2.0);
-    }
- 
     #[test]
     fn test_matrix_vector_mul() {
         let x = mat![1.0, 2.0, 3.0; 4.0, 2.0, 5.0];
@@ -725,6 +689,15 @@ mod tests {
         let b = vec![5.0, 8.0];
         let m = a.col_mul_row(&b);
         assert!(m.eq(&mat![10.0, 16.0; 15.0, 24.0; 20.0, 32.0]));
+    }
+
+    #[test]
+    fn test_recip() {
+
+        assert_eq!(2.0.recip(), 0.5);
+        assert_eq!(vec![2.0, 4.0].recip(), vec![0.5, 0.25]);
+        assert!(mat![2.0, 4.0; 5.0, 10.0].recip().eq(
+            &mat![0.5, 0.25; 0.2, 0.1]));
     }
 }
 

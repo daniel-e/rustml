@@ -120,7 +120,7 @@
 pub use distance::{Distance, Euclid, DistancePoint2D};
 pub use matrix::{HasNan, Similar, Matrix};
 pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
-pub use ops::{MatrixScalarOps, VectorOps, VectorScalarOps, VectorVectorOps};
+pub use ops::{MatrixScalarOps, Ops, VectorScalarOps, VectorVectorOps};
 pub use ops_inplace::{VectorVectorOpsInPlace, MatrixMatrixOpsInPlace};
 pub use gaussian::{GaussianEstimator, GaussianFunctions, Gaussian};
 pub use geometry::{Point2D};
