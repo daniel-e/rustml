@@ -334,7 +334,6 @@ mod tests {
         assert_eq!(n.output_size(), 1);
 
         let p = n.predict(&x);
-        println!("{:?}", p);
         assert!(p.similar(&vec![0.61301], 0.00001));
     }
 
@@ -452,7 +451,7 @@ mod tests {
     }
 
     #[test]
-    fn test_errror() {
+    fn test_error() {
 
         // parameters
         let params1 = mat![
@@ -486,7 +485,6 @@ mod tests {
         ];
         let e = n.error(&x, &t);
 
-        println!("er {}", e);
         assert!(num::abs(e - 0.26807) <= 0.0001);
     }
 
