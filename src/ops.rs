@@ -6,8 +6,39 @@ use std::iter::repeat;
 
 use blas::*;
 use matrix::Matrix;
-use ops_inplace::{VectorVectorOpsInPlace, d_gemv, s_gemv, FunctionsInPlace};
+use ops_inplace::{VectorVectorOpsInPlace, d_gemv, s_gemv, FunctionsInPlace, MatrixMatrixOpsInPlace};
 use vectors::zero;
+
+// ----------------------------------------------------------------------------
+
+/// Trait for matrix-matrix operations.
+pub trait MatrixMatrixOps<T> {
+
+    /// Add the matrix `rhs` to this matrix.
+    ///
+    /// Implementation details: internally uses the in-place `iadd`.
+    fn add(&self, rhs: &Matrix<T>) -> Matrix<T>;
+
+    /// Subtracts the matrix `rhs` from this matrix.
+    ///
+    /// Implementation details: internally uses the in-place `isub`.
+    fn sub(&self, rhs: &Matrix<T>) -> Matrix<T>;
+}
+
+impl MatrixMatrixOps<f64> for Matrix<f64> {
+
+    fn add(&self, rhs: &Matrix<f64>) -> Matrix<f64> {
+        let mut x = self.clone();
+        x.iadd(rhs);
+        x
+    }
+
+    fn sub(&self, rhs: &Matrix<f64>) -> Matrix<f64> {
+        let mut x = self.clone();
+        x.isub(rhs);
+        x
+    }
+}
 
 // ----------------------------------------------------------------------------
 
@@ -99,11 +130,6 @@ pub trait Ops<T> {
         where F: Fn(&T) -> U;
 }
 
-pub trait OpsSigned<T> {
-
-    fn abs(&self) -> Vec<T>;
-}
-
 macro_rules! ops_impl {
     ($($t:ty)*) => ($(
 
@@ -121,6 +147,13 @@ macro_rules! ops_impl {
 }
 
 ops_impl!{ usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64 }
+
+// ----------------------------------------------------------------------------
+
+pub trait OpsSigned<T> {
+
+    fn abs(&self) -> Vec<T>;
+}
 
 macro_rules! ops_signed_impl {
     ($($t:ty)*) => ($(
@@ -599,7 +632,6 @@ mod tests {
         let x = mat![1.0, 2.0; 3.0, 4.0; 2.0, 5.0];
         let h = [2.0, 6.0, 3.0];
         let y = x.transp_mul_vec(&h);
-        println!("{:?}", y);
         assert_eq!(y, vec![26.0, 43.0]);
     }
 
@@ -698,6 +730,40 @@ mod tests {
         assert_eq!(vec![2.0, 4.0].recip(), vec![0.5, 0.25]);
         assert!(mat![2.0, 4.0; 5.0, 10.0].recip().eq(
             &mat![0.5, 0.25; 0.2, 0.1]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_add() {
+        let x = mat![
+            1.0, 2.0, 3.0; 
+            4.0, 2.0, 5.0
+        ];
+        let y = mat![
+            3.0, 1.0, 4.0; 
+            2.0, 3.0, 2.0
+        ];
+
+        let m = x.add(&y);
+        assert!(m.eq(&mat![
+            4.0, 3.0, 7.0; 6.0, 5.0, 7.0
+        ]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_sub() {
+        let x = mat![
+            1.0, 2.0, 3.0; 
+            4.0, 2.0, 5.0
+        ];
+        let y = mat![
+            3.0, 1.0, 4.0; 
+            2.0, 3.0, 2.0
+        ];
+
+        let m = x.sub(&y);
+        assert!(m.eq(&mat![
+            -2.0, 1.0, -1.0; 2.0, -1.0, 3.0
+        ]));
     }
 }
 
