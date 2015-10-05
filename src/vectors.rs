@@ -10,7 +10,8 @@ use std::marker::Copy;
 use std::cmp::{PartialEq, min};
 use std::iter;
 use std::mem;
-
+use std::fmt;
+use std::io::Write;
 
 // ------------------------------------------------------------------
 
@@ -198,6 +199,35 @@ pub fn from_file<T: FromStr>(path: &str) -> Result<VecReader<BufReader<File>, T>
     })
 }
 
+/// 
+pub trait VectorIO {
+
+    fn to_file(&self, path: &str) -> bool;
+}
+
+impl <T: fmt::Display> VectorIO for Vec<T> {
+
+    // TODO test
+    fn to_file(&self, path: &str) -> bool {
+
+        match File::create(path) {
+            Err(_) => false,
+            Ok(mut f) => {
+                for (idx, val) in self.iter().enumerate() {
+                    let mut s = format!(" {}", val);
+                    if idx == 0 {
+                        s = format!("{}", val);
+                    }
+                    if f.write_all(s.as_bytes()).is_err() {
+                        return false;
+                    }
+                }
+                f.write_all("\n".as_bytes()).is_ok()
+            }
+        }
+    }
+}
+
 // ------------------------------------------------------------------
 
 /// Counts and compresses consecutive elements that are equal.
@@ -331,6 +361,8 @@ mod tests {
     extern crate num;
     use super::*;
     use matrix::Similar;
+    use std::fs::File;
+    use std::io::{Read, BufReader};
 
     #[test]
     fn test_zero() {
@@ -411,6 +443,23 @@ mod tests {
 
         assert!((-1.0).linspace(1.0, 3).similar(&vec![-1.0, 0.0, 1.0], 0.0001));
         assert!(1.0.linspace(-1.0, 3).similar(&vec![1.0, 0.0, -1.0], 0.0001));
+    }
+
+    #[test]
+    fn test_vec_to_file() {
+
+        let a = vec![1, 4, 2, 3, 5];
+        assert!(a.to_file("/tmp/test_vec_to_file.txt"));
+
+        let f = File::open("/tmp/test_vec_to_file.txt").unwrap();
+        let mut r = BufReader::new(f);
+        let mut b: Vec<u8> = Vec::<u8>::new();
+        r.read_to_end(&mut b).unwrap();
+        assert_eq!(b, "1 4 2 3 5\n".as_bytes());
+
+        let mut i = from_file::<u32>("/tmp/test_vec_to_file.txt").unwrap();
+        assert_eq!(i.next().unwrap().unwrap(), vec![1, 4, 2, 3, 5]);
+        assert!(i.next().is_none());
     }
 }
 
