@@ -572,8 +572,20 @@ pub trait MatrixMatrixOpsInPlace<T> {
 
     /// Adds the matrix `rhs` to this matrix inplace.
     ///
-    /// Not accelarated via BLAS.
+    /// Implementation details: iterates through the rows of both matrices and
+    /// uses `iadd` for the vectors (using BLAS).
     fn iadd(&mut self, rhs: &Matrix<T>);
+
+    /// Subtracts the matrix `rhs` from this matrix inplace.
+    ///
+    /// Implementation details: iterates through the rows of both matrices and
+    /// uses `isub` for the vectors (using BLAS).
+    fn isub(&mut self, rhs: &Matrix<T>);
+
+    /// Element wise matrix multiplication.
+    ///
+    /// (not accelerated via BLAS)
+    fn imule(&mut self, rhs: &Matrix<T>);
 }
 
 macro_rules! impl_matrix_matrix_ops_inplace {
@@ -590,6 +602,25 @@ macro_rules! impl_matrix_matrix_ops_inplace {
                 for (i, j) in self.values_mut().zip(rhs.values()) {
                     *i = *i + j;
                 }*/
+            }
+
+            fn isub(&mut self, rhs: &Matrix<$x>) { 
+
+                assert!(self.rows() == rhs.rows() && self.cols() == rhs.cols(), "Dimensions mismatch.");
+                for i in (0..self.rows()) {
+                    self.row_mut(i).unwrap().isub(&rhs.row(i).unwrap());
+                }/*
+                for (i, j) in self.values_mut().zip(rhs.values()) {
+                    *i = *i + j;
+                }*/
+            }
+
+            fn imule(&mut self, rhs: &Matrix<$x>) {
+
+                assert!(self.rows() == rhs.rows() && self.cols() == rhs.cols(), "Dimensions mismatch.");
+                for (i, j) in self.values_mut().zip(rhs.values()) {
+                    *i = *i * j;
+                }
             }
         }
     )*)
@@ -1043,21 +1074,19 @@ mod tests {
     #[test]
     fn test_matrix_matrix_ops_inplace_iadd() {
 
-        let mut a = mat![
-            1.0, 2.0, 3.0;
-            4.0, 1.0, 7.0
-        ];
-
-        let b = mat![
-            2.0, 5.0, 9.0;
-            1.0, 7.0, 3.0
-        ];
-
+        let mut a = mat![1.0, 2.0, 3.0; 4.0, 1.0, 7.0];
+        let b = mat![2.0, 5.0, 9.0; 1.0, 7.0, 3.0];
         a.iadd(&b);
-        assert!(a.eq(&mat![
-            3.0, 7.0, 12.0;
-            5.0, 8.0, 10.0
-        ]));
+        assert!(a.eq(&mat![3.0, 7.0, 12.0; 5.0, 8.0, 10.0]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_inplace_isub() {
+
+        let mut a = mat![1.0, 2.0, 3.0; 4.0, 1.0, 7.0];
+        let     b = mat![2.0, 5.0, 9.0; 1.0, 7.0, 3.0];
+        a.isub(&b);
+        assert!(a.similar(&mat![-1.0, -3.0, -6.0; 3.0, -6.0, 4.0], 0.0001));
     }
 
     #[test]
@@ -1114,6 +1143,15 @@ mod tests {
             -1.0, 0.0, 1.0;
             2.0, -1.0, 5.0
         ]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_inplace_imule() {
+
+        let mut a = mat![1.0, 2.0, 3.0; 4.0, 1.0, 7.0];
+        let     b = mat![2.0, 5.0, 9.0; 1.0, 7.0, 3.0];
+        a.imule(&b);
+        assert!(a.similar(&mat![2.0, 10.0, 27.0; 4.0, 7.0, 21.0], 0.0001));
     }
 
     #[test]
