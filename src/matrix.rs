@@ -705,9 +705,15 @@ impl <T: Clone> Matrix<T> {
             .collect()
     }
 
-    /// Inserts a column before the specified column.
+    /// Inserts a column before the specified column (indexing starts at zero).
     ///
-    /// Returns `None` if `v.len() != self.rows()`.
+    /// If the matrix is empty a new matrix `n x 1` matrix is returned
+    /// where `n` is the number of elements in `v`. If `pos`
+    /// is greater or equal to the number columns the vector
+    /// is appended as a new column.
+    ///
+    /// If the matrix is not empty and `v.len() != self.rows()` a
+    /// `None` is returned.
     pub fn insert_column(&self, pos: usize, v: &[T]) -> Option<Matrix<T>> {
 
         if self.empty() {
@@ -757,6 +763,15 @@ impl <T: Clone> Matrix<T> {
             m.add_row(&q);
         }
         Some(m)
+    }
+
+    pub fn if_then<F>(&self, prd: F, tr: T, fa: T) -> Matrix<T> 
+        where F: Fn(&T) -> bool {
+
+        Matrix::from_iter(
+            self.values().map(|x| if prd(x) { tr.clone() } else { fa.clone() }), 
+            self.cols()
+        ).unwrap()
     }
 }
 
@@ -1326,6 +1341,15 @@ mod tests {
         let b = Matrix::from_iter(v.iter(), 2).unwrap();
         assert_eq!(b.cols(), 2);
         assert_eq!(b.rows(), 3);
+    }
+
+    #[test]
+    fn test_if_then() {
+
+        let a = mat![1, 2, 3, 4; 3, 2, 4, 1];
+        assert!(
+            a.if_then(|&x| x > 2, 1, 0).eq(&mat![0, 0, 1, 1; 1, 0, 1, 0])
+        );
     }
 }
 
