@@ -12,6 +12,7 @@ use std::iter;
 use std::mem;
 use std::fmt;
 use std::io::Write;
+use std::fs::OpenOptions;
 
 // ------------------------------------------------------------------
 
@@ -207,10 +208,9 @@ pub trait VectorIO {
 
 impl <T: fmt::Display> VectorIO for Vec<T> {
 
-    // TODO test
     fn to_file(&self, path: &str) -> bool {
 
-        match File::create(path) {
+        match OpenOptions::new().write(true).append(true).create(true).open(path) {
             Err(_) => false,
             Ok(mut f) => {
                 for (idx, val) in self.iter().enumerate() {
@@ -361,7 +361,7 @@ mod tests {
     extern crate num;
     use super::*;
     use matrix::Similar;
-    use std::fs::File;
+    use std::fs::{File, remove_file};
     use std::io::{Read, BufReader};
 
     #[test]
@@ -447,6 +447,11 @@ mod tests {
 
     #[test]
     fn test_vec_to_file() {
+
+        match remove_file("/tmp/test_vec_to_file.txt") {
+            Err(_) => (),
+            Ok(_) => ()
+        }
 
         let a = vec![1, 4, 2, 3, 5];
         assert!(a.to_file("/tmp/test_vec_to_file.txt"));
