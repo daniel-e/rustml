@@ -12,13 +12,14 @@ fi
 echo "Generating doc ..."
 cargo doc
 
-cd $DOCFOLDER
 rm -rf DOCFOLDER/*
+cd $DOCFOLDER
 git pull
 cd ../rustml
 
 echo "Syncing ..."
 rsync --delete -r target/doc/* $DOCFOLDER/
+rsync -r doc_data/* $DOCFOLDER/
 cd $DOCFOLDER
 git add -A
 git commit -m "update to current version"
