@@ -167,9 +167,9 @@ pub fn plot_nn() {
 
 pub fn main() {
 
-    //plot_mixture();
-    //plot_normal_data();
-    //plot_knn_decision_boundary();
+    plot_mixture();
+    plot_normal_data();
+    plot_knn_decision_boundary();
     plot_nn();
 }
 
