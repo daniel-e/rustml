@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,18 +45,20 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-11551' class='srclink' href='../../src/rustml/ops.rs.html#218-230' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-13111' class='srclink' href='../../src/rustml/ops.rs.html#290-305' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait VectorVectorOps&lt;T&gt; {
     fn <a href='#tymethod.sub' class='fnname'>sub</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;;
     fn <a href='#tymethod.add' class='fnname'>add</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;;
     fn <a href='#tymethod.mul' class='fnname'>mul</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;;
     fn <a href='#tymethod.div' class='fnname'>div</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;;
     fn <a href='#tymethod.mutate' class='fnname'>mutate</a>&lt;F&gt;(&amp;self, f: F) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(T) -&gt; T</span>;
+    fn <a href='#tymethod.col_mul_row' class='fnname'>col_mul_row</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;;
 }</pre><div class='docblock'><p>Trait for vector vector operations.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.sub' class='method stab '><code>fn <a href='#tymethod.sub' class='fnname'>sub</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><h3 id='tymethod.add' class='method stab '><code>fn <a href='#tymethod.add' class='fnname'>add</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><h3 id='tymethod.mul' class='method stab '><code>fn <a href='#tymethod.mul' class='fnname'>mul</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><h3 id='tymethod.div' class='method stab '><code>fn <a href='#tymethod.div' class='fnname'>div</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><h3 id='tymethod.mutate' class='method stab '><code>fn <a href='#tymethod.mutate' class='fnname'>mutate</a>&lt;F&gt;(&amp;self, f: F) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(T) -&gt; T</span></code></h3></div>
+        <h3 id='tymethod.sub' class='method stab '><code>fn <a href='#tymethod.sub' class='fnname'>sub</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><h3 id='tymethod.add' class='method stab '><code>fn <a href='#tymethod.add' class='fnname'>add</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><h3 id='tymethod.mul' class='method stab '><code>fn <a href='#tymethod.mul' class='fnname'>mul</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='docblock'><p>Element wise multiplication.</p>
+</div><h3 id='tymethod.div' class='method stab '><code>fn <a href='#tymethod.div' class='fnname'>div</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><h3 id='tymethod.mutate' class='method stab '><code>fn <a href='#tymethod.mutate' class='fnname'>mutate</a>&lt;F&gt;(&amp;self, f: F) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(T) -&gt; T</span></code></h3><h3 id='tymethod.col_mul_row' class='method stab '><code>fn <a href='#tymethod.col_mul_row' class='fnname'>col_mul_row</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
     <li><code>impl <a class='trait' href='../../rustml/ops/trait.VectorVectorOps.html' title='rustml::ops::VectorVectorOps'>VectorVectorOps</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt; for <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>[<a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>]</a></code></li>
@@ -91,37 +93,44 @@
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-21807' class='srclink' href='../../src/rustml/opt.rs.html#1-313' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-26648' class='srclink' href='../../src/rustml/opt.rs.html#1-334' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Module for optimization with gradient descent.</p>
 
 <h1 id="example:-gradient-descent" class='section-header'><a
@@ -72,8 +72,7 @@ descent.</p>
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;error after iteration {} was {}&quot;</span>, <span class='ident'>iter</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>i</span>.<span class='number'>1</span>);
 }
 <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;solution: {:?}&quot;</span>, <span class='ident'>r</span>.<span class='ident'>params</span>);
-<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>params</span>[<span class='number'>0</span>] <span class='op'>-</span> <span class='number'>2.0</span> <span class='op'>&lt;=</span> <span class='number'>0.3</span>);
-</pre>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>params</span>[<span class='number'>0</span>] <span class='op'>-</span> <span class='number'>2.0</span> <span class='op'>&lt;=</span> <span class='number'>0.3</span>);</pre>
 
 <p>See <a href="https://github.com/daniel-e/rustml/blob/master/examples/gradient_descent.rs">here</a> for
 another example.</p>
@@ -138,37 +137,44 @@ another example.</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

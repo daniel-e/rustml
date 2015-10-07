@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,8 +45,37 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/rustml/lib.rs.html#1-123' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/rustml/lib.rs.html#1-157' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Library for doing machine learning with Rust.</p>
+
+<div style="font-size:80%">
+ <div style="float:left;text-align:center">
+  Linear regression<br/><img src="../linreg_plot.png">
+ </div>
+ <div style="float:left;text-align:center;padding-left:10px">
+  MNIST database of handwritten digits<br/><img style="border-top:1px solid black" src="../digits_grid.png">
+ </div>
+ <div style="float:left;text-align:center;padding-left:10px">
+  Gradient descent<br/><img style="border-top:1px solid black" src="../gradient_descent.png">
+ </div>
+
+ <div style="clear:both;"></div>
+
+ <!-- <div style="float:left;text-align:center">
+  Generator for normally distributed data<br/><img src="../plot_normal_1.png">
+ </div> -->
+ <div style="float:left;text-align:center">
+  Neural networks<br/><img src="../nn.png">
+ </div>
+ <div style="float:left;text-align:center">
+  Toy data: mixture<br/><img src="../plot_mixture.png">
+ </div>
+ <div style="float:left;text-align:center">
+  Decision boundary for knn (k = 5)<br/><img src="../plot_knn_boundary.png">
+ </div>
+
+ <div style="clear:both;"></div>
+</div>
 
 <h1 id="features" class='section-header'><a
                            href="#features">Features</a></h1>
@@ -61,7 +90,7 @@ matrices)</li>
 <li>optimization of linear regression with gradient descent</li>
 <li>classification with <i>k</i>-nearest neighbours</li>
 <li>sliding windows for arbitrary dimensions (e.g. for image processing)</li>
-<li>standard databases (e.g. MNIST database of handwritten digits)</li>
+<li><a href="datasets/index.html">standard databases</a> (e.g. MNIST database of handwritten digits)</li>
 <li>feature scaling</li>
 <li>video and image processing via integration of OpenCV</li>
 </ul>
@@ -110,8 +139,7 @@ the label of a vector with two features based on the examples in the matrix
         <span class='number'>3</span>, <span class='comment'>// look at the 3 nearest neighbours to make the decision</span>
         <span class='op'>|</span><span class='ident'>x</span>, <span class='ident'>y</span><span class='op'>|</span> <span class='ident'>Euclid</span>::<span class='ident'>compute</span>(<span class='ident'>x</span>, <span class='ident'>y</span>).<span class='ident'>unwrap</span>() <span class='comment'>// use Euclidean distance</span>
     );
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='number'>1</span>);
-</pre>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='number'>1</span>);</pre>
 
 <h1 id="all-examples" class='section-header'><a
                            href="#all-examples">All examples</a></h1>
@@ -132,9 +160,11 @@ examples requires an external dataset that has to be downloaded separately (see
 create plots with Octave</li>
 <li><a href="https://github.com/daniel-e/rustml/blob/master/examples/gradient_descent.rs">gradient descent</a>: use gradient
 to optimize a function with two parameters</li>
+<li><a href="https://github.com/daniel-e/rustml/blob/master/examples/image_grid.rs">image grid</a>: plot some of the 
+handwritten digits of the MNIST database into a grid</li>
 </ul>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub use distance::{<a class='trait' href='../rustml/distance/trait.Distance.html' title='rustml::distance::Distance'>Distance</a>, <a class='struct' href='../rustml/distance/struct.Euclid.html' title='rustml::distance::Euclid'>Euclid</a>, <a class='trait' href='../rustml/distance/trait.DistancePoint2D.html' title='rustml::distance::DistancePoint2D'>DistancePoint2D</a>};</code></td></tr><tr><td><code>pub use matrix::{<a class='trait' href='../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a>, <a class='trait' href='../rustml/matrix/trait.Similar.html' title='rustml::matrix::Similar'>Similar</a>, <a class='struct' href='../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>};</code></td></tr><tr><td><code>pub use math::{<a class='enum' href='../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>, <a class='enum' href='../rustml/math/enum.Normalization.html' title='rustml::math::Normalization'>Normalization</a>, <a class='trait' href='../rustml/math/mean/trait.Mean.html' title='rustml::math::mean::Mean'>Mean</a>, <a class='trait' href='../rustml/math/mean/trait.MeanVec.html' title='rustml::math::mean::MeanVec'>MeanVec</a>, <a class='trait' href='../rustml/math/sum/trait.Sum.html' title='rustml::math::sum::Sum'>Sum</a>, <a class='trait' href='../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>, <a class='trait' href='../rustml/math/sum/trait.SumVec.html' title='rustml::math::sum::SumVec'>SumVec</a>};</code></td></tr><tr><td><code>pub use ops::{<a class='trait' href='../rustml/ops/trait.MatrixScalarOps.html' title='rustml::ops::MatrixScalarOps'>MatrixScalarOps</a>, <a class='trait' href='../rustml/ops/trait.VectorOps.html' title='rustml::ops::VectorOps'>VectorOps</a>, <a class='trait' href='../rustml/ops/trait.VectorScalarOps.html' title='rustml::ops::VectorScalarOps'>VectorScalarOps</a>, <a class='trait' href='../rustml/ops/trait.VectorVectorOps.html' title='rustml::ops::VectorVectorOps'>VectorVectorOps</a>};</code></td></tr><tr><td><code>pub use ops_inplace::{<a class='trait' href='../rustml/ops_inplace/trait.VectorVectorOpsInPlace.html' title='rustml::ops_inplace::VectorVectorOpsInPlace'>VectorVectorOpsInPlace</a>};</code></td></tr><tr><td><code>pub use gaussian::{<a class='trait' href='../rustml/gaussian/trait.GaussianEstimator.html' title='rustml::gaussian::GaussianEstimator'>GaussianEstimator</a>, <a class='trait' href='../rustml/gaussian/trait.GaussianFunctions.html' title='rustml::gaussian::GaussianFunctions'>GaussianFunctions</a>, <a class='struct' href='../rustml/gaussian/struct.Gaussian.html' title='rustml::gaussian::Gaussian'>Gaussian</a>};</code></td></tr><tr><td><code>pub use geometry::{<a class='struct' href='../rustml/geometry/struct.Point2D.html' title='rustml::geometry::Point2D'>Point2D</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr><td><code>pub use distance::{<a class='trait' href='../rustml/distance/trait.Distance.html' title='rustml::distance::Distance'>Distance</a>, <a class='struct' href='../rustml/distance/struct.Euclid.html' title='rustml::distance::Euclid'>Euclid</a>, <a class='trait' href='../rustml/distance/trait.DistancePoint2D.html' title='rustml::distance::DistancePoint2D'>DistancePoint2D</a>};</code></td></tr><tr><td><code>pub use matrix::{<a class='trait' href='../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a>, <a class='trait' href='../rustml/matrix/trait.Similar.html' title='rustml::matrix::Similar'>Similar</a>, <a class='struct' href='../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>};</code></td></tr><tr><td><code>pub use math::{<a class='enum' href='../rustml/math/enum.Dimension.html' title='rustml::math::Dimension'>Dimension</a>, <a class='enum' href='../rustml/math/enum.Normalization.html' title='rustml::math::Normalization'>Normalization</a>, <a class='trait' href='../rustml/math/mean/trait.Mean.html' title='rustml::math::mean::Mean'>Mean</a>, <a class='trait' href='../rustml/math/mean/trait.MeanVec.html' title='rustml::math::mean::MeanVec'>MeanVec</a>, <a class='trait' href='../rustml/math/sum/trait.Sum.html' title='rustml::math::sum::Sum'>Sum</a>, <a class='trait' href='../rustml/math/var/trait.Var.html' title='rustml::math::var::Var'>Var</a>, <a class='trait' href='../rustml/math/sum/trait.SumVec.html' title='rustml::math::sum::SumVec'>SumVec</a>};</code></td></tr><tr><td><code>pub use ops::{<a class='trait' href='../rustml/ops/trait.MatrixScalarOps.html' title='rustml::ops::MatrixScalarOps'>MatrixScalarOps</a>, <a class='trait' href='../rustml/ops/trait.Ops.html' title='rustml::ops::Ops'>Ops</a>, <a class='trait' href='../rustml/ops/trait.VectorScalarOps.html' title='rustml::ops::VectorScalarOps'>VectorScalarOps</a>, <a class='trait' href='../rustml/ops/trait.VectorVectorOps.html' title='rustml::ops::VectorVectorOps'>VectorVectorOps</a>, <a class='trait' href='../rustml/ops/trait.MatrixMatrixOps.html' title='rustml::ops::MatrixMatrixOps'>MatrixMatrixOps</a>};</code></td></tr><tr><td><code>pub use ops_inplace::{<a class='trait' href='../rustml/ops_inplace/trait.VectorVectorOpsInPlace.html' title='rustml::ops_inplace::VectorVectorOpsInPlace'>VectorVectorOpsInPlace</a>, <a class='trait' href='../rustml/ops_inplace/trait.MatrixMatrixOpsInPlace.html' title='rustml::ops_inplace::MatrixMatrixOpsInPlace'>MatrixMatrixOpsInPlace</a>};</code></td></tr><tr><td><code>pub use gaussian::{<a class='trait' href='../rustml/gaussian/trait.GaussianEstimator.html' title='rustml::gaussian::GaussianEstimator'>GaussianEstimator</a>, <a class='trait' href='../rustml/gaussian/trait.GaussianFunctions.html' title='rustml::gaussian::GaussianFunctions'>GaussianFunctions</a>, <a class='struct' href='../rustml/gaussian/struct.Gaussian.html' title='rustml::gaussian::Gaussian'>Gaussian</a>};</code></td></tr><tr><td><code>pub use geometry::{<a class='struct' href='../rustml/geometry/struct.Point2D.html' title='rustml::geometry::Point2D'>Point2D</a>};</code></td></tr><tr><td><code>pub use vectors::{<a class='trait' href='../rustml/vectors/trait.Linspace.html' title='rustml::vectors::Linspace'>Linspace</a>, <a class='trait' href='../rustml/vectors/trait.VectorIO.html' title='rustml::vectors::VectorIO'>VectorIO</a>};</code></td></tr><tr><td><code>pub use datasets::{<a class='fn' href='../rustml/datasets/fn.mixture_builder.html' title='rustml::datasets::mixture_builder'>mixture_builder</a>, <a class='fn' href='../rustml/datasets/fn.normal_builder.html' title='rustml::datasets::normal_builder'>normal_builder</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                     <tr class=' module-item'>
                         <td><a class='mod' href='blas/index.html'
@@ -255,6 +285,14 @@ operations.</p>
                     </tr>
                 
                     <tr class=' module-item'>
+                        <td><a class='mod' href='nn/index.html'
+                               title='rustml::nn'>nn</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
                         <td><a class='mod' href='norm/index.html'
                                title='rustml::norm'>norm</a></td>
                         <td class='docblock short'>
@@ -310,7 +348,8 @@ operations.</p>
                         <td><a class='mod' href='regression/index.html'
                                title='rustml::regression'>regression</a></td>
                         <td class='docblock short'>
-                             
+                             <p>Module for linear regression.</p>
+
                         </td>
                     </tr>
                 
@@ -356,37 +395,44 @@ operations.</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

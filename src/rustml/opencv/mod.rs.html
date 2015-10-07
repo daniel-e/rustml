@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -1108,6 +1108,14 @@
 <span id="1066">1066</span>
 <span id="1067">1067</span>
 <span id="1068">1068</span>
+<span id="1069">1069</span>
+<span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
+<span id="1073">1073</span>
+<span id="1074">1074</span>
+<span id="1075">1075</span>
+<span id="1076">1076</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! &lt;font color=&quot;red&quot;&gt;&lt;b&gt;Experimental&lt;/b&gt;&lt;/font&gt; module for image and video manipulation.</span>
 <span class='doccomment'>//!</span>
@@ -1125,6 +1133,7 @@
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>rand</span>::{<span class='ident'>thread_rng</span>, <span class='ident'>Rng</span>};
 
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>bindings</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>matrix</span>::<span class='ident'>Matrix</span>;
 
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>FontFace</span> {
     <span class='ident'>CvFontHersheyComplex</span>,
@@ -1656,6 +1665,10 @@
         }
     }
 
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_matrix</span>(<span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>GrayImage</span> {
+        <span class='ident'>GrayImage</span>::<span class='ident'>from_slice</span>(<span class='ident'>m</span>.<span class='ident'>buf</span>(), <span class='ident'>m</span>.<span class='ident'>rows</span>(), <span class='ident'>m</span>.<span class='ident'>cols</span>()).<span class='ident'>unwrap</span>()
+    }
+
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_slice</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>rows</span>: <span class='ident'>usize</span>, <span class='ident'>cols</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>GrayImage</span><span class='op'>&gt;</span> {
 
         <span class='kw'>if</span> <span class='ident'>rows</span> <span class='op'>*</span> <span class='ident'>cols</span> <span class='op'>!=</span> <span class='ident'>v</span>.<span class='ident'>len</span>() {
@@ -1968,114 +1981,117 @@
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
 
-    <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>libc</span>::{<span class='ident'>c_char</span>, <span class='ident'>c_int</span>};
+    <span class='comment'>//use self::libc::{c_char, c_int};</span>
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>bindings</span>::<span class='op'>*</span>;
+    <span class='comment'>//use super::bindings::*;</span>
 
-    <span class='comment'>// #[test]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_cv_capture_from_file_lowlevel</span>() {
-        <span class='kw'>unsafe</span> {
-            <span class='comment'>// Opening a file that does not exist should result in null.</span>
-            <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>cvCreateFileCapture</span>(<span class='string'>&quot;xxxxxxxxxxxxxxx\0&quot;</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_char</span>);
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>is_null</span>());
+    <span class='comment'>// TODO reorganize long running tests</span>
+    <span class='comment'>/*
+    #[test]
+    fn test_cv_capture_from_file_lowlevel() {
+        unsafe {
+            // Opening a file that does not exist should result in null.
+            let c = cvCreateFileCapture(&quot;xxxxxxxxxxxxxxx\0&quot;.as_ptr() as *const c_char);
+            assert!(c.is_null());
 
-            <span class='comment'>// Open an existing file.</span>
-            <span class='kw'>let</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>cvCreateFileCapture</span>(<span class='string'>&quot;datasets/testing/tree.mp4\0&quot;</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_char</span>);
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>d</span>.<span class='ident'>is_null</span>());
+            // Open an existing file.
+            let d = cvCreateFileCapture(&quot;datasets/testing/tree.mp4\0&quot;.as_ptr() as *const c_char);
+            assert!(!d.is_null());
 
-            <span class='comment'>// Check that we get all frames of a video of 50 frames.</span>
-            <span class='kw'>for</span> _ <span class='kw'>in</span> (<span class='number'>0</span>..<span class='number'>50</span>) {
-                <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>cvGrabFrame</span>(<span class='ident'>d</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>i</span> <span class='op'>!=</span> <span class='number'>0</span>);
-                <span class='kw'>let</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='ident'>cvRetrieveFrame</span>(<span class='ident'>d</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='ident'>c_int</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>k</span>.<span class='ident'>is_null</span>());
+            // Check that we get all frames of a video of 50 frames.
+            for _ in (0..50) {
+                let i = cvGrabFrame(d);
+                assert!(i != 0);
+                let k = cvRetrieveFrame(d, 0 as c_int);
+                assert!(!k.is_null());
 
-                <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='op'>*</span><span class='ident'>k</span>).<span class='ident'>width</span>, <span class='number'>1400</span>);
-                <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='op'>*</span><span class='ident'>k</span>).<span class='ident'>height</span>, <span class='number'>1296</span>);
-                <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='op'>*</span><span class='ident'>k</span>).<span class='ident'>nchannels</span>, <span class='number'>3</span>);
+                assert_eq!((*k).width, 1400);
+                assert_eq!((*k).height, 1296);
+                assert_eq!((*k).nchannels, 3);
             }
 
-            <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>cvGrabFrame</span>(<span class='ident'>d</span>);
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>i</span> <span class='op'>==</span> <span class='number'>0</span>);
-            <span class='kw'>let</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='ident'>cvRetrieveFrame</span>(<span class='ident'>d</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='ident'>c_int</span>);
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>k</span>.<span class='ident'>is_null</span>());
+            let i = cvGrabFrame(d);
+            assert!(i == 0);
+            let k = cvRetrieveFrame(d, 0 as c_int);
+            assert!(k.is_null());
 
-            <span class='comment'>//cvReleaseCapture(&amp;d);</span>
+            //cvReleaseCapture(&amp;d);
         }
     }
 
-    <span class='comment'>// #[test] long test</span>
-    <span class='kw'>fn</span> <span class='ident'>test_cv_capture_pixel_lowlevel</span>() {
-        <span class='kw'>let</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Video</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;datasets/testing/colors.mp4&quot;</span>).<span class='ident'>unwrap</span>();
+    #[test] long test
+    fn test_cv_capture_pixel_lowlevel() {
+        let d = Video::from_file(&quot;datasets/testing/colors.mp4&quot;).unwrap();
 
-        <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>d</span>.<span class='ident'>color_frame_iter</span>().<span class='ident'>next</span>().<span class='ident'>unwrap</span>();
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>channels</span>(), <span class='number'>3</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>widthstep</span>(), <span class='number'>300</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>depth</span>(), <span class='number'>8</span>);
+        let i = d.color_frame_iter().next().unwrap();
+        assert_eq!(i.channels(), 3);
+        assert_eq!(i.widthstep(), 300);
+        assert_eq!(i.depth(), 8);
 
-        <span class='comment'>// check that the red box exists</span>
-        <span class='kw'>for</span> <span class='ident'>y</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='number'>45</span>) {
-            <span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='number'>45</span>) {
-                <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>i</span>.<span class='ident'>pixel</span>(<span class='ident'>x</span>, <span class='ident'>y</span>).<span class='ident'>unwrap</span>();
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&gt;</span> <span class='number'>230</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
+        // check that the red box exists
+        for y in (0..45) {
+            for x in (0..45) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r &gt; 230);
+                assert!(p.g &lt; 20);
+                assert!(p.b &lt; 20);
             }
         }
-        <span class='comment'>// check that the white box exists</span>
-        <span class='kw'>for</span> <span class='ident'>y</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='number'>45</span>) {
-            <span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> (<span class='number'>55</span>..<span class='number'>95</span>) {
-                <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>i</span>.<span class='ident'>pixel</span>(<span class='ident'>x</span>, <span class='ident'>y</span>).<span class='ident'>unwrap</span>();
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&gt;</span> <span class='number'>230</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&gt;</span> <span class='number'>230</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&gt;</span> <span class='number'>230</span>);
+        // check that the white box exists
+        for y in (0..45) {
+            for x in (55..95) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r &gt; 230);
+                assert!(p.g &gt; 230);
+                assert!(p.b &gt; 230);
             }
         }
-        <span class='comment'>// check that the black box exists</span>
-        <span class='kw'>for</span> <span class='ident'>y</span> <span class='kw'>in</span> (<span class='number'>55</span>..<span class='number'>100</span>) {
-            <span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='number'>45</span>) {
-                <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>i</span>.<span class='ident'>pixel</span>(<span class='ident'>x</span>, <span class='ident'>y</span>).<span class='ident'>unwrap</span>();
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
+        // check that the black box exists
+        for y in (55..100) {
+            for x in (0..45) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r &lt; 20);
+                assert!(p.g &lt; 20);
+                assert!(p.b &lt; 20);
             }
         }
-        <span class='comment'>// check that the green box exists</span>
-        <span class='kw'>for</span> <span class='ident'>y</span> <span class='kw'>in</span> (<span class='number'>55</span>..<span class='number'>100</span>) {
-            <span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> (<span class='number'>55</span>..<span class='number'>95</span>) {
-                <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>i</span>.<span class='ident'>pixel</span>(<span class='ident'>x</span>, <span class='ident'>y</span>).<span class='ident'>unwrap</span>();
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&gt;</span> <span class='number'>230</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
+        // check that the green box exists
+        for y in (55..100) {
+            for x in (55..95) {
+                let p = i.pixel(x, y).unwrap();
+                assert!(p.r &lt; 20);
+                assert!(p.g &gt; 230);
+                assert!(p.b &lt; 20);
             }
         }
     }
 
-    <span class='comment'>//#[test]  TODO long test</span>
-    <span class='kw'>fn</span> <span class='ident'>test_video</span>() {
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>Video</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;xxxxxxxxxxx.mp4&quot;</span>).<span class='ident'>is_none</span>());
+    #[test]  TODO long test
+    fn test_video() {
+        assert!(Video::from_file(&quot;xxxxxxxxxxx.mp4&quot;).is_none());
 
         {
-        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Video</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;datasets/testing/colors.mp4&quot;</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>color_frame_iter</span>();
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>count</span>(), <span class='number'>25</span>);
+        let c = Video::from_file(&quot;datasets/testing/colors.mp4&quot;).unwrap();
+        let i = c.color_frame_iter();
+        assert_eq!(i.count(), 25);
         }
 
-        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Video</span>::<span class='ident'>from_file</span>(<span class='string'>&quot;datasets/testing/colors.mp4&quot;</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='number'>0</span>;
-        <span class='kw'>for</span> <span class='ident'>img</span> <span class='kw'>in</span> <span class='ident'>c</span>.<span class='ident'>color_frame_iter</span>() {
-            <span class='ident'>k</span> <span class='op'>+=</span> <span class='number'>1</span>;
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>img</span>.<span class='ident'>pixel</span>(<span class='number'>25</span>, <span class='number'>25</span>).<span class='ident'>unwrap</span>();
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&gt;</span> <span class='number'>200</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>20</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
-            <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>img</span>.<span class='ident'>pixel</span>(<span class='number'>75</span>, <span class='number'>25</span>).<span class='ident'>unwrap</span>();
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&gt;</span> <span class='number'>200</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&gt;</span> <span class='number'>200</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&gt;</span> <span class='number'>200</span>);
-            <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>img</span>.<span class='ident'>pixel</span>(<span class='number'>25</span>, <span class='number'>75</span>).<span class='ident'>unwrap</span>();
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&lt;</span> <span class='number'>20</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>20</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&lt;</span> <span class='number'>20</span>);
-            <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>img</span>.<span class='ident'>pixel</span>(<span class='number'>75</span>, <span class='number'>75</span>).<span class='ident'>unwrap</span>();
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>r</span> <span class='op'>&lt;</span> <span class='number'>20</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>20</span> <span class='op'>&amp;&amp;</span> <span class='ident'>p</span>.<span class='ident'>g</span> <span class='op'>&gt;</span> <span class='number'>200</span>);
+        let c = Video::from_file(&quot;datasets/testing/colors.mp4&quot;).unwrap();
+        let mut k = 0;
+        for img in c.color_frame_iter() {
+            k += 1;
+            let mut p = img.pixel(25, 25).unwrap();
+            assert!(p.r &gt; 200 &amp;&amp; p.b &lt; 20 &amp;&amp; p.g &lt; 20);
+            p = img.pixel(75, 25).unwrap();
+            assert!(p.r &gt; 200 &amp;&amp; p.b &gt; 200 &amp;&amp; p.g &gt; 200);
+            p = img.pixel(25, 75).unwrap();
+            assert!(p.r &lt; 20 &amp;&amp; p.b &lt; 20 &amp;&amp; p.g &lt; 20);
+            p = img.pixel(75, 75).unwrap();
+            assert!(p.r &lt; 20 &amp;&amp; p.b &lt; 20 &amp;&amp; p.g &gt; 200);
         }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>k</span>, <span class='number'>25</span>);
+        assert_eq!(k, 25);
     }
+    */</span>
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_colorimage_error</span>() {
@@ -2184,37 +2200,44 @@
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

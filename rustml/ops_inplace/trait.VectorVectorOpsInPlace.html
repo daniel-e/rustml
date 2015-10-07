@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,17 +45,18 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-16123' class='srclink' href='../../src/rustml/ops_inplace.rs.html#194-276' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-20981' class='srclink' href='../../src/rustml/ops_inplace.rs.html#635-739' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait VectorVectorOpsInPlace&lt;T&gt; {
     fn <a href='#tymethod.iadd' class='fnname'>iadd</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>);
     fn <a href='#tymethod.isub' class='fnname'>isub</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>);
     fn <a href='#tymethod.imul' class='fnname'>imul</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>);
     fn <a href='#tymethod.idiv' class='fnname'>idiv</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>);
+    fn <a href='#tymethod.nrm2' class='fnname'>nrm2</a>(&amp;self) -&gt; T;
 }</pre><div class='docblock'><p>Trait for inplace vector-vector operations.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.iadd' class='method stab '><code>fn <a href='#tymethod.iadd' class='fnname'>iadd</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h3><div class='docblock'><p>Adds the given slice <code>rhs</code> to self inplace.</p>
+        <h3 id='tymethod.iadd' class='method stab '><code>fn <a href='#tymethod.iadd' class='fnname'>iadd</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h3><div class='docblock'><p>Adds the given vector <code>rhs</code> to self inplace.</p>
 
 <p>This operation uses BLAS for high performance for vectors with elements
 of type f32 and f64. Panics if the dimensions of the vectors do not match.</p>
@@ -67,9 +68,8 @@ of type f32 and f64. Panics if the dimensions of the vectors do not match.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.0</span>, <span class='number'>2.0</span>];
 <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.0</span>, <span class='number'>8.0</span>];
 <span class='ident'>v</span>.<span class='ident'>iadd</span>(<span class='kw-2'>&amp;</span><span class='ident'>y</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4.0</span>, <span class='number'>10.0</span>]);
-</pre>
-</div><h3 id='tymethod.isub' class='method stab '><code>fn <a href='#tymethod.isub' class='fnname'>isub</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h3><div class='docblock'><p>Substracts the given slice <code>rhs</code> from self inplace.</p>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4.0</span>, <span class='number'>10.0</span>]);</pre>
+</div><h3 id='tymethod.isub' class='method stab '><code>fn <a href='#tymethod.isub' class='fnname'>isub</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h3><div class='docblock'><p>Substracts the given vector <code>rhs</code> from self inplace.</p>
 
 <p>This operation uses BLAS for high performance for vectors with elements
 of type f32 and f64. Panics if the dimensions of the vectors do not match.</p>
@@ -81,8 +81,7 @@ of type f32 and f64. Panics if the dimensions of the vectors do not match.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.0</span>, <span class='number'>2.0</span>];
 <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.0</span>, <span class='number'>8.0</span>];
 <span class='ident'>v</span>.<span class='ident'>isub</span>(<span class='kw-2'>&amp;</span><span class='ident'>y</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='op'>-</span><span class='number'>2.0</span>, <span class='op'>-</span><span class='number'>6.0</span>]);
-</pre>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='op'>-</span><span class='number'>2.0</span>, <span class='op'>-</span><span class='number'>6.0</span>]);</pre>
 </div><h3 id='tymethod.imul' class='method stab '><code>fn <a href='#tymethod.imul' class='fnname'>imul</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h3><div class='docblock'><p>Computes an element-wise vector-vector multiplication and stores the result
 in self.</p>
 
@@ -100,8 +99,7 @@ the element-wise vector-vector multiplication.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.0</span>, <span class='number'>2.0</span>];
 <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.0</span>, <span class='number'>8.0</span>];
 <span class='ident'>v</span>.<span class='ident'>imul</span>(<span class='kw-2'>&amp;</span><span class='ident'>y</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>9.0</span>, <span class='number'>16.0</span>]);
-</pre>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>9.0</span>, <span class='number'>16.0</span>]);</pre>
 </div><h3 id='tymethod.idiv' class='method stab '><code>fn <a href='#tymethod.idiv' class='fnname'>idiv</a>(&amp;mut self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h3><div class='docblock'><p>Computes an element-wise vector-vector division and stores the result
 in self.</p>
 
@@ -122,8 +120,20 @@ the element-wise vector-vector division.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.0</span>, <span class='number'>2.0</span>];
 <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2.0</span>, <span class='number'>8.0</span>];
 <span class='ident'>v</span>.<span class='ident'>idiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>y</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.5</span>, <span class='number'>0.25</span>]);
-</pre>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1.5</span>, <span class='number'>0.25</span>]);</pre>
+</div><h3 id='tymethod.nrm2' class='method stab '><code>fn <a href='#tymethod.nrm2' class='fnname'>nrm2</a>(&amp;self) -&gt; T</code></h3><div class='docblock'><p>Computes the L2 norm (i.e. the euclidean norm) of the vector.</p>
+
+<h1 id="implementation-details" class='section-header'><a
+                           href="#implementation-details">Implementation details</a></h1>
+<p>This operation is optimized via BLAS.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><pre class='rust rust-example-rendered'>
+
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='op'>*</span>;
+
+<span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3.0</span>, <span class='number'>2.0</span>, <span class='number'>4.0</span>];
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>v</span>.<span class='ident'>nrm2</span>() <span class='op'>-</span> <span class='number'>5.3852</span>) <span class='op'>&lt;=</span> <span class='number'>0.0001</span>);</pre>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
@@ -139,37 +149,44 @@ the element-wise vector-vector division.</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

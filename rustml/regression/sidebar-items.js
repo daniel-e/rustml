@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["design_matrix","Creates a design matrix from a matrix with features."]],"struct":[["Hypothesis","Hypothesis for linear regression."]]});
+initSidebarItems({"struct":[["Hypothesis","Hypothesis for linear regression."]],"trait":[["DesignMatrix","Trait to create the design matrix of a matrix of features, i.e. a new column is inserted at the left of the matrix where all elements are equal to one."]]});

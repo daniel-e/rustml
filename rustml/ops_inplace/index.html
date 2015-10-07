@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,11 +45,11 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-15669' class='srclink' href='../../src/rustml/ops_inplace.rs.html#1-510' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-18694' class='srclink' href='../../src/rustml/ops_inplace.rs.html#1-1184' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Provides scalar, vector, vector-vector, vector-matrix and matrix-matrix operations.</p>
 
-<p>Most of the operations are accelerated using the underlying BLAS implementation.
-If BLAS is not used for an operation this is explicitly documented.</p>
+<p>Most of the operations are optimized using the underlying BLAS implementation.
+For each function it is explicitly documented whether or not BLAS is used.</p>
 
 <h1 id="examples" class='section-header'><a
                            href="#examples">Examples</a></h1>
@@ -61,10 +61,36 @@ vector.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> [<span class='number'>1.0</span>, <span class='number'>2.0</span>, <span class='number'>3.0</span>, <span class='number'>4.0</span>, <span class='number'>5.0</span>, <span class='number'>6.0</span>];
 <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> [<span class='number'>3.0</span>, <span class='number'>6.0</span>, <span class='number'>2.0</span>, <span class='number'>3.0</span>, <span class='number'>6.0</span>, <span class='number'>9.0</span>];
 <span class='ident'>a</span>.<span class='ident'>iadd</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>a</span>, [<span class='number'>4.0</span>, <span class='number'>8.0</span>, <span class='number'>5.0</span>, <span class='number'>7.0</span>, <span class='number'>11.0</span>, <span class='number'>15.0</span>]);
-</pre>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>a</span>, [<span class='number'>4.0</span>, <span class='number'>8.0</span>, <span class='number'>5.0</span>, <span class='number'>7.0</span>, <span class='number'>11.0</span>, <span class='number'>15.0</span>]);</pre>
 </div><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.FunctionsInPlace.html'
+                               title='rustml::ops_inplace::FunctionsInPlace'>FunctionsInPlace</a></td>
+                        <td class='docblock short'>
+                             <p>Trait for common mathematical functions for scalars, vectors and matrices.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.MatrixMatrixOpsInPlace.html'
+                               title='rustml::ops_inplace::MatrixMatrixOpsInPlace'>MatrixMatrixOpsInPlace</a></td>
+                        <td class='docblock short'>
+                             <p>Trait for matrix-matrix operations.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.MatrixScalarOpsInPlace.html'
+                               title='rustml::ops_inplace::MatrixScalarOpsInPlace'>MatrixScalarOpsInPlace</a></td>
+                        <td class='docblock short'>
+                             <p>Trait for matrix-scalar operations.</p>
+
+                        </td>
+                    </tr>
+                
                     <tr class=' module-item'>
                         <td><a class='trait' href='trait.VectorVectorOpsInPlace.html'
                                title='rustml::ops_inplace::VectorVectorOpsInPlace'>VectorVectorOpsInPlace</a></td>
@@ -79,7 +105,7 @@ vector.</p>
                         <td><a class='fn' href='fn.d_axpy.html'
                                title='rustml::ops_inplace::d_axpy'>d_axpy</a></td>
                         <td class='docblock short'>
-                             <p>Computes <code>alpha * x + y</code> and stores the result in <code>y</code>. (accelerated via BLAS)</p>
+                             <p>Computes <code>alpha * x + y</code> and stores the result in <code>y</code>. (optimized via BLAS)</p>
 
                         </td>
                     </tr>
@@ -88,7 +114,7 @@ vector.</p>
                         <td><a class='fn' href='fn.d_gemm.html'
                                title='rustml::ops_inplace::d_gemm'>d_gemm</a></td>
                         <td class='docblock short'>
-                             <p>Computes <code>alpha * op(A) * op(B) + beta * C</code> and stores the result in <code>C</code>. (accelerated via BLAS)</p>
+                             <p>Computes <code>alpha * op(A) * op(B) + beta * C</code> and stores the result in <code>C</code>. (optimized via BLAS)</p>
 
                         </td>
                     </tr>
@@ -98,7 +124,53 @@ vector.</p>
                                title='rustml::ops_inplace::d_gemv'>d_gemv</a></td>
                         <td class='docblock short'>
                              <p>Computes <code>alpha * A * x + beta * y</code> or <code>alpha * A^T * x + beta * y</code> and stores the
-result in <code>y</code>. (accelerated via BLAS)</p>
+result in <code>y</code>. (optimized via BLAS)</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.d_nrm2.html'
+                               title='rustml::ops_inplace::d_nrm2'>d_nrm2</a></td>
+                        <td class='docblock short'>
+                             <p>Computes the L2 norm (euclidean norm) of a vector. (optimized via BLAS)</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.s_axpy.html'
+                               title='rustml::ops_inplace::s_axpy'>s_axpy</a></td>
+                        <td class='docblock short'>
+                             <p>Computes <code>alpha * x + y</code> and stores the result in <code>y</code>. (optimized via BLAS)</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.s_gemm.html'
+                               title='rustml::ops_inplace::s_gemm'>s_gemm</a></td>
+                        <td class='docblock short'>
+                             <p>Computes <code>alpha * op(A) * op(B) + beta * C</code> and stores the result in <code>C</code>. (optimized via BLAS)</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.s_gemv.html'
+                               title='rustml::ops_inplace::s_gemv'>s_gemv</a></td>
+                        <td class='docblock short'>
+                             <p>Computes <code>alpha * A * x + beta * y</code> or <code>alpha * A^T * x + beta * y</code> and stores the
+result in <code>y</code>. (optimized via BLAS)</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.s_nrm2.html'
+                               title='rustml::ops_inplace::s_nrm2'>s_nrm2</a></td>
+                        <td class='docblock short'>
+                             <p>Computes the L2 norm (euclidean norm) of a vector. (optimized via BLAS)</p>
 
                         </td>
                     </tr>
@@ -108,37 +180,44 @@ result in <code>y</code>. (accelerated via BLAS)</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

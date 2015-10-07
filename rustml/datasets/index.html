@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,11 +45,50 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-2460' class='srclink' href='../../src/rustml/datasets.rs.html#1-185' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-3066' class='srclink' href='../../src/rustml/datasets.rs.html#1-403' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Module to easily access popular datasets often used to measure the performance of
 machine learning algorithms.</p>
+
+<p>The image on the left shows an example of 200 handwritten digits from the 
+<a href="http://yann.lecun.com/exdb/mnist/">MNIST database of handwritten digits</a>.
+Rustml provides a simple interface via 
+<a href="struct.MnistDigits.html">MnistDigits</a> to easily access those digits. The MNIST
+database comes with 60,000 examples in a training set and 10,000 examples in
+a test set. The image has been created with rustml with just a few lines of code.
+See the example <a href="https://github.com/daniel-e/rustml/blob/master/examples/image_grid.rs">here</a>.</p>
+
+<p>The image in the middle shows an example of 1000 points normally distributed with the
+mean at (1, 2) and a standard deviation of 0.3 for the first dimension and 0.4 for
+the second dimension.</p>
+
+<p>The image on the right shows a mixture model. A dataset which consists of three sources
+which are normally distributed with different parameters.</p>
+
+<div style="font-size:80%">
+ <div style="float:left;text-align:center;">
+  MNIST database of handwritten digits<br/><img style="border-top:1px solid black" src="../../digits_grid.png">
+ </div>
+ <div style="float:left;text-align:center;padding-left:10px">
+  Toy data: normally distributed data<br/><img src="../../plot_normal_1.png">
+ </div>
+ <div style="float:left;text-align:center;padding-left:10px">
+  Toy data: mixture<br/><img src="../../plot_mixture.png">
+ </div>
+</div>
+
+<div style="clear:both;"></div>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Mixture.html'
+                               title='rustml::datasets::Mixture'>Mixture</a></td>
+                        <td class='docblock short'>
+                             <p>Generates random multi-dimensional data points (a population) from
+different normally distributed sources (subpopulations).</p>
+
+                        </td>
+                    </tr>
+                
                     <tr class=' module-item'>
                         <td><a class='struct' href='struct.MnistDigits.html'
                                title='rustml::datasets::MnistDigits'>MnistDigits</a></td>
@@ -58,13 +97,32 @@ machine learning algorithms.</p>
 
                         </td>
                     </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.NormalData.html'
+                               title='rustml::datasets::NormalData'>NormalData</a></td>
+                        <td class='docblock short'>
+                             <p>Generates multi-dimensional data where each dimension is normally distributed.</p>
+
+                        </td>
+                    </tr>
                 </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
                     <tr class=' module-item'>
-                        <td><a class='fn' href='fn.gaussian_distributed.html'
-                               title='rustml::datasets::gaussian_distributed'>gaussian_distributed</a></td>
+                        <td><a class='fn' href='fn.mixture_builder.html'
+                               title='rustml::datasets::mixture_builder'>mixture_builder</a></td>
                         <td class='docblock short'>
-                             
+                             <p>Creates a mixture model with normally distributed data sources.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.normal_builder.html'
+                               title='rustml::datasets::normal_builder'>normal_builder</a></td>
+                        <td class='docblock short'>
+                             <p>Creates a normally distributed data source.</p>
+
                         </td>
                     </tr>
                 </table></section>
@@ -73,37 +131,44 @@ machine learning algorithms.</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `NeuralNetwork` struct in crate `rustml`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, NeuralNetwork">
+
+    <title>rustml::nn::NeuralNetwork - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>rustml</a>::<wbr><a href='index.html'>nn</a></p><script>window.sidebarCurrent = {name: 'NeuralNetwork', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>rustml</a>::<wbr><a href='index.html'>nn</a>::<wbr><a class='struct' href=''>NeuralNetwork</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-28393' class='srclink' href='../../src/rustml/nn.rs.html#10-13' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct NeuralNetwork {
+    // some fields omitted
+}</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h3><div class='docblock'><p>Implementation of a neural network.</p>
+</div><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h4>
+<div class='docblock'><p>Creates a new neural network.</p>
+
+<p>The network does not contain any layer. Layers can be added with the method
+<code>add_layer</code>.</p>
+</div><h4 id='method.add_layer' class='method'><code>fn <a href='#method.add_layer' class='fnname'>add_layer</a>(&amp;self, n: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h4>
+<div class='docblock'><p>Adds an layer to the neural network.</p>
+</div><h4 id='method.set_params' class='method'><code>fn <a href='#method.set_params' class='fnname'>set_params</a>(&amp;self, layer: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, params: <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;) -&gt; <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h4>
+<div class='docblock'><p>Sets the parameters which connect the given layer <code>layer</code> with the next
+layer.</p>
+</div><h4 id='method.input_size' class='method'><code>fn <a href='#method.input_size' class='fnname'>input_size</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the number of input units.</p>
+</div><h4 id='method.output_size' class='method'><code>fn <a href='#method.output_size' class='fnname'>output_size</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the number of output units.</p>
+</div><h4 id='method.layers' class='method'><code>fn <a href='#method.layers' class='fnname'>layers</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the number of layers.</p>
+</div><h4 id='method.error' class='method'><code>fn <a href='#method.error' class='fnname'>error</a>(&amp;self, examples: &amp;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;, targets: &amp;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a></code></h4>
+<div class='docblock'><p>Computes the error of the net.</p>
+</div><h4 id='method.predict' class='method'><code>fn <a href='#method.predict' class='fnname'>predict</a>(&amp;self, input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;</code></h4>
+<div class='docblock'><p>Computes the output of the neural network for the given input.</p>
+</div><h4 id='method.optimize' class='method'><code>fn <a href='#method.optimize' class='fnname'>optimize</a>(&amp;self, x: &amp;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;, labels: &amp;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;, p: <a class='struct' href='../../rustml/opt/struct.OptParams.html' title='rustml::opt::OptParams'>OptParams</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;) -&gt; <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h4>
+<h4 id='method.derivatives' class='method'><code>fn <a href='#method.derivatives' class='fnname'>derivatives</a>(&amp;self, examples: &amp;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;, targets: &amp;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;&gt;</code></h4>
+<h4 id='method.update_params' class='method'><code>fn <a href='#method.update_params' class='fnname'>update_params</a>(&amp;mut self, deltas: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h4>
+<div class='docblock'><p>Updates the parameters of the network.</p>
+
+<p>Each matrix in <code>deltas</code> is added to the corresponding matrix
+of parameters of the network, i.e. the first matrix which
+contains the parameters from the first layer to the second layer,
+the second matrix is added to the parameters which contains the
+parameters from the second layer to the third layer and so on.</p>
+</div><h4 id='method.params' class='method'><code>fn <a href='#method.params' class='fnname'>params</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;&gt;</code></h4>
+<div class='docblock'><p>Returns the parameters of the network.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../rustml/nn/struct.NeuralNetwork.html' title='rustml::nn::NeuralNetwork'>NeuralNetwork</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustml";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

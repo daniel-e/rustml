@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1808' class='srclink' href='../../src/rustml/blas.rs.html#1-172' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-2373' class='srclink' href='../../src/rustml/blas.rs.html#1-221' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Bindings for BLAS/ATLAS for high performance vector and matrix operations.</p>
 
 <p>from <a href="http://www.netlib.org/blas/">here</a>:</p>
@@ -78,8 +78,7 @@ application with cargo. Then, you can use the
 ATLAS implementation simply by starting your application as follows (depending on your
 installation):</p>
 <pre class='rust rust-example-rendered'>
-<span class='ident'>LD_PRELOAD</span><span class='op'>=</span><span class='op'>/</span><span class='ident'>opt</span><span class='op'>/</span><span class='ident'>atlas</span><span class='op'>/</span><span class='ident'>lib</span><span class='op'>/</span><span class='ident'>libtatlas</span>.<span class='ident'>so</span> <span class='ident'>cargo</span> <span class='ident'>run</span> <span class='ident'>myapp</span>
-</pre>
+<span class='ident'>LD_PRELOAD</span><span class='op'>=</span><span class='op'>/</span><span class='ident'>opt</span><span class='op'>/</span><span class='ident'>atlas</span><span class='op'>/</span><span class='ident'>lib</span><span class='op'>/</span><span class='ident'>libtatlas</span>.<span class='ident'>so</span> <span class='ident'>cargo</span> <span class='ident'>run</span> <span class='ident'>myapp</span></pre>
 
 <h1 id="using-blas-for-vector-and-matrix-operations" class='section-header'><a
                            href="#using-blas-for-vector-and-matrix-operations">Using BLAS for vector and matrix operations</a></h1>
@@ -141,7 +140,7 @@ result in <code>y</code>.</p>
                         <td><a class='fn' href='fn.cblas_dnrm2.html'
                                title='rustml::blas::cblas_dnrm2'>cblas_dnrm2</a></td>
                         <td class='docblock short'>
-                             <p>Computes the L2 norm of a vector of f64 (doubles).</p>
+                             <p>Computes the L2 norm (euclidean norm) of a vector of elements of type f64 (doubles).</p>
 
                         </td>
                     </tr>
@@ -150,8 +149,7 @@ result in <code>y</code>.</p>
                         <td><a class='fn' href='fn.cblas_saxpy.html'
                                title='rustml::blas::cblas_saxpy'>cblas_saxpy</a></td>
                         <td class='docblock short'>
-                             <p>Computes <code>alpha * x + y</code> where <code>alpha</code> is a f64 scalar and <code>x</code> and <code>y</code> are
-vectors of f32.</p>
+                             <p>Computes <code>alpha * x + y</code> and stores the result in <code>y</code>.</p>
 
                         </td>
                     </tr>
@@ -160,10 +158,17 @@ vectors of f32.</p>
                         <td><a class='fn' href='fn.cblas_sgemm.html'
                                title='rustml::blas::cblas_sgemm'>cblas_sgemm</a></td>
                         <td class='docblock short'>
-                             <p>Computes <code>alpha * op(A) * op(B) + beta * C</code> where <code>alpha</code> and
-<code>beta</code> are f32 scalars, <code>A</code>, <code>B</code>, <code>C</code> are a matrices of f32 values and <code>op(X)</code> is either
-<code>op(X) = X</code> or <code>op(X) = X^T</code> (the transpose or conjugate transpose of
-the matrix <code>X</code>).</p>
+                             <p>Computes <code>alpha * op(A) * op(B) + beta * C</code> and stores the result in <code>C</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cblas_sgemv.html'
+                               title='rustml::blas::cblas_sgemv'>cblas_sgemv</a></td>
+                        <td class='docblock short'>
+                             <p>Computes <code>alpha * A * x + beta * y</code> or <code>alpha * A^T * x + beta * y</code> and stores the
+result in <code>y</code>.</p>
 
                         </td>
                     </tr>
@@ -172,7 +177,7 @@ the matrix <code>X</code>).</p>
                         <td><a class='fn' href='fn.cblas_snrm2.html'
                                title='rustml::blas::cblas_snrm2'>cblas_snrm2</a></td>
                         <td class='docblock short'>
-                             <p>Computes the L2 norm of a vector of f32 (floats).</p>
+                             <p>Computes the L2 norm (euclidean norm) of a vector of elements of type f32 (floats</p>
 
                         </td>
                     </tr>
@@ -182,37 +187,44 @@ the matrix <code>X</code>).</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

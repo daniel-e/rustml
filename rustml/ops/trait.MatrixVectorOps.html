@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,16 +45,30 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-14809' class='srclink' href='../../src/rustml/ops.rs.html#274-281' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-17797' class='srclink' href='../../src/rustml/ops.rs.html#361-384' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait MatrixVectorOps&lt;T&gt; {
     fn <a href='#tymethod.add_row' class='fnname'>add_row</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;;
     fn <a href='#tymethod.sub_row' class='fnname'>sub_row</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;;
+    fn <a href='#tymethod.mul_vec' class='fnname'>mul_vec</a>(&amp;self, v: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;;
+    fn <a href='#tymethod.transp_mul_vec' class='fnname'>transp_mul_vec</a>(&amp;self, v: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;;
 }</pre><div class='docblock'><p>Trait for matrix vector operations.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
         <h3 id='tymethod.add_row' class='method stab '><code>fn <a href='#tymethod.add_row' class='fnname'>add_row</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Adds the given vector to each row of the matrix.</p>
 </div><h3 id='tymethod.sub_row' class='method stab '><code>fn <a href='#tymethod.sub_row' class='fnname'>sub_row</a>(&amp;self, rhs: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='docblock'><p>Subtracts the given vector from each row of the matrix.</p>
+</div><h3 id='tymethod.mul_vec' class='method stab '><code>fn <a href='#tymethod.mul_vec' class='fnname'>mul_vec</a>(&amp;self, v: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='docblock'><p>Multiplies the matrix with a vector (i.e. <code>X*v</code>)
+and returns the result.</p>
+
+<h1 id="implementation-details" class='section-header'><a
+                           href="#implementation-details">Implementation details</a></h1>
+<p>This operation is done via the underlying BLAS implementation.</p>
+</div><h3 id='tymethod.transp_mul_vec' class='method stab '><code>fn <a href='#tymethod.transp_mul_vec' class='fnname'>transp_mul_vec</a>(&amp;self, v: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>T<a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='docblock'><p>Multiplies the transpose of the matrix with a vector (i.e. X<sup>T</sup> * v)
+and returns the result.</p>
+
+<h1 id="implementation-details" class='section-header'><a
+                           href="#implementation-details">Implementation details</a></h1>
+<p>This operation is done via the underlying BLAS implementation.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
@@ -68,37 +82,44 @@
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 
