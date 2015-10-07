@@ -17,7 +17,7 @@ fn main() {
     
     grid.to_file("/tmp/grid.png");
 
-    println!("The image has been save in /tmp/grid.png.");
+    println!("The image has been saved in /tmp/grid.png.");
     println!("Press any key to quit.");
 
     Window::new().show_image(&grid).wait_key();
