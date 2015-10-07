@@ -18,6 +18,7 @@
    * trait to append a vector to another one
    * trait to select indexes from a vector
    * create vector via from_value
+   * trait VectorIO
  * fixed some warning introduced by Rust 1.3
 
 ## 0.0.4
