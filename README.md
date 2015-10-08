@@ -6,8 +6,9 @@ The documentation of the project with a descprition of the modules can be found 
 
 ## Features 
 
-* powerful matrix and vector support with BLAS bindings to provide very high performance 
+* powerful matrix and vector operations with BLAS bindings for high performance computing
 * k-nearest neighbord classification algorithm
+* neural networks
 * DBSCAN clustering algorithm
 * gradient descent for minimizing functions
 * linear regression
