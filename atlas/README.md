@@ -24,15 +24,22 @@ rm -rf ATLAS
 
 ---
 
-LD_PRELOAD=/usr/lib/libblas.so.3 cargo run --bin matrix_mul
+# Test
+
+```
+# CBLAS implemenation installed by default on the system
+LD_PRELOAD=/usr/lib/libblas.so.3 cargo run --example matrix_multiplication
 PT19.900532926S
 
-LD_PRELOAD=/usr/lib/libatlas.so.3 cargo run --bin matrix_mul
+# ATLAS implemenation installed by default on the system
+LD_PRELOAD=/usr/lib/libatlas.so.3 cargo run --example matrix_multiplication
 PT19.889701623S
 
-LD_PRELOAD=/opt/atlas/lib/libsatlas.so cargo run --bin matrix_mul
+# Single threaded compiled ATLAS implementation
+LD_PRELOAD=/opt/atlas/lib/libsatlas.so cargo run --example matrix_multiplication
 PT13.021963039S
 
-LD_PRELOAD=/opt/atlas/lib/libtatlas.so cargo run --bin matrix_mul
+# Multi threaded compiled ATLAS implementation
+LD_PRELOAD=/opt/atlas/lib/libtatlas.so cargo run --example matrix_multiplication
 PT6.459068706S
 
