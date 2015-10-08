@@ -1,13 +1,16 @@
-The source code of atlas and lapack has been downloaded from:
-http://math-atlas.sourceforge.net/
-http://www.netlib.org/lapack/
+The source code of atlas and lapack can been downloaded from:
+http://downloads.sourceforge.net/project/math-atlas/Stable/3.10.2/atlas3.10.2.tar.bz2
+http://www.netlib.org/lapack/lapack-3.5.0.tgz
 
 Install
 -------
 
-for i in {0..7}; do cpufreq-set -g performance -c $1; done
-# /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+```
+# turn off CPU throttling
+# see http://math-atlas.sourceforge.net/atlas_install/node5.html
+for i in {0..7}; do cpufreq-set -g performance -c $i; done
 
+# install ATLAS
 tar xjf atlas3.10.2.tar.bz2
 mkdir ATLAS/build
 cd ATLAS/build
@@ -17,6 +20,7 @@ mkdir -p /opt/atlas/lib/
 cp lib/lib*.so /opt/atlas/lib/
 cd ../..
 rm -rf ATLAS
+```
 
 ---
 
