@@ -1,3 +1,9 @@
+# ATLAS
+
+This document describes how you can install a multi-threaded ATLAS library for high performance computing.
+
+## Prerequisites
+
 The following packages needs to be downloaded:
 * http://downloads.sourceforge.net/project/math-atlas/Stable/3.10.2/atlas3.10.2.tar.bz2
 * http://www.netlib.org/lapack/lapack-3.5.0.tgz
@@ -24,7 +30,7 @@ rm -rf ATLAS
 
 ---
 
-# Test
+## Test
 
 ```
 # CBLAS implemenation installed by default on the system
