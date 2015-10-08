@@ -69,18 +69,19 @@ Now, in the `example` directory run the example with `cargo run`.
 
 ### Other examples
 
-You can find other examples in the directory `examples`. These examples can be executed with
-Cargo as follows:
+You can find other examples in the directory `examples`. Each example can be executed with `cargo run --example <example name>` where `<example name>` is one of the following:
 
-```bash
-cargo run --example vector_addition
-cargo run --example matrix_multiplication
-cargo run --example scale_matrix
-
-# the following examples require the rustml dataset package (see below)
-cargo run --example video_histogram
-cargo run --example mnist_digits
-``` 
+* `gradient_descent`: uses gradient descent to find the minimum of a function
+* `image_grid`: how to arrange a set of images into a grid
+* `linear_regression`: use linear regression to approximate the points of an unknown function
+* `matrix_multiplication`: guess what ;)
+* `mnist_digits`: shows how to load the MNIST database of handwritten digits
+* `neuralnetwork`: trains a neural network to compute the XOR function and plots the decision boundaries
+* `octave_plot`: shows how to plot things with Octave
+* `plots`: creates some plots for the online documentation
+* `scale_matrix`: demonstrates how to scale features
+* `vector_addition`: demonstrates how to add vectors
+* `video_histogram`: how to select specific regions of a video and compute the histogram
 
 ## Rustml datasets package
 
