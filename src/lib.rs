@@ -35,6 +35,7 @@
 //! * [highly optimized linear algebra via BLAS integration](blas/index.html) (i.e. operations on vectors and
 //! matrices)
 //! * gradient descent with debugging capabilities (e.g. with learning curves)
+//! * [neural networks](nn/index.html)
 //! * DBSCAN clustering algorithm
 //! * linear regression
 //! * optimization of linear regression with gradient descent
