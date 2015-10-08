@@ -42,4 +42,4 @@ PT13.021963039S
 # Multi threaded compiled ATLAS implementation
 LD_PRELOAD=/opt/atlas/lib/libtatlas.so cargo run --example matrix_multiplication
 PT6.459068706S
-
+```
