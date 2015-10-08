@@ -1,12 +1,15 @@
 extern crate rustml;
 extern crate num;
+extern crate getopts;
 
+use std::env;
 use rustml::octave::*;
 use rustml::opencv::*;
 use rustml::opt::*;
 use num::pow;
 
 fn main() {
+    let waitkey = env::args().skip(1).next().unwrap_or("".to_string()) != "--nokey".to_string();
 
     let fxy = |x: f64, y: f64| (pow(x, 2) + pow(y, 2)).sqrt();
     // objective function to be minimized
@@ -52,7 +55,9 @@ fn main() {
         .add("print -r50 -dpng /tmp/3dplot.png");
 
     o.run("/tmp/3dplot.m").unwrap();
-    Window::new()
-        .show_image(&RgbImage::from_file("/tmp/3dplot.png").unwrap())
-        .wait_key();
+    if waitkey {
+        Window::new()
+            .show_image(&RgbImage::from_file("/tmp/3dplot.png").unwrap())
+            .wait_key();
+    }
 }

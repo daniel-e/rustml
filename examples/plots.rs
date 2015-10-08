@@ -1,5 +1,7 @@
 extern crate rustml;
+extern crate getopts;
 
+use std::env;
 use std::iter::repeat;
 
 use rustml::octave::builder;
@@ -9,7 +11,13 @@ use rustml::nn::NeuralNetwork;
 use rustml::opt::empty_opts;
 use rustml::*;
 
+static mut WAITKEY: bool = true;
+
+fn wait_key() -> bool { unsafe { WAITKEY } }
+
 fn plot_normal_data() {
+
+    println!("normal data ...");
 
     let seed = [1, 3, 5, 7];
     let data = normal_builder(seed).add(1.0, 0.3).add(2.0, 0.4).take(1000).collect::<Vec<Vec<f64>>>();
@@ -24,12 +32,16 @@ fn plot_normal_data() {
         .run("/tmp/plot_normal_1.m")
         .unwrap();
 
-    Window::new()
-        .show_image(&RgbImage::from_file("/tmp/plot_normal_1.png").unwrap())
-        .wait_key();
+    if wait_key() {
+        Window::new()
+            .show_image(&RgbImage::from_file("/tmp/plot_normal_1.png").unwrap())
+            .wait_key();
+    }
 }
 
 pub fn plot_mixture() {
+
+    println!("normal mixture ...");
 
     let seed = [2, 3, 5, 7];
 
@@ -56,13 +68,16 @@ pub fn plot_mixture() {
         .run("/tmp/plot_normal.m")
         .unwrap();
 
-    Window::new()
-        .show_image(&RgbImage::from_file("/tmp/plot_mixture.png").unwrap())
-        .wait_key();
-
+    if wait_key() {
+        Window::new()
+            .show_image(&RgbImage::from_file("/tmp/plot_mixture.png").unwrap())
+            .wait_key();
+    }
 }
 
 pub fn plot_knn_decision_boundary() {
+
+    println!("knn decision boundary ...");
 
     let seed = [2, 3, 5, 7];
 
@@ -109,12 +124,16 @@ pub fn plot_knn_decision_boundary() {
         .run("/tmp/plot_knn_boundary.m")
         .unwrap();
 
-    Window::new()
-        .show_image(&RgbImage::from_file("/tmp/plot_knn_boundary.png").unwrap())
-        .wait_key();
+    if wait_key() {
+        Window::new()
+            .show_image(&RgbImage::from_file("/tmp/plot_knn_boundary.png").unwrap())
+            .wait_key();
+    }
 }
 
 pub fn plot_nn() {
+
+    println!("nn ...");
 
     let seed = [1, 2, 3, 4];
     let n = 50;
@@ -166,6 +185,7 @@ pub fn plot_nn() {
 
 
 pub fn main() {
+    unsafe { WAITKEY = env::args().skip(1).next().unwrap_or("".to_string()) != "--nokey".to_string(); }
 
     plot_mixture();
     plot_normal_data();

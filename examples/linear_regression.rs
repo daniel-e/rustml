@@ -1,5 +1,7 @@
 extern crate rustml;
+extern crate getopts;
 
+use std::env;
 use rustml::csv::from_csv_file;
 use rustml::octave::builder;
 use rustml::opencv::{Window, RgbImage};
@@ -7,6 +9,7 @@ use rustml::regression::{Hypothesis, DesignMatrix};
 use rustml::opt::{plot_learning_curve, opt_hypothesis, empty_opts};
 
 fn main() {
+    let waitkey = env::args().skip(1).next().unwrap_or("".to_string()) != "--nokey".to_string();
 
     let dm = from_csv_file("datasets/testing/points.txt", " ")
         .unwrap().design_matrix();
@@ -22,8 +25,10 @@ fn main() {
 
     let w = Window::new();
 
-    plot_learning_curve(&result, &w).unwrap();
-    w.wait_key();
+    if waitkey {
+        plot_learning_curve(&result, &w).unwrap();
+        w.wait_key();
+    }
 
     // plot the hypothesis with the data points
     builder()
@@ -40,7 +45,9 @@ fn main() {
         .run("/tmp/plot_script.m")
         .unwrap();
 
-    w.show_image(&RgbImage::from_file("/tmp/linreg_plot.png").unwrap());
-    w.wait_key();
+    if waitkey {
+        w.show_image(&RgbImage::from_file("/tmp/linreg_plot.png").unwrap());
+        w.wait_key();
+    }
 }
 
