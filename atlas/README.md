@@ -1,6 +1,6 @@
-The source code of atlas and lapack can been downloaded from:
-http://downloads.sourceforge.net/project/math-atlas/Stable/3.10.2/atlas3.10.2.tar.bz2
-http://www.netlib.org/lapack/lapack-3.5.0.tgz
+The following packages needs to be downloaded:
+* http://downloads.sourceforge.net/project/math-atlas/Stable/3.10.2/atlas3.10.2.tar.bz2
+* http://www.netlib.org/lapack/lapack-3.5.0.tgz
 
 Install
 -------
