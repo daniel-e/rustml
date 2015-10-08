@@ -1,3 +1,5 @@
+//! Module which provides implementation of neural networks.
+
 extern crate rand;
 
 use matrix::Matrix;
@@ -7,22 +9,68 @@ use ops_inplace::{MatrixMatrixOpsInPlace, MatrixScalarOpsInPlace};
 use opt::OptParams;
 
 #[derive(Debug, Clone)]
+/// A simple feed forward neural network with an arbitrary number of layers
+/// and one bias unit in each hidden layer.
+///
+/// Neural networks are a powerful machine learning approach which are
+/// able to learn complex non-linear hypothesis, e.g. for
+/// regression or classification.
 pub struct NeuralNetwork {
     layers: Vec<usize>,
     params: Vec<Matrix<f64>>
 }
 
-/// Implementation of a neural network.
 impl NeuralNetwork {
 
     /// Creates a new neural network.
     ///
-    /// The network does not contain any layer. Layers can be added with the method
-    /// `add_layer`.
+    /// The network does not contain any layer. To add layers use the
+    /// method `add_layer`.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// use rustml::nn::NeuralNetwork;
+    ///
+    /// // create a neural network ... 
+    /// let n = NeuralNetwork::new()
+    ///     .add_layer(3)   // ... with 3 units in the input layer
+    ///     .add_layer(10)  // ... 10 units in the hidden layer
+    ///     .add_layer(4);  // and 4 units in the output layer
+    /// ```
     pub fn new() -> NeuralNetwork {
         NeuralNetwork {
             layers: vec![],
             params: vec![]
+        }
+    }
+
+    /// Adds an layer to the network with the specified number
+    /// of units.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// use rustml::nn::NeuralNetwork;
+    ///
+    /// // create a neural network ... 
+    /// let n = NeuralNetwork::new()
+    ///     .add_layer(3)   // ... with 3 units in the input layer
+    ///     .add_layer(10)  // ... 10 units in the hidden layer
+    ///     .add_layer(4);  // and 4 units in the output layer
+    /// ```
+    pub fn add_layer(&self, n: usize) -> NeuralNetwork {
+
+        NeuralNetwork {
+            layers: self.layers.append(&[n]),
+            params: match self.layers.last() {
+                // If this is the first layer no parameters needs to be added.
+                None => vec![],
+                // If this is not the first layer we need to add random parameters
+                // from each unit of the previous layer to all units of the new
+                // layer.
+                Some(&m) => self.params.append(&[self.create_params(n, m, self.layers() == 1)]),
+            }
         }
     }
 
@@ -37,18 +85,6 @@ impl NeuralNetwork {
         let n = if from_input_layer { cols } else { cols + 1 };
 
         Matrix::from_vec(random::<f64>(rows * n), rows, n).unwrap()
-    }
-
-    /// Adds an layer to the neural network.
-    pub fn add_layer(&self, n: usize) -> NeuralNetwork {
-
-        NeuralNetwork {
-            layers: self.layers.append(&[n]),
-            params: match self.layers.last() {
-                Some(&m) => self.params.append(&[self.create_params(n, m, self.layers() == 1)]),
-                None => vec![]
-            }
-        }
     }
 
     /// Sets the parameters which connect the given layer `layer` with the next
