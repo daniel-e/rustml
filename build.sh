@@ -1,0 +1,101 @@
+#!/bin/bash
+
+set -e
+
+# options:
+# all (default): build lib, doc and examples + run tests
+# examples     : build only example
+# doc          : build doc with image
+# docrelease   : build and push public documentation
+# run          : run all examples
+
+function build_examples {
+	echo "building examples ..."
+	for i in $(find examples/ -name "*.rs" | cut -d/ -f2 | cut -d. -f1); do
+		echo "-> example $i ..."
+		cargo build --example $i
+	done
+}
+
+function run_examples {
+	echo "run examples ..."
+	for i in $(find examples/ -name "*.rs" | cut -d/ -f2 | cut -d. -f1); do
+		echo "-> example $i ..."
+		cargo run --example $i
+	done
+}
+
+function build_doc {
+	DST=target/doc/
+	cargo doc
+
+	cargo run --example linear_regression -- --nokey
+	convert -trim /tmp/linreg_plot.png $DST/linreg_plot.png
+	cargo run --example image_grid -- --nokey
+	convert -resize x246 /tmp/grid.png $DST/digits_grid.png
+	cargo run --example gradient_descentA -- --nokey
+	convert -trim /tmp/3dplot.png $DST/gradient_descent.png
+	cargo run --example plots -- --nokey
+	convert -trim /tmp/plot_normal_1.png $DST/plot_normal_1.png
+	convert -trim /tmp/plot_mixture.png $DST/plot_mixture.png
+	convert -trim /tmp/plot_knn_boundary.png $DST/plot_knn_boundary.png
+	convert -trim /tmp/nn.png $DST/nn.png
+}
+
+function build_all {
+	echo "build all"
+	echo "clean"
+	cargo clean
+	echo "building lib ..."
+	cargo build
+	echo "doc"
+	cargo doc
+	echo "running test"
+	cargo test
+	build_examples
+}
+
+function build_doc_release {
+	echo "build doc release"
+	pushd /tmp
+	rm -rf docrelease
+	git clone git@github.com:daniel-e/rustml.git docrelease
+	cd docrelease/
+	git checkout gh-pages
+	if [ `git status | grep "On branch gh-pages" | wc -l` -ne 1 ]; then
+		echo "something went wrong!"
+		popd
+		exit 1
+	fi
+	popd
+	build_doc  # build documentation with images
+	rsync --delete -r target/doc/* /tmp/docrelease/
+	pushd /tmp/docrelease/
+	git add -A
+	git commit -m "update to current version"
+	echo "pushing ..."
+	git push
+	echo "done"
+}
+
+case $1 in
+	all)
+		echo "all"
+		;;
+	examples)
+		build_examples
+		;;
+	doc)
+		build_doc
+		;;
+	docrelease)
+		build_doc_release
+		;;
+	run)
+		run_examples
+		;;
+	*)
+		build_all
+		;;
+esac
+

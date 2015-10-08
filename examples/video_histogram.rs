@@ -1,5 +1,6 @@
 extern crate rustml;
 
+use std::process;
 use std::io::Write;
 use std::fs::File;
 
@@ -14,11 +15,30 @@ use rustml::consts::*;
 // start Octave and type:
 // > load("/tmp/day_and_night.txt");
 // > hist(day_and_night, 256);
+
+fn err() {
+    println!("\n\nThis example requires the Rustml datasets package.");
+    println!("Please have a look at https://github.com/daniel-e/rustml#rustml-datasets-package");
+    println!("for details on how to install it.\n");
+}
+
 fn main() {
-    let video = Video::from_file(
-        &consts::path_for("videos/day_and_night_in_gray.avi").unwrap()).unwrap();
-    let mask = GrayImage::from_file(
-        &consts::path_for("videos/day_and_night_in_gray_mask_sky.png").unwrap()).unwrap();
+
+    let video = match Video::from_file(&path_for("videos/day_and_night_in_gray.avi").unwrap()) {
+        None => {
+            err();
+            process::exit(0);
+        },
+        Some(x) => x
+    };
+
+    let mask = match GrayImage::from_file(&consts::path_for("videos/day_and_night_in_gray_mask_sky.png").unwrap()) {
+        None => {
+            err();
+            process::exit(0);
+        },
+        Some(x) => x
+    };
 
     let mut f = File::create("/tmp/day_and_night.txt").unwrap();
 
