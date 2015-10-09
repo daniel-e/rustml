@@ -18,21 +18,32 @@ use std::fs::OpenOptions;
 
 pub trait Append<T> {
     fn append(&self, v: &[T]) -> Vec<T>;
+    fn add(&self, v: T) -> Vec<T>;
 }
 
 impl <T: Clone> Append<T> for Vec<T> {
 
     fn append(&self, v: &[T]) -> Vec<T> {
-
         self.iter().chain(v.iter()).cloned().collect::<Vec<T>>()
+    }
+
+    fn add(&self, v: T) -> Vec<T> {
+        let mut x = self.clone();
+        x.push(v);
+        x
     }
 }
 
 impl <T: Clone> Append<T> for [T] {
 
     fn append(&self, v: &[T]) -> Vec<T> {
-
         self.iter().chain(v.iter()).cloned().collect::<Vec<T>>()
+    }
+
+    fn add(&self, v: T) -> Vec<T> {
+        let mut x = self.to_vec();
+        x.push(v);
+        x
     }
 }
 
@@ -413,6 +424,13 @@ mod tests {
         let a = [1, 2, 3];
         let b = [4, 5];
         assert_eq!(a.append(&b), vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_add() {
+
+        let a = [1, 2, 3];
+        assert_eq!(a.add(5), vec![1, 2, 3, 5]);
     }
 
     #[test]
