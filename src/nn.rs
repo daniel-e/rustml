@@ -48,6 +48,18 @@ impl NeuralNetwork {
     /// Adds an layer to the network with the specified number
     /// of units.
     /// 
+    /// The first layer that is added represents the input layer. The
+    /// following layers that are added represent the hidden layers and the
+    /// last layer that is added automatically becomes the output
+    /// layer.
+    ///
+    /// For each layer that is added (except the input layer) random
+    /// parameters are generated (i.e. the weights of the connections
+    /// between the units / neurons) which connect the previous layer
+    /// with the new layer.
+    ///
+    /// Panics if `n == 0`.
+    ///
     /// # Example
     ///
     /// ```
@@ -61,34 +73,81 @@ impl NeuralNetwork {
     /// ```
     pub fn add_layer(&self, n: usize) -> NeuralNetwork {
 
+        assert!(n > 0, "The parameter n must not be zero.");
+
         NeuralNetwork {
             layers: self.layers.append(&[n]),
+
             params: match self.layers.last() {
+
                 // If this is the first layer no parameters needs to be added.
                 None => vec![],
+                
                 // If this is not the first layer we need to add random parameters
                 // from each unit of the previous layer to all units of the new
                 // layer.
-                Some(&m) => self.params.append(&[self.create_params(n, m, self.layers() == 1)]),
+                Some(&m) => self.params.add(self.create_params(n, m, self.layers() == 1)),
             }
         }
     }
 
-    /// Creates random parameters which connect one layer with the other layer.
+    /// Creates random parameters which connect each unit of one layer
+    /// with all units of the other layer.
     ///
-    /// The parameter `rows` denotes the number of layers in the right layer. The
-    /// parameter `cols` denotes the number of layers in the left layer. If
+    /// The method returns a matrix where the element at row `j` and column `i`
+    /// denotes the weight which connects unit `i` of previous layer with unit `j` of
+    /// the next layer, i.e. all weights for unit `j` are stored in row `j`.
+    ///
+    /// The parameter `m` denotes the number of layers in the right layer. The
+    /// parameter `n` denotes the number of layers in the left layer. If
     /// `from_input_layer` is `true` the left layer is an input layer. Otherwise,
     /// the left layer is a hidden layer.
-    fn create_params(&self, rows: usize, cols: usize, from_input_layer: bool) -> Matrix<f64> {
+    /// 
+    /// If the previous layer is the input layer, no bias unit to the previous
+    /// layer is added.
+    fn create_params(&self, m: usize, n: usize, from_input_layer: bool) -> Matrix<f64> {
 
-        let n = if from_input_layer { cols } else { cols + 1 };
+        // no bias unit in the input layer
+        let k = if from_input_layer { n } else { n + 1 };
 
-        Matrix::from_vec(random::<f64>(rows * n), rows, n).unwrap()
+        Matrix::from_vec(random::<f64>(m * k), m, k).unwrap()
     }
 
-    /// Sets the parameters which connect the given layer `layer` with the next
-    /// layer.
+    /// Sets the parameters (i.e. the weights) which connect the layer at
+    /// depth `n` with the layer at depth `n + 1`. 
+    ///
+    /// The input layer has depth 0, the first hidden layer has depth 1 and so on.
+    /// 
+    /// Panics if the layer does not exist or the dimension of the parameter
+    /// matrix which is replaced does not match with the dimension of the
+    /// matrix containing the new parameters.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    /// use rustml::nn::NeuralNetwork;
+    ///
+    /// # fn main() {
+    /// // create a neural network ... 
+    /// let n = NeuralNetwork::new()
+    ///     .add_layer(3)   // ... with 2 units in the input layer
+    ///     .add_layer(2)   // ... 2 units in the hidden layer
+    ///     .add_layer(1)   // and 1 units in the output layer
+    ///     .set_params(0, mat![
+    ///         // weights from the first, second and third unit of the first
+    ///         // layer (input layer) to he first unit in the second layer
+    ///         1.0, 0.9, 0.2;
+    ///         // weights from the first, second and third unit of the first
+    ///         // layer to the second unit in the second layer
+    ///         -0.3, 0.2, 0.5])
+    ///     .set_params(1, mat![
+    ///         // weights from the bias unit, the first and second units of the
+    ///         // second layer to the unit in the output layer
+    ///         0.1, -0.3, -0.1]);
+    /// # }
+    /// ```
     pub fn set_params(&self, layer: usize, params: Matrix<f64>) -> NeuralNetwork {
 
         let mut m = self.params.clone();
@@ -97,7 +156,7 @@ impl NeuralNetwork {
             None     => { panic!("Layer does not exist."); }
             Some(mx) => {
                 assert!(mx.rows() == params.rows() && 
-                    mx.cols() == params.cols(), "Parameter configuration is incompatible.");
+                    mx.cols() == params.cols(), "Parameter matrices do not match.");
                 *mx = params;
             }
         }
@@ -109,6 +168,20 @@ impl NeuralNetwork {
     }
 
     /// Returns the number of input units.
+    /// 
+    /// Panics if no input layer exists.
+    /// 
+    /// # Example
+    /// ```
+    /// use rustml::nn::NeuralNetwork;
+    ///
+    /// // create a neural network ... 
+    /// let n = NeuralNetwork::new()
+    ///     .add_layer(3)   // ... with 3 units in the input layer
+    ///     .add_layer(10)  // ... 10 units in the hidden layer
+    ///     .add_layer(4);  // and 4 units in the output layer
+    /// assert_eq!(n.input_size(), 3);
+    /// ```
     pub fn input_size(&self) -> usize {
 
         assert!(self.layers.len() != 0, "No input layer defined.");
@@ -116,6 +189,20 @@ impl NeuralNetwork {
     }
 
     /// Returns the number of output units.
+    /// 
+    /// Panics of no output layer exists.
+    /// 
+    /// # Example
+    /// ```
+    /// use rustml::nn::NeuralNetwork;
+    ///
+    /// // create a neural network ... 
+    /// let n = NeuralNetwork::new()
+    ///     .add_layer(3)   // ... with 3 units in the input layer
+    ///     .add_layer(10)  // ... 10 units in the hidden layer
+    ///     .add_layer(4);  // and 4 units in the output layer
+    /// assert_eq!(n.output_size(), 4);
+    /// ```
     pub fn output_size(&self) -> usize {
 
         assert!(self.layers.len() != 0, "No output layer defined.");
@@ -123,12 +210,24 @@ impl NeuralNetwork {
     }
 
     /// Returns the number of layers.
+    /// 
+    /// # Example
+    /// ```
+    /// use rustml::nn::NeuralNetwork;
+    ///
+    /// // create a neural network ... 
+    /// let n = NeuralNetwork::new()
+    ///     .add_layer(3)   // ... with 3 units in the input layer
+    ///     .add_layer(10)  // ... 10 units in the hidden layer
+    ///     .add_layer(4);  // and 4 units in the output layer
+    /// assert_eq!(n.layers(), 3);
+    /// ```
     pub fn layers(&self) -> usize {
 
         self.layers.len()
     }
 
-    /// Computes the error of the net.
+    /// Computes the error of the network.
     pub fn error(&self, examples: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
 
         let mut err = 0.0;
