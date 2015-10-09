@@ -8,13 +8,13 @@ use vectors::{Append, random};
 use ops_inplace::{MatrixMatrixOpsInPlace, MatrixScalarOpsInPlace};
 use opt::OptParams;
 
-#[derive(Debug, Clone)]
 /// A simple feed forward neural network with an arbitrary number of layers
 /// and one bias unit in each hidden layer.
 ///
 /// Neural networks are a powerful machine learning approach which are
 /// able to learn complex non-linear hypothesis, e.g. for
 /// regression or classification.
+#[derive(Debug, Clone)]
 pub struct NeuralNetwork {
     layers: Vec<usize>,
     params: Vec<Matrix<f64>>
