@@ -20,57 +20,6 @@ pub struct NeuralNetwork {
     params: Vec<Matrix<f64>>
 }
 
-pub trait IntoInput {
-
-    fn to_input(&self) -> Input;
-}
-
-impl IntoInput for Vec<f64> {
-
-    fn to_input(&self) -> Input {
-        Input {
-            patterns: Matrix::from_vec(self.clone(), 1, self.len()).unwrap()
-        }
-    }
-}
-
-impl IntoInput for [f64] {
-
-    fn to_input(&self) -> Input {
-        Input {
-            patterns: Matrix::from_vec(self.to_vec(), 1, self.len()).unwrap()
-        }
-    }
-}
-
-impl IntoInput for Matrix<f64> {
-
-    fn to_input(&self) -> Input {
-        Input {
-            patterns: self.clone()
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Input {
-    patterns: Matrix<f64>
-}
-
-impl Input {
-
-    pub fn as_matrix(self) -> Matrix<f64> {
-        self.patterns
-    }
-}
-
-
-#[derive(Debug, Clone)]
-pub struct Output {
-    out: Matrix<f64>
-}
-
-
 impl NeuralNetwork {
 
     /// Creates a new neural network.
@@ -278,19 +227,16 @@ impl NeuralNetwork {
         self.layers.len()
     }
 
-    pub fn ppredict<I: IntoInput>(&self, input: &IntoInput) -> Output {
+    pub fn ppredict(&self, input: &Matrix<f64>) -> Matrix<f64> {
 
-        let mut o = input.to_input().as_matrix();
+        let mut o = input.clone();
 
         for i in &self.params {
             let mut x = o.mul(i, false, true);
             x.isigmoid();
             o = x.insert_column(0, &from_value(1.0, x.rows())).unwrap();
         }
-
-        Output {
-            out: o.rm_column(0).unwrap()
-        }
+        o.rm_column(0).unwrap()
     }
 
     /// Computes the error of the network.
@@ -762,8 +708,8 @@ mod tests {
         assert_eq!(n.input_size(), 3);
         assert_eq!(n.output_size(), 1);
 
-        let p = n.ppredict::<Vec<_>>(&x);
-        assert!(p.out.similar(&mat![0.88547], 0.00001));
+        let p = n.ppredict(&x.to_matrix());
+        assert!(p.similar(&mat![0.88547], 0.00001));
     }
 
 }
