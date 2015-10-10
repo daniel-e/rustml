@@ -79,6 +79,13 @@ impl <T: Clone> IntoMatrix<T> for Vec<T> {
     }
 }
 
+impl <T: Clone> IntoMatrix<T> for [T] {
+
+    fn to_matrix(&self) -> Matrix<T> {
+        Matrix::from_vec(self.to_vec(), 1, self.len()).unwrap()
+    }
+}
+
 // ------------------------------------------------------------------
 
 /// Trait to check if a matrix contains a NaN value.

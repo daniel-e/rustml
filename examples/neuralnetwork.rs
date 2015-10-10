@@ -38,7 +38,7 @@ fn main() {
     let mut p = vec![];
     for y in (-1.0).linspace(2.0, 100) {
         for x in (-1.0).linspace(2.0, 100) {
-            p.push(*n.predict(&[x, y]).first().unwrap());
+            p.push(*n.predict(&[x, y].to_matrix()).get(0, 0).unwrap());
         }
     }
 

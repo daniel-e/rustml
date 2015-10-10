@@ -227,7 +227,8 @@ impl NeuralNetwork {
         self.layers.len()
     }
 
-    pub fn ppredict(&self, input: &Matrix<f64>) -> Matrix<f64> {
+    /// Computes the output of the neural network for the given input.
+    pub fn predict(&self, input: &Matrix<f64>) -> Matrix<f64> {
 
         let mut o = input.clone();
 
@@ -242,25 +243,9 @@ impl NeuralNetwork {
     /// Computes the error of the network.
     pub fn error(&self, examples: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
 
-        let mut err = 0.0;
-        for (row, t) in examples.row_iter().zip(targets.row_iter()) {
-            let v = self.predict(row).sub(t);
-            err += v.iter().fold(0.0, |acc, val| acc + val * val);
-        }
-        err / (2.0 * examples.rows() as f64)
-    }
-
-    /// Computes the output of the neural network for the given input.
-    pub fn predict(&self, input: &[f64]) -> Vec<f64> {
-
-        assert!(self.layers.len() >= 2, "At least two layers are required.");
-        assert!(input.len() == self.input_size(), "Dimension of input vector does not match.");
-
-        self.params.iter()
-            .fold(input.to_vec(), 
-                  |v, ref params| [1.0].append(&params.mul_vec(&v).sigmoid())
-            )
-            .iter().skip(1).cloned().collect() // skip the bias unit TODO more elegant way?
+        let mut o = self.predict(examples);
+        o.isub(targets);
+        o.values().map(|&x| x * x).fold(0.0, |acc, val| acc + val) / (2.0 * examples.rows() as f64)
     }
 
     pub fn optimize(&self, x: &Matrix<f64>, labels: &Matrix<f64>, p: OptParams<f64>) -> NeuralNetwork {
@@ -480,8 +465,8 @@ mod tests {
         assert_eq!(n.input_size(), 3);
         assert_eq!(n.output_size(), 1);
 
-        let p = n.predict(&x);
-        assert!(p.similar(&vec![0.61301], 0.00001));
+        let p = n.predict(&x.to_matrix());
+        assert!(p.similar(&mat![0.61301], 0.00001));
     }
 
     #[test]
@@ -511,8 +496,8 @@ mod tests {
         assert_eq!(n.input_size(), 3);
         assert_eq!(n.output_size(), 1);
 
-        let p = n.predict(&x);
-        assert!(p.similar(&vec![0.88547], 0.00001));
+        let p = n.predict(&x.to_matrix());
+        assert!(p.similar(&mat![0.88547], 0.00001));
     }
 
     #[test]
@@ -681,36 +666,5 @@ mod tests {
         assert!(p[0].eq(&params1));
         assert!(p[1].eq(&params2));
     }
-
-    #[test]
-    fn test_ppredict() {
-        // parameters
-        let params1 = mat![
-            0.1, 0.2, 0.4;
-            0.2, 0.1, 2.0
-        ];
-
-        let params2 = mat![
-            0.8, 1.2, 0.6
-        ];
-
-        // input vector
-        let x = vec![0.4, 0.5, 0.8];
-
-        let n = NeuralNetwork::new()
-            .add_layer(3)
-            .add_layer(2)
-            .add_layer(1)
-            .set_params(0, params1)
-            .set_params(1, params2);
-
-        assert_eq!(n.layers(), 3);
-        assert_eq!(n.input_size(), 3);
-        assert_eq!(n.output_size(), 1);
-
-        let p = n.ppredict(&x.to_matrix());
-        assert!(p.similar(&mat![0.88547], 0.00001));
-    }
-
 }
 
