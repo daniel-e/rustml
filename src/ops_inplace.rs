@@ -103,8 +103,11 @@ pub fn d_gemm(alpha: f64, a: &Matrix<f64>, b: &Matrix<f64>,
     let rowsb = if transb { b.cols() } else { b.rows() };
     let colsb = if transb { b.rows() } else { b.cols() };
 
-    if colsa != rowsb || rowsa != c.rows() || colsb != c.cols() {
-        panic!("Dimensions do not match.");
+    if colsa != rowsb {
+        panic!(
+            format!("Dimensions for d_gemm do not match: {}x{} * {}x{}", 
+            rowsa, colsa, rowsb, colsb
+        ));
     }
 
     let m = c.rows();

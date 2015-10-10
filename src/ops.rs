@@ -47,7 +47,10 @@ impl MatrixMatrixOps<f64> for Matrix<f64> {
 
     fn mul(&self, rhs: &Matrix<f64>, lhs_t: bool, rhs_t: bool) -> Matrix<f64> {
 
-        let mut c = Matrix::fill(0.0, self.rows(), rhs.cols());
+        let r = if lhs_t { self.cols() } else { self.rows() };
+        let c = if rhs_t { rhs.rows() } else { rhs.cols() };
+
+        let mut c = Matrix::fill(0.0, r, c);
         d_gemm(1.0, self, rhs, 0.0, &mut c, lhs_t, rhs_t);
         c
     }
