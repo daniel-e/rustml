@@ -1,11 +1,11 @@
-//! Module which provides implementation of neural networks.
+//! Module which provides implementations of neural networks.
 
 extern crate rand;
 
 use matrix::Matrix;
-use ops::{MatrixVectorOps, Functions, VectorVectorOps, MatrixScalarOps};
-use vectors::{Append, random};
-use ops_inplace::{MatrixMatrixOpsInPlace, MatrixScalarOpsInPlace};
+use ops::{MatrixVectorOps, Functions, VectorVectorOps, MatrixScalarOps, MatrixMatrixOps};
+use vectors::{Append, random, from_value};
+use ops_inplace::{MatrixMatrixOpsInPlace, MatrixScalarOpsInPlace, FunctionsInPlace};
 use opt::OptParams;
 
 /// A simple feed forward neural network with an arbitrary number of layers
@@ -19,6 +19,57 @@ pub struct NeuralNetwork {
     layers: Vec<usize>,
     params: Vec<Matrix<f64>>
 }
+
+pub trait IntoInput {
+
+    fn to_input(&self) -> Input;
+}
+
+impl IntoInput for Vec<f64> {
+
+    fn to_input(&self) -> Input {
+        Input {
+            patterns: Matrix::from_vec(self.clone(), 1, self.len()).unwrap()
+        }
+    }
+}
+
+impl IntoInput for [f64] {
+
+    fn to_input(&self) -> Input {
+        Input {
+            patterns: Matrix::from_vec(self.to_vec(), 1, self.len()).unwrap()
+        }
+    }
+}
+
+impl IntoInput for Matrix<f64> {
+
+    fn to_input(&self) -> Input {
+        Input {
+            patterns: self.clone()
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Input {
+    patterns: Matrix<f64>
+}
+
+impl Input {
+
+    pub fn as_matrix(self) -> Matrix<f64> {
+        self.patterns
+    }
+}
+
+
+#[derive(Debug, Clone)]
+pub struct Output {
+    out: Matrix<f64>
+}
+
 
 impl NeuralNetwork {
 
@@ -225,6 +276,21 @@ impl NeuralNetwork {
     pub fn layers(&self) -> usize {
 
         self.layers.len()
+    }
+
+    pub fn ppredict<I: IntoInput>(&self, input: &IntoInput) -> Output {
+
+        let mut o = input.to_input().as_matrix();
+
+        for i in &self.params {
+            let mut x = o.mul(i, false, true);
+            x.isigmoid();
+            o = x.insert_column(0, &from_value(1.0, x.rows())).unwrap();
+        }
+
+        Output {
+            out: o.rm_column(0).unwrap()
+        }
     }
 
     /// Computes the error of the network.
@@ -669,5 +735,36 @@ mod tests {
         assert!(p[0].eq(&params1));
         assert!(p[1].eq(&params2));
     }
+
+    #[test]
+    fn test_ppredict() {
+        // parameters
+        let params1 = mat![
+            0.1, 0.2, 0.4;
+            0.2, 0.1, 2.0
+        ];
+
+        let params2 = mat![
+            0.8, 1.2, 0.6
+        ];
+
+        // input vector
+        let x = vec![0.4, 0.5, 0.8];
+
+        let n = NeuralNetwork::new()
+            .add_layer(3)
+            .add_layer(2)
+            .add_layer(1)
+            .set_params(0, params1)
+            .set_params(1, params2);
+
+        assert_eq!(n.layers(), 3);
+        assert_eq!(n.input_size(), 3);
+        assert_eq!(n.output_size(), 1);
+
+        let p = n.ppredict::<Vec<_>>(&x);
+        assert!(p.out.similar(&mat![0.88547], 0.00001));
+    }
+
 }
 
