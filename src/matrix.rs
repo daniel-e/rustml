@@ -67,6 +67,20 @@ pub struct Matrix<T> {
 
 // ------------------------------------------------------------------
 
+/// Trait to convert a data type into a matrix.
+pub trait IntoMatrix<T> {
+    fn to_matrix(&self) -> Matrix<T>;
+}
+
+impl <T: Clone> IntoMatrix<T> for Vec<T> {
+
+    fn to_matrix(&self) -> Matrix<T> {
+        Matrix::from_vec(self.clone(), 1, self.len()).unwrap()
+    }
+}
+
+// ------------------------------------------------------------------
+
 /// Trait to check if a matrix contains a NaN value.
 pub trait HasNan {
     /// Returns `true` if at least one element that is NaN exists.
@@ -93,7 +107,14 @@ impl <T: Clone + Signed + Float> Similar<T> for Matrix<T> {
 
     fn similar(&self, e: &Self, epsilon: T) -> bool {
 
-        assert!(self.rows() == e.rows() && self.cols() == e.cols(), "Dimensions of matrices do not match.");
+        assert!(
+            self.rows() == e.rows() && 
+            self.cols() == e.cols(), 
+            format!("Dimensions of matrices do not match. {}x{}, {}x{}",
+                    self.rows(), self.cols(), e.rows(), e.cols()
+            )
+        );
+
         self.values().zip(e.values()).all(|(&x, &y)| num::abs(x - y) <= epsilon)
     }
 }
@@ -1350,6 +1371,12 @@ mod tests {
         assert!(
             a.if_then(|&x| x > 2, 1, 0).eq(&mat![0, 0, 1, 1; 1, 0, 1, 0])
         );
+    }
+
+    #[test]
+    fn test_to_matrix() {
+        let v = vec![1, 2, 3, 4, 5];
+        assert!(v.to_matrix().eq(&mat![1, 2, 3, 4, 5]));
     }
 }
 
