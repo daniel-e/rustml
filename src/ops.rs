@@ -6,7 +6,7 @@ use std::iter::repeat;
 
 use blas::*;
 use matrix::Matrix;
-use ops_inplace::{VectorVectorOpsInPlace, d_gemv, s_gemv, FunctionsInPlace, MatrixMatrixOpsInPlace};
+use ops_inplace::{VectorVectorOpsInPlace, d_gemm, d_gemv, s_gemv, FunctionsInPlace, MatrixMatrixOpsInPlace};
 use vectors::zero;
 
 // ----------------------------------------------------------------------------
@@ -23,6 +23,12 @@ pub trait MatrixMatrixOps<T> {
     ///
     /// Implementation details: internally uses the in-place `isub`.
     fn sub(&self, rhs: &Matrix<T>) -> Matrix<T>;
+
+    /// Multiplies this matrix with `rhs` using BLAS.
+    ///
+    /// If `lhs_t` is true the transpose of the first matrix is used. If
+    /// `lhs_r` is true the transpose of the second matrix is used.
+    fn mul(&self, rhs: &Matrix<T>, lhs_t: bool, rhs_t: bool) -> Matrix<T>;
 }
 
 impl MatrixMatrixOps<f64> for Matrix<f64> {
@@ -37,6 +43,13 @@ impl MatrixMatrixOps<f64> for Matrix<f64> {
         let mut x = self.clone();
         x.isub(rhs);
         x
+    }
+
+    fn mul(&self, rhs: &Matrix<f64>, lhs_t: bool, rhs_t: bool) -> Matrix<f64> {
+
+        let mut c = Matrix::fill(0.0, self.rows(), rhs.cols());
+        d_gemm(1.0, self, rhs, 0.0, &mut c, lhs_t, rhs_t);
+        c
     }
 }
 
@@ -763,6 +776,24 @@ mod tests {
         let m = x.sub(&y);
         assert!(m.eq(&mat![
             -2.0, 1.0, -1.0; 2.0, -1.0, 3.0
+        ]));
+    }
+
+    #[test]
+    fn test_matrix_matrix_ops_mul() {
+        let x = mat![
+            1.0, 2.0, 3.0; 
+            4.0, 2.0, 5.0
+        ];
+        let y = mat![
+            3.0, 1.0; 
+            2.0, 3.0;
+            1.0, 2.0
+        ];
+
+        let m = x.mul(&y, false, false);
+        assert!(m.eq(&mat![
+            10.0, 13.0; 21.0, 20.0
         ]));
     }
 }
