@@ -6,6 +6,7 @@ extern crate rand;
 extern crate num;
 
 use std::{iter, fmt, fs};
+use std::iter::FromIterator;
 use std::io::Read;
 use std::str::FromStr;
 use std::ops::Mul;
@@ -181,6 +182,16 @@ macro_rules! mat {
     };
 }
 
+impl <T: Clone> FromIterator<T> for Matrix<T> {
+
+    fn from_iter<I>(iterator: I) -> Self
+        where I: IntoIterator<Item = T> {
+
+        let v = Vec::from_iter(iterator);
+        let n = v.len();
+        Matrix::<T>::from_vec(v, 1, n).unwrap()
+    }
+}
 
 // ------------------------------------------------------------------
 
@@ -295,11 +306,11 @@ impl <T: Clone> Matrix<T> {
     /// use rustml::Matrix;
     ///
     /// let v = vec![1, 2, 3, 4, 5, 6];
-    /// let a = Matrix::from_iter(v.iter(), 3).unwrap();
+    /// let a = Matrix::from_it(v.iter(), 3).unwrap();
     /// assert_eq!(a.rows(), 2);
     /// assert_eq!(a.cols(), 3);
     /// ```
-    pub fn from_iter<I: Iterator<Item = T>>(iter: I, cols: usize) -> Option<Matrix<T>> {
+    pub fn from_it<I: Iterator<Item = T>>(iter: I, cols: usize) -> Option<Matrix<T>> {
 
         let v = iter.collect::<Vec<T>>();
         let l = v.len();
@@ -796,7 +807,7 @@ impl <T: Clone> Matrix<T> {
     pub fn if_then<F>(&self, prd: F, tr: T, fa: T) -> Matrix<T> 
         where F: Fn(&T) -> bool {
 
-        Matrix::from_iter(
+        Matrix::from_it(
             self.values().map(|x| if prd(x) { tr.clone() } else { fa.clone() }), 
             self.cols()
         ).unwrap()
@@ -1370,13 +1381,13 @@ mod tests {
     }
 
     #[test]
-    fn test_from_iter() {
+    fn test_from_it() {
 
         let v = vec![1, 2, 3, 4, 5, 6];
-        let a = Matrix::from_iter(v.iter(), 3).unwrap();
+        let a = Matrix::from_it(v.iter(), 3).unwrap();
         assert_eq!(a.rows(), 2);
         assert_eq!(a.cols(), 3);
-        let b = Matrix::from_iter(v.iter(), 2).unwrap();
+        let b = Matrix::from_it(v.iter(), 2).unwrap();
         assert_eq!(b.cols(), 2);
         assert_eq!(b.rows(), 3);
     }
@@ -1405,5 +1416,13 @@ mod tests {
         assert!(a.eq(&mat![1, 2; 3, 4; 3, 2; 4, 1]));
     }
 
+    #[test]
+    fn test_from_iter() {
+        let v = vec![1, 2, 3, 4, 5, 6, 7, 8];
+        let m = v.iter().cloned().collect::<Matrix<_>>();
+        assert_eq!(m.rows(), 1);
+        assert_eq!(m.cols(), 8);
+        assert!(m.eq(&mat![1, 2, 3, 4, 5, 6, 7, 8]));
+    }
 }
 
