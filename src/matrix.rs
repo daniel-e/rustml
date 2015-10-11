@@ -801,6 +801,16 @@ impl <T: Clone> Matrix<T> {
             self.cols()
         ).unwrap()
     }
+
+    pub fn reshape(&mut self, rows: usize, cols: usize) {
+
+        assert!(rows * cols == self.data.len(),
+            "The new shape must contain the same number of elements."
+        );
+
+        self.nrows = rows;
+        self.ncols = cols;
+    }
 }
 
 // --------------- Iterators ----------------------------------------
@@ -1385,5 +1395,15 @@ mod tests {
         let v = vec![1, 2, 3, 4, 5];
         assert!(v.to_matrix().eq(&mat![1, 2, 3, 4, 5]));
     }
+
+    #[test]
+    fn test_reshape() {
+        let mut a = mat![1, 2, 3, 4; 3, 2, 4, 1]; // 2x4
+        a.reshape(4, 2);
+        assert_eq!(a.rows(), 4);
+        assert_eq!(a.cols(), 2);
+        assert!(a.eq(&mat![1, 2; 3, 4; 3, 2; 4, 1]));
+    }
+
 }
 
