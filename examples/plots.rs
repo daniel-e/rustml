@@ -7,7 +7,7 @@ use std::iter::repeat;
 use rustml::octave::builder;
 use rustml::opencv::{Window, RgbImage};
 use rustml::knn::classify;
-use rustml::nn::NeuralNetwork;
+use rustml::nn::*;
 use rustml::opt::empty_opts;
 use rustml::*;
 
@@ -89,7 +89,7 @@ pub fn plot_knn_decision_boundary() {
             .as_matrix();
 
     let labels = m.column(0).unwrap().iter().map(|&x| x.clone() as usize).collect::<Vec<usize>>();
-    let mx = m.rm_column(0).unwrap();
+    let mx = m.rm_column(0);
 
     let mut mt = Matrix::<f64>::new();
     for y in (-49..100) {
@@ -143,10 +143,10 @@ pub fn plot_nn() {
             .add(n, normal_builder(seed).add(0.0, 0.2).add(1.0, 0.2))
             .add(n, normal_builder(seed).add(1.0, 0.2).add(0.0, 0.2))
             .as_matrix()
-            .rm_column(0).unwrap();
+            .rm_column(0);
 
     // create the labels
-    let labels = Matrix::from_iter(
+    let labels = Matrix::from_it(
             repeat(0.0).take(2 * n).chain(repeat(1.0).take(2 * n)), 1
         ).unwrap();
 
@@ -154,13 +154,13 @@ pub fn plot_nn() {
         .add_layer(2)   // input layer with two units
         .add_layer(3)   // hidden layer with two units
         .add_layer(1)   // output layer
-        .optimize(&x, &labels, empty_opts().alpha(20.0).iter(500));
+        .gd(&x, &labels, empty_opts().alpha(20.0).iter(500));
         
     // create the values for the contour plot
     let mut p = vec![];
     for y in (-1.0).linspace(2.0, 100) {
         for x in (-1.0).linspace(2.0, 100) {
-            p.push(*n.predict(&[x, y]).first().unwrap());
+            p.push(*n.predict(&[x, y].to_matrix()).row(0).unwrap().first().unwrap());
         }
     }
 
@@ -183,6 +183,62 @@ pub fn plot_nn() {
         .unwrap();
 }
 
+pub fn plot_nn_example() {
+
+    println!("nn example ...");
+
+    let seed = [1, 2, 3, 4];
+    let n = 50;
+    let x = mixture_builder()
+            .add(n, normal_builder(seed).add(0.0, 0.5).add(0.0, 0.5))
+            .add(n, normal_builder(seed).add(1.0, 0.5).add(1.0, 0.5))
+            .as_matrix()
+            .rm_column(0);
+
+    // create the labels
+    let labels = Matrix::from_it(
+            repeat(0.0).take(n).chain(repeat(1.0).take(n)), 1
+        ).unwrap();
+
+    let n = NeuralNetwork::new()
+        .add_layer(2)   // input layer with two units
+        .add_layer(3)   // hidden layer
+        .add_layer(1)   // output layer
+        .gd(&x, &labels, empty_opts().alpha(20.0).iter(500));
+        
+    // create the values for the contour plot
+    let mut p = vec![];
+    for y in (-1.0).linspace(2.0, 100) {
+        for x in (-1.0).linspace(2.0, 100) {
+            p.push(*n.predict(&[x, y].to_matrix()).row(0).unwrap().first().unwrap());
+        }
+    }
+
+    builder()
+        // contour plot
+        .add_vector("P = $$", &p)
+        .add("tx = ty = linspace(-1, 2, 100)")
+        .add("contour(tx, ty, reshape(P, 100, 100))")
+        .add("hold on")
+        // examples
+        .add_matrix("X = $$", &x)
+        .add_vector_iter("y = $$", labels.values())
+        .add("plot(X(y == 0, 1), X(y == 0, 2), 'd', 'markersize', 6, 'markerfacecolor', 'yellow', 'color', 'black')")
+        .add("plot(X(y == 1, 1), X(y == 1, 2), 'o', 'markersize', 6, 'markerfacecolor', 'blue', 'color', 'black')")
+        .add("axis([-1, 2, -1, 2])")
+        .add("axis('nolabel')")
+        .add("grid on")
+        .add("print -dpng -r50 '/tmp/nn_example.png'")
+        .run("/tmp/nn_example.m")
+        .unwrap();
+
+    if wait_key() {
+        Window::new()
+            .show_image(&RgbImage::from_file("/tmp/nn_example.png").unwrap())
+            .wait_key();
+    }
+}
+
 
 pub fn main() {
     unsafe { WAITKEY = env::args().skip(1).next().unwrap_or("".to_string()) != "--nokey".to_string(); }
@@ -191,5 +247,6 @@ pub fn main() {
     plot_normal_data();
     plot_knn_decision_boundary();
     plot_nn();
+    plot_nn_example();
 }
 
