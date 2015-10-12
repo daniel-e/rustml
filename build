@@ -59,9 +59,16 @@ function build_all {
 function build_doc_release {
 	echo "build doc release"
 	pushd /tmp
-	rm -rf docrelease
-	git clone git@github.com:daniel-e/rustml.git docrelease
-	cd docrelease/
+	if [ ! -e docrelease ]; then
+		echo "Cloning ..."
+		git clone git@github.com:daniel-e/rustml.git docrelease
+		cd docrelease/
+	else 
+		echo "Pulling ..."
+		cd docrelease
+		git pull
+	fi
+	echo "change branch ..."
 	git checkout gh-pages
 	if [ `git status | grep "On branch gh-pages" | wc -l` -ne 1 ]; then
 		echo "something went wrong!"
