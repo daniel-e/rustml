@@ -470,7 +470,7 @@
     <span class='kw'>fn</span> <span class='ident'>design_matrix</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='self'>self</span>.<span class='ident'>insert_column</span>(<span class='number'>0</span>, 
             <span class='kw-2'>&amp;</span><span class='ident'>repeat</span>(<span class='number'>1.0</span>).<span class='ident'>take</span>(<span class='self'>self</span>.<span class='ident'>rows</span>()).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;&gt;</span>()
-        ).<span class='ident'>unwrap</span>()
+        )
     }
 }
 
@@ -478,7 +478,7 @@
     <span class='kw'>fn</span> <span class='ident'>design_matrix</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
         <span class='self'>self</span>.<span class='ident'>insert_column</span>(<span class='number'>0</span>, 
             <span class='kw-2'>&amp;</span><span class='ident'>repeat</span>(<span class='number'>1.0</span>).<span class='ident'>take</span>(<span class='self'>self</span>.<span class='ident'>rows</span>()).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;&gt;</span>()
-        ).<span class='ident'>unwrap</span>()
+        )
     }
 }
 

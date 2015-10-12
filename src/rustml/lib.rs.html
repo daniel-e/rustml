@@ -197,6 +197,7 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
+<span id="158">158</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Library for doing machine learning with Rust.</span>
 <span class='doccomment'>//!</span>
@@ -235,6 +236,7 @@
 <span class='doccomment'>//! * [highly optimized linear algebra via BLAS integration](blas/index.html) (i.e. operations on vectors and</span>
 <span class='doccomment'>//! matrices)</span>
 <span class='doccomment'>//! * gradient descent with debugging capabilities (e.g. with learning curves)</span>
+<span class='doccomment'>//! * [neural networks](nn/index.html)</span>
 <span class='doccomment'>//! * DBSCAN clustering algorithm</span>
 <span class='doccomment'>//! * linear regression</span>
 <span class='doccomment'>//! * optimization of linear regression with gradient descent</span>
@@ -318,7 +320,7 @@
 <span class='doccomment'>//! handwritten digits of the MNIST database into a grid</span>
 <span class='doccomment'>//!</span>
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>distance</span>::{<span class='ident'>Distance</span>, <span class='ident'>Euclid</span>, <span class='ident'>DistancePoint2D</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>matrix</span>::{<span class='ident'>HasNan</span>, <span class='ident'>Similar</span>, <span class='ident'>Matrix</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>matrix</span>::{<span class='ident'>HasNan</span>, <span class='ident'>Similar</span>, <span class='ident'>Matrix</span>, <span class='ident'>IntoMatrix</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>math</span>::{<span class='ident'>Dimension</span>, <span class='ident'>Normalization</span>, <span class='ident'>Mean</span>, <span class='ident'>MeanVec</span>, <span class='ident'>Sum</span>, <span class='ident'>Var</span>, <span class='ident'>SumVec</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>MatrixScalarOps</span>, <span class='ident'>Ops</span>, <span class='ident'>VectorScalarOps</span>, <span class='ident'>VectorVectorOps</span>, <span class='ident'>MatrixMatrixOps</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ops_inplace</span>::{<span class='ident'>VectorVectorOpsInPlace</span>, <span class='ident'>MatrixMatrixOpsInPlace</span>};

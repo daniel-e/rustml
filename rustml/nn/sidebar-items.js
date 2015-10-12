@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["NeuralNetwork",""]]});
+initSidebarItems({"struct":[["NeuralNetwork","A simple feed forward neural network with an arbitrary number of layers and one bias unit in each hidden layer."]],"trait":[["GradientDescent","Trait to optimize via gradient descent."],["MeanSquareError","Trait to compute the mean square error of a predictor."]]});

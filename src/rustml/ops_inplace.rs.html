@@ -1225,6 +1225,9 @@
 <span id="1183">1183</span>
 <span id="1184">1184</span>
 <span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Provides scalar, vector, vector-vector, vector-matrix and matrix-matrix operations.</span>
 <span class='doccomment'>//!</span>
@@ -1331,8 +1334,11 @@
     <span class='kw'>let</span> <span class='ident'>rowsb</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>transb</span> { <span class='ident'>b</span>.<span class='ident'>cols</span>() } <span class='kw'>else</span> { <span class='ident'>b</span>.<span class='ident'>rows</span>() };
     <span class='kw'>let</span> <span class='ident'>colsb</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>transb</span> { <span class='ident'>b</span>.<span class='ident'>rows</span>() } <span class='kw'>else</span> { <span class='ident'>b</span>.<span class='ident'>cols</span>() };
 
-    <span class='kw'>if</span> <span class='ident'>colsa</span> <span class='op'>!=</span> <span class='ident'>rowsb</span> <span class='op'>||</span> <span class='ident'>rowsa</span> <span class='op'>!=</span> <span class='ident'>c</span>.<span class='ident'>rows</span>() <span class='op'>||</span> <span class='ident'>colsb</span> <span class='op'>!=</span> <span class='ident'>c</span>.<span class='ident'>cols</span>() {
-        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Dimensions do not match.&quot;</span>);
+    <span class='kw'>if</span> <span class='ident'>colsa</span> <span class='op'>!=</span> <span class='ident'>rowsb</span> {
+        <span class='macro'>panic</span><span class='macro'>!</span>(
+            <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Dimensions for d_gemm do not match: {}x{} * {}x{}&quot;</span>, 
+            <span class='ident'>rowsa</span>, <span class='ident'>colsa</span>, <span class='ident'>rowsb</span>, <span class='ident'>colsb</span>
+        ));
     }
 
     <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>rows</span>();
@@ -1817,7 +1823,7 @@
 }
 
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>impl_matrix_matrix_ops_inplace</span> {
-    ( $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span>:<span class='ident'>ty</span> )<span class='op'>+</span> ) <span class='op'>=&gt;</span> ($(
+    ( $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gemm</span>:<span class='ident'>expr</span> )<span class='op'>+</span> ) <span class='op'>=&gt;</span> ($(
 
         <span class='kw'>impl</span> <span class='ident'>MatrixMatrixOpsInPlace</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span><span class='op'>&gt;</span> {
 
@@ -1854,8 +1860,8 @@
     )<span class='op'>*</span>)
 }
 
-<span class='macro'>impl_matrix_matrix_ops_inplace</span><span class='macro'>!</span>{ <span class='ident'>f32</span> }
-<span class='macro'>impl_matrix_matrix_ops_inplace</span><span class='macro'>!</span>{ <span class='ident'>f64</span> }
+<span class='macro'>impl_matrix_matrix_ops_inplace</span><span class='macro'>!</span>{ <span class='ident'>f32</span>, <span class='ident'>s_gemm</span> }
+<span class='macro'>impl_matrix_matrix_ops_inplace</span><span class='macro'>!</span>{ <span class='ident'>f64</span>, <span class='ident'>d_gemm</span> }
 
 <span class='comment'>// ----------------------------------------------------------------------------</span>
 
