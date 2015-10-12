@@ -2,7 +2,7 @@
 
 use std::iter::repeat;
 
-use rustml::nn::NeuralNetwork;
+use rustml::nn::*;
 use rustml::octave::builder;
 use rustml::opencv::{Window, RgbImage};
 use rustml::*;
@@ -21,10 +21,10 @@ fn main() {
             .add(n, normal_builder(seed).add(0.0, 0.2).add(1.0, 0.2))
             .add(n, normal_builder(seed).add(1.0, 0.2).add(0.0, 0.2))
             .as_matrix()
-            .rm_column(0).unwrap();
+            .rm_column(0);
 
     // create the labels
-    let labels = Matrix::from_iter(
+    let labels = Matrix::from_it(
             repeat(0.0).take(2 * n).chain(repeat(1.0).take(2 * n)), 1
         ).unwrap();
 
@@ -32,7 +32,7 @@ fn main() {
         .add_layer(2)   // input layer with two units
         .add_layer(3)   // hidden layer with two units
         .add_layer(1)   // output layer
-        .optimize(&x, &labels, empty_opts().alpha(20.0).iter(500));
+        .gd(&x, &labels, empty_opts().alpha(20.0).iter(500));
         
     // create the values for the contour plot
     let mut p = vec![];

@@ -273,7 +273,7 @@ impl <T: Clone> Matrix<T> {
             if v[i].len() != rows {
                 return None;
             }
-            m = m.insert_column(m.cols(), &v[i]).unwrap();
+            m = m.insert_column(m.cols(), &v[i]);
         }
         Some(m)
     }
@@ -753,15 +753,15 @@ impl <T: Clone> Matrix<T> {
     ///
     /// If the matrix is not empty and `v.len() != self.rows()` a
     /// `None` is returned.
-    pub fn insert_column(&self, pos: usize, v: &[T]) -> Option<Matrix<T>> {
+    pub fn insert_column(&self, pos: usize, v: &[T]) -> Matrix<T> {
 
         if self.empty() {
-            return Matrix::from_vec(v.to_vec(), v.len(), 1);
+            return Matrix::from_vec(v.to_vec(), v.len(), 1).unwrap();
         }
 
-        if v.len() != self.rows() {
-            return None;
-        }
+        assert!(v.len() == self.rows(), 
+            "Length of vector must be equal to the number of rows."
+        );
 
         let mut m = Matrix::<T>::new();
         for (i, r) in self.row_iter().enumerate() {
@@ -773,7 +773,7 @@ impl <T: Clone> Matrix<T> {
             }
             m.add_row(&q);
         }
-        Some(m)
+        m
     }
 
     /// Returns a copy of the column at the specified index.
@@ -785,23 +785,22 @@ impl <T: Clone> Matrix<T> {
         Some(self.row_iter().map(|r| r[pos].clone()).collect::<Vec<T>>())
     }
 
-    pub fn rm_column(&self, pos: usize) -> Option<Matrix<T>> {
+    /// Removes the column at index `pos` and returns the result.
+    ///
+    /// Counting starts at zero. Panics if the column does not exist.
+    pub fn rm_column(&self, pos: usize) -> Matrix<T> {
 
-        if pos >= self.cols() {
-            return None;
-        }
+        assert!(pos < self.cols(), "Column does not exist.");
 
-        let mut m = Matrix::<T>::new();
-        if self.cols() == 1 {
-            return Some(m);
+        let mut m = Matrix::new();
+        if self.cols() > 1 {
+            for r in self.row_iter() {
+                let mut q = r.to_vec();
+                q.remove(pos);
+                m.add_row(&q);
+            }
         }
-
-        for r in self.row_iter() {
-            let mut q = r.to_vec();
-            q.remove(pos);
-            m.add_row(&q);
-        }
-        Some(m)
+        m
     }
 
     pub fn if_then<F>(&self, prd: F, tr: T, fa: T) -> Matrix<T> 
@@ -1329,7 +1328,7 @@ mod tests {
             4, 5, 6
         ];
         assert_eq!(
-            a.insert_column(0, &[8, 9]).unwrap().buf(),
+            a.insert_column(0, &[8, 9]).buf(),
             &[8, 1, 2, 3, 9, 4, 5, 6]
         );
     }

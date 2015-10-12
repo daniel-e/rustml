@@ -173,7 +173,7 @@ impl DesignMatrix<f64> for Matrix<f64> {
     fn design_matrix(&self) -> Self {
         self.insert_column(0, 
             &repeat(1.0).take(self.rows()).collect::<Vec<f64>>()
-        ).unwrap()
+        )
     }
 }
 
@@ -181,7 +181,7 @@ impl DesignMatrix<f32> for Matrix<f32> {
     fn design_matrix(&self) -> Self {
         self.insert_column(0, 
             &repeat(1.0).take(self.rows()).collect::<Vec<f32>>()
-        ).unwrap()
+        )
     }
 }
 

@@ -15,7 +15,7 @@ fn main() {
         .unwrap().design_matrix();
     
     let y = dm.column(2).unwrap();
-    let x = dm.rm_column(2).unwrap();
+    let x = dm.rm_column(2);
 
     let result = opt_hypothesis(
         &Hypothesis::from_params(&[0.7, 0.5]),

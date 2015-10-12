@@ -8,12 +8,90 @@ use vectors::{Append, random, from_value};
 use ops_inplace::{MatrixMatrixOpsInPlace, MatrixScalarOpsInPlace, FunctionsInPlace};
 use opt::OptParams;
 
+/// Trait to compute the mean square error of a predictor.
+pub trait MeanSquareError {
+    /// Computes the mean square error of a predictor.
+    fn mse(&self, input: &Matrix<f64>, target: &Matrix<f64>) -> f64;
+}
+
+impl MeanSquareError for NeuralNetwork {
+
+    fn mse(&self, input: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
+        let mut o = self.predict(input);
+        o.isub(targets);
+        o.values().map(|&x| x * x).fold(0.0, |acc, val| acc + val) / (2.0 * input.rows() as f64)
+    }
+}
+
+/// Trait to optimize via gradient descent.
+pub trait GradientDescent {
+    fn gd(&self, input: &Matrix<f64>, targets: &Matrix<f64>, p: OptParams<f64>) -> Self;
+}
+
+impl GradientDescent for NeuralNetwork {
+
+    fn gd(&self, input: &Matrix<f64>, targets: &Matrix<f64>, p: OptParams<f64>) -> Self {
+        let a = p.alpha.unwrap();
+        let mut n = self.clone();
+        for _ in (0..p.iter.unwrap()) {
+            let v = n.derivatives(input, targets).iter().map(|x| x.mul_scalar(-a)).collect::<Vec<_>>();
+            n.update_params(&v);
+        }
+        n
+    }
+}
+
 /// A simple feed forward neural network with an arbitrary number of layers
 /// and one bias unit in each hidden layer.
 ///
 /// Neural networks are a powerful machine learning approach which are
 /// able to learn complex non-linear hypothesis, e.g. for
-/// regression or classification.
+/// regression or classification task.
+/// 
+/// # Example
+/// 
+/// In the following example a toy dataset is generated from two Gaussian
+/// sources. Then, a neural network is trained to build a hypothesis which
+/// seperates the points of the two sources. The decision boundary of the
+/// hypothesis and the points of the toy dataset are shown in the following
+/// plot.
+///
+/// <img src="../../nn_example.png">
+///
+/// ```
+/// #[macro_use] extern crate rustml;
+///
+/// use std::iter::repeat;
+/// use rustml::nn::*;
+/// use rustml::*;
+/// use rustml::opt::empty_opts;
+///
+/// # fn main() {
+/// // create a toy dataset
+/// let seed = [1, 2, 3, 4];
+/// let n = 50;
+/// let x = mixture_builder()
+///         .add(n, normal_builder(seed).add(0.0, 0.5).add(0.0, 0.5))
+///         .add(n, normal_builder(seed).add(1.0, 0.5).add(1.0, 0.5))
+///         .as_matrix()
+///         .rm_column(0);
+///
+/// // create the labels
+/// let labels = Matrix::from_it(
+///         repeat(0.0).take(n).chain(repeat(1.0).take(n)), 1
+///     ).unwrap();
+///
+/// let n = NeuralNetwork::new()
+///     .add_layer(2)    // input layer with two units
+///     .add_layer(3)    // hidden layer with two units
+///     .add_layer(1)    // output layer
+///     .gd(&x, &labels, // use gradient descent to optimize the network
+///         empty_opts()
+///             .alpha(20.0)  // learning reate is 20
+///             .iter(500)    // number of iterations is 500
+///     );
+/// # }
+/// ```
 #[derive(Debug, Clone)]
 pub struct NeuralNetwork {
     layers: Vec<usize>,
@@ -227,7 +305,54 @@ impl NeuralNetwork {
         self.layers.len()
     }
 
-    /// Computes the output of the neural network for the given input.
+    /// Computes the output of the neural network for the given inputs.
+    ///
+    /// Each row in the input matrix represents an observation for which
+    /// the neural network computes the output value.
+    /// 
+    /// The implementation uses matrix multiplications that are optimized
+    /// via BLAS.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::*;
+    /// use rustml::nn::NeuralNetwork;
+    ///
+    /// # fn main() {
+    /// // parameters from the input layer to the first hidden layer
+    /// let p1 = mat![
+    ///     0.1, 0.2, 0.4; 
+    ///     0.2, 0.1, 2.0
+    /// ];
+    /// // parameters from the hidden layer (+ bias unit) to the output layer
+    /// let p2 = mat![
+    ///     0.8, 1.2, 0.6; 
+    ///     0.4, 0.5, 0.8; 
+    ///     1.4, 1.5, 2.0
+    /// ];
+    /// let n = NeuralNetwork::new()
+    ///     .add_layer(3) // 3 units in the input layer
+    ///     .add_layer(2) // 2 units in the hidden layer (without bias)
+    ///     .add_layer(3) // 3 units in the output layer
+    ///     .set_params(0, p1)
+    ///     .set_params(1, p2);
+    /// // observations
+    /// let x = mat![
+    ///     0.5, 1.2, 1.5; // features of the first observation
+    ///     0.3, 1.1, 1.0; // features of the second observation
+    ///     0.7, 0.9, 1.8  // features of the third observation
+    /// ];
+    /// // expected target values
+    /// let t = mat![
+    ///     0.90270, 0.82108, 0.98771; // output for the first observation
+    ///     0.89349, 0.80946, 0.98494; // output for the second observation
+    ///     0.90529, 0.82427, 0.98840  // output for the third observation
+    /// ];
+    /// assert!(n.predict(&x).similar(&t, 0.00001));
+    /// # }
+    /// ```
     pub fn predict(&self, input: &Matrix<f64>) -> Matrix<f64> {
 
         let mut o = input.clone();
@@ -235,29 +360,9 @@ impl NeuralNetwork {
         for i in &self.params {
             let mut x = o.mul(i, false, true);
             x.isigmoid();
-            o = x.insert_column(0, &from_value(1.0, x.rows())).unwrap();
+            o = x.insert_column(0, &from_value(1.0, x.rows()));
         }
-        o.rm_column(0).unwrap()
-    }
-
-    /// Computes the error of the network.
-    pub fn error(&self, examples: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
-
-        let mut o = self.predict(examples);
-        o.isub(targets);
-        o.values().map(|&x| x * x).fold(0.0, |acc, val| acc + val) / (2.0 * examples.rows() as f64)
-    }
-
-    pub fn optimize(&self, x: &Matrix<f64>, labels: &Matrix<f64>, p: OptParams<f64>) -> NeuralNetwork {
-
-        let a = p.alpha.unwrap();
-        let mut n = self.clone();
-
-        for _ in (0..p.iter.unwrap()) {
-            let v = n.derivatives(x, labels).iter().map(|x| x.mul_scalar(-a)).collect::<Vec<_>>();
-            n.update_params(&v);
-        }
-        n
+        o.rm_column(0)
     }
 
     fn feedforward(&self, x: &[f64]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
@@ -583,7 +688,7 @@ mod tests {
     }
 
     #[test]
-    fn test_error() {
+    fn test_mse() {
 
         // parameters
         let params1 = mat![
@@ -615,7 +720,7 @@ mod tests {
             1.2, 0.4, 0.2;
             0.6, 0.3, 1.1
         ];
-        let e = n.error(&x, &t);
+        let e = n.mse(&x, &t);
 
         assert!(num::abs(e - 0.26807) <= 0.0001);
     }
@@ -666,5 +771,22 @@ mod tests {
         assert!(p[0].eq(&params1));
         assert!(p[1].eq(&params2));
     }
+
+    #[test]
+    fn test_nn_predict() {
+
+        let p1 = mat![0.1, 0.2, 0.4; 0.2, 0.1, 2.0];
+        let p2 = mat![0.8, 1.2, 0.6; 0.4, 0.5, 0.8; 1.4, 1.5, 2.0];
+        let n = NeuralNetwork::new()
+            .add_layer(3)
+            .add_layer(2)
+            .add_layer(3)
+            .set_params(0, p1)
+            .set_params(1, p2);
+        let x = mat![0.5, 1.2, 1.5; 0.3, 1.1, 1.0; 0.7, 0.9, 1.8];
+        let t = mat![0.90270, 0.82108, 0.98771; 0.89349, 0.80946, 0.98494; 0.90529, 0.82427, 0.98840];
+        assert!(n.predict(&x).similar(&t, 0.00001));
+    }
+
 }
 
