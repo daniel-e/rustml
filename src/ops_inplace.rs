@@ -592,7 +592,7 @@ pub trait MatrixMatrixOpsInPlace<T> {
 }
 
 macro_rules! impl_matrix_matrix_ops_inplace {
-    ( $( $x:ty )+ ) => ($(
+    ( $( $x:ty, $gemm:expr )+ ) => ($(
 
         impl MatrixMatrixOpsInPlace<$x> for Matrix<$x> {
 
@@ -629,8 +629,8 @@ macro_rules! impl_matrix_matrix_ops_inplace {
     )*)
 }
 
-impl_matrix_matrix_ops_inplace!{ f32 }
-impl_matrix_matrix_ops_inplace!{ f64 }
+impl_matrix_matrix_ops_inplace!{ f32, s_gemm }
+impl_matrix_matrix_ops_inplace!{ f64, d_gemm }
 
 // ----------------------------------------------------------------------------
 
