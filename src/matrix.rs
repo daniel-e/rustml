@@ -17,6 +17,10 @@ use self::libc::{c_int, c_double, c_float};
 
 use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 
+// TODO implement some ops
+// https://doc.rust-lang.org/std/ops/
+
+
 // ------------------------------------------------------------------
 
 /// A matrix with elements of type T.
@@ -30,16 +34,54 @@ use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 /// implemented for matrices where `T` is `f32` or `f64` such matrices
 /// can be multplied with the `*` operator.
 ///
+/// # Creating a matrix
+///
+/// ## FromIterator
+///
+/// The trait `FromIterator` is implemented so that a matrix can be created
+/// with the code below. The `collect` function can only create matrices
+/// with one row. You can use the `reshape` or `reshape_mut` function to
+/// reshape the matrix.
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// # use rustml::*;
+///
+/// # fn main() {
+/// let a = vec![1, 2, 3, 4, 5, 6, 7, 8];
+/// let m = a.iter().cloned()
+///     .collect::<Matrix<_>>() // collect into a matrix with 1 row and 8 columns
+///     .reshape(2, 4);         // reshape into a 2x4 matrix
+/// assert_eq!(m, mat![1, 2, 3, 4; 5, 6, 7, 8]);
+/// # }
+/// ```
+///
+/// ## IntoMatrix
+///
+/// A matrix can be easily created from each data type which implements the
+/// `IntoMatrix` trait of the `matrix` module.
+///
+/// ```
+/// # #[macro_use] extern crate rustml;
+/// # use rustml::*;
+///
+/// # fn main() {
+/// let a = vec![1, 2, 3, 4, 5, 6, 7, 8];
+/// // create a matrix from a with 4 rows and 2 columns
+/// let m = a.to_matrix(4);
+/// assert_eq!(m, mat![1, 2; 3, 4; 5, 6; 7, 8]);
+/// # }
+/// ```
 /// # Multiplication of matrices
 ///
-/// To multiply two matrices the underlying BLAS implementation is used. By
-/// default this is CBLAS. In many cases performance
-/// can be greatly improved when switching to ATLAS. For a detailed description on how
+/// Two matrices can be easily multiplied by using the `*` operator. The
+/// multiplication is implemented for `f32` and `f64` and it uses BLAS to
+/// do this in a very efficient manner. For a detailed description on how
 /// to optimize the numeric computations please read the separate
 /// documentation on this topic available
 /// [here](https://github.com/daniel-e/rustml/tree/master/build).
 ///
-/// ## Example
+/// ## Example: matrix multiplication
 /// ```
 /// # #[macro_use] extern crate rustml;
 /// use rustml::*;
@@ -70,20 +112,34 @@ pub struct Matrix<T> {
 
 /// Trait to convert a data type into a matrix.
 pub trait IntoMatrix<T> {
-    fn to_matrix(&self) -> Matrix<T>;
+
+    /// Converts a data type into a matrix.
+    ///
+    /// The number of rows is specified by the parameter
+    /// `rows`.
+    ///
+    /// Panics if the number of elements from which the matrix
+    /// is created is not divisible by `rows`.
+    fn to_matrix(&self, rows: usize) -> Matrix<T>;
 }
 
 impl <T: Clone> IntoMatrix<T> for Vec<T> {
 
-    fn to_matrix(&self) -> Matrix<T> {
-        Matrix::from_vec(self.clone(), 1, self.len()).unwrap()
+    fn to_matrix(&self, rows: usize) -> Matrix<T> {
+        assert!(self.len() % rows == 0, 
+            "The length of the vector must be divisible by the number of rows."
+        );
+        Matrix::from_vec(self.clone(), rows, self.len() / rows).unwrap()
     }
 }
 
 impl <T: Clone> IntoMatrix<T> for [T] {
 
-    fn to_matrix(&self) -> Matrix<T> {
-        Matrix::from_vec(self.to_vec(), 1, self.len()).unwrap()
+    fn to_matrix(&self, rows: usize) -> Matrix<T> {
+        assert!(self.len() % rows == 0, 
+            "The length of the vector must be divisible by the number of rows."
+        );
+        Matrix::from_vec(self.to_vec(), rows, self.len() / rows).unwrap()
     }
 }
 
@@ -181,6 +237,8 @@ macro_rules! mat {
         }
     };
 }
+
+// ------------------------------------------------------------------
 
 impl <T: Clone> FromIterator<T> for Matrix<T> {
 
@@ -785,12 +843,15 @@ impl <T: Clone> Matrix<T> {
         Some(self.row_iter().map(|r| r[pos].clone()).collect::<Vec<T>>())
     }
 
-    /// Removes the column at index `pos` and returns the result.
+    /// Removes the column at index `pos` (indexing starts at zero)
+    /// and returns the result.
     ///
-    /// Counting starts at zero. Panics if the column does not exist.
+    /// Panics if the column does not exist.
     pub fn rm_column(&self, pos: usize) -> Matrix<T> {
 
         assert!(pos < self.cols(), "Column does not exist.");
+
+        // TODO a more efficient version
 
         let mut m = Matrix::new();
         if self.cols() > 1 {
@@ -803,7 +864,16 @@ impl <T: Clone> Matrix<T> {
         m
     }
 
-    pub fn if_then<F>(&self, prd: F, tr: T, fa: T) -> Matrix<T> 
+    /// Iterates through the elements of the matrix, replaces elements
+    /// and returns the new matrix.
+    ///
+    /// A element is replaced by `tr` if the predicate `prd` evaluated for this
+    /// element returns `true`. If the predicate returns `false` the element
+    /// is replaced by `fa`.
+    ///
+    /// The complexity is O(n) where `n` is the number of elements of the
+    /// matrix.
+    pub fn if_then_else<F>(&self, prd: F, tr: T, fa: T) -> Matrix<T> 
         where F: Fn(&T) -> bool {
 
         Matrix::from_it(
@@ -812,14 +882,63 @@ impl <T: Clone> Matrix<T> {
         ).unwrap()
     }
 
-    pub fn reshape(&mut self, rows: usize, cols: usize) {
+    /// Iterates through the elements of the matrix and replaces the elements
+    /// inplace.
+    ///
+    /// A element is replaced by `tr` if the predicate `prd` evaluated for this
+    /// element returns `true`. If the predicate returns `false` the element
+    /// is replaced by `fa`.
+    ///
+    /// The complexity is O(n) where `n` is the number of elements of the
+    /// matrix.
+    pub fn if_then_else_mut<F>(&mut self, prd: F, tr: T, fa: T)
+        where F: Fn(&T) -> bool {
 
-        assert!(rows * cols == self.data.len(),
-            "The new shape must contain the same number of elements."
+        for i in self.values_mut() {
+            *i = if prd(i) { tr.clone() } else { fa.clone() };
+        }
+    }
+
+    /// Reshapes the matrix, i.e. modifies the number of rows and columns.
+    ///
+    /// The complexity of this function is O(1) if `rows * cols` is equal
+    /// to the number of elements in the matrix. If the new number of elements
+    /// is smaller than the current number of elements the complexity is
+    /// equal to the complexity of `Vec::truncate`.
+    ///
+    /// Panics if `rows * cols` is greater than the number of
+    /// elements stored in the matrix.
+    pub fn reshape_mut(&mut self, rows: usize, cols: usize) {
+
+        assert!(rows * cols <= self.data.len(),
+            "The new shape must not contain more elements."
         );
 
+        if rows * cols < self.nrows * self.ncols {
+            self.data.truncate(rows * cols);
+        }
         self.nrows = rows;
         self.ncols = cols;
+    }
+
+    /// Reshapes the matrix, i.e. modifies the number of rows and columns
+    /// and returns the result.
+    ///
+    /// The complexity of this function is O(rows * cols).
+    ///
+    /// Panics if `rows * cols` is greater than the number of
+    /// elements stored in the matrix.
+    pub fn reshape(&self, rows: usize, cols: usize) -> Matrix<T> {
+
+        assert!(rows * cols <= self.data.len(),
+            "The new shape must not contain more elements."
+        );
+
+        Matrix {
+            nrows: rows,
+            ncols: cols,
+            data: self.data[..rows * cols].to_vec()
+        }
     }
 }
 
@@ -1392,27 +1511,47 @@ mod tests {
     }
 
     #[test]
-    fn test_if_then() {
+    fn test_if_then_else() {
 
         let a = mat![1, 2, 3, 4; 3, 2, 4, 1];
         assert!(
-            a.if_then(|&x| x > 2, 1, 0).eq(&mat![0, 0, 1, 1; 1, 0, 1, 0])
+            a.if_then_else(|&x| x > 2, 1, 0).eq(&mat![0, 0, 1, 1; 1, 0, 1, 0])
         );
+    }
+
+    #[test]
+    fn test_if_then_else_mut() {
+
+        let mut a = mat![
+            1, 2, 3, 4; 
+            3, 2, 4, 1
+        ];
+        a.if_then_else_mut(|&x| x > 2, 1, 0);
+        assert!(a.eq(&mat![0, 0, 1, 1; 1, 0, 1, 0]));
     }
 
     #[test]
     fn test_to_matrix() {
         let v = vec![1, 2, 3, 4, 5];
-        assert!(v.to_matrix().eq(&mat![1, 2, 3, 4, 5]));
+        assert!(v.to_matrix(1).eq(&mat![1, 2, 3, 4, 5]));
+    }
+
+    #[test]
+    fn test_reshape_mut() {
+        let mut a = mat![1, 2, 3, 4; 3, 2, 4, 1]; // 2x4
+        a.reshape_mut(4, 2);
+        assert_eq!(a.rows(), 4);
+        assert_eq!(a.cols(), 2);
+        assert!(a.eq(&mat![1, 2; 3, 4; 3, 2; 4, 1]));
     }
 
     #[test]
     fn test_reshape() {
-        let mut a = mat![1, 2, 3, 4; 3, 2, 4, 1]; // 2x4
-        a.reshape(4, 2);
-        assert_eq!(a.rows(), 4);
-        assert_eq!(a.cols(), 2);
-        assert!(a.eq(&mat![1, 2; 3, 4; 3, 2; 4, 1]));
+        let a = mat![1, 2, 3, 4; 3, 2, 4, 1]; // 2x4
+        let b = a.reshape(4, 2);
+        assert_eq!(b.rows(), 4);
+        assert_eq!(b.cols(), 2);
+        assert!(b.eq(&mat![1, 2; 3, 4; 3, 2; 4, 1]));
     }
 
     #[test]

@@ -160,7 +160,7 @@ pub fn plot_nn() {
     let mut p = vec![];
     for y in (-1.0).linspace(2.0, 100) {
         for x in (-1.0).linspace(2.0, 100) {
-            p.push(*n.predict(&[x, y].to_matrix()).row(0).unwrap().first().unwrap());
+            p.push(*n.predict(&[x, y].to_matrix(1)).row(0).unwrap().first().unwrap());
         }
     }
 
@@ -210,7 +210,7 @@ pub fn plot_nn_example() {
     let mut p = vec![];
     for y in (-1.0).linspace(2.0, 100) {
         for x in (-1.0).linspace(2.0, 100) {
-            p.push(*n.predict(&[x, y].to_matrix()).row(0).unwrap().first().unwrap());
+            p.push(*n.predict(&[x, y].to_matrix(1)).row(0).unwrap().first().unwrap());
         }
     }
 

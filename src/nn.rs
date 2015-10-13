@@ -570,7 +570,7 @@ mod tests {
         assert_eq!(n.input_size(), 3);
         assert_eq!(n.output_size(), 1);
 
-        let p = n.predict(&x.to_matrix());
+        let p = n.predict(&x.to_matrix(1));
         assert!(p.similar(&mat![0.61301], 0.00001));
     }
 
@@ -601,7 +601,7 @@ mod tests {
         assert_eq!(n.input_size(), 3);
         assert_eq!(n.output_size(), 1);
 
-        let p = n.predict(&x.to_matrix());
+        let p = n.predict(&x.to_matrix(1));
         assert!(p.similar(&mat![0.88547], 0.00001));
     }
 
