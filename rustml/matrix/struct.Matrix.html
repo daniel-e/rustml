@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-74' class='srclink' href='../../src/rustml/matrix.rs.html#63-67' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-74' class='srclink' href='../../src/rustml/matrix.rs.html#105-109' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Matrix&lt;T&gt; {
     // some fields omitted
 }</pre><div class='docblock'><p>A matrix with elements of type T.</p>
@@ -59,17 +59,44 @@ equal to the number of rows of the right matrix.</p>
 implemented for matrices where <code>T</code> is <code>f32</code> or <code>f64</code> such matrices
 can be multplied with the <code>*</code> operator.</p>
 
+<h1 id="creating-a-matrix" class='section-header'><a
+                           href="#creating-a-matrix">Creating a matrix</a></h1>
+<h2 id="fromiterator" class='section-header'><a
+                           href="#fromiterator">FromIterator</a></h2>
+<p>The trait <code>FromIterator</code> is implemented so that a matrix can be created
+with the code below. The <code>collect</code> function can only create matrices
+with one row. You can use the <code>reshape</code> or <code>reshape_mut</code> function to
+reshape the matrix.</p>
+<pre class='rust rust-example-rendered'>
+
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>, <span class='number'>7</span>, <span class='number'>8</span>];
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>iter</span>().<span class='ident'>cloned</span>()
+    .<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>() <span class='comment'>// collect into a matrix with 1 row and 8 columns</span>
+    .<span class='ident'>reshape</span>(<span class='number'>2</span>, <span class='number'>4</span>);         <span class='comment'>// reshape into a 2x4 matrix</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>, <span class='macro'>mat</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>; <span class='number'>5</span>, <span class='number'>6</span>, <span class='number'>7</span>, <span class='number'>8</span>]);</pre>
+
+<h2 id="intomatrix" class='section-header'><a
+                           href="#intomatrix">IntoMatrix</a></h2>
+<p>A matrix can be easily created from each data type which implements the
+<a href="trait.IntoMatrix.html"><code>IntoMatrix</code></a> trait of the <a href="index.html"><code>matrix</code></a> module.</p>
+<pre class='rust rust-example-rendered'>
+
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>, <span class='number'>7</span>, <span class='number'>8</span>];
+<span class='comment'>// create a matrix from a with 4 rows and 2 columns</span>
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>to_matrix</span>(<span class='number'>4</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>, <span class='macro'>mat</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>; <span class='number'>3</span>, <span class='number'>4</span>; <span class='number'>5</span>, <span class='number'>6</span>; <span class='number'>7</span>, <span class='number'>8</span>]);</pre>
+
 <h1 id="multiplication-of-matrices" class='section-header'><a
                            href="#multiplication-of-matrices">Multiplication of matrices</a></h1>
-<p>To multiply two matrices the underlying BLAS implementation is used. By
-default this is CBLAS. In many cases performance
-can be greatly improved when switching to ATLAS. For a detailed description on how
+<p>Two matrices can be easily multiplied by using the <code>*</code> operator. The
+multiplication is implemented for <code>f32</code> and <code>f64</code> and it uses BLAS to
+do this in a very efficient manner. For a detailed description on how
 to optimize the numeric computations please read the separate
 documentation on this topic available
 <a href="https://github.com/daniel-e/rustml/tree/master/build">here</a>.</p>
 
-<h2 id="example" class='section-header'><a
-                           href="#example">Example</a></h2><pre class='rust rust-example-rendered'>
+<h2 id="example:-matrix-multiplication" class='section-header'><a
+                           href="#example:-matrix-multiplication">Example: matrix multiplication</a></h2><pre class='rust rust-example-rendered'>
 <span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='op'>*</span>;
 
 <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[
@@ -332,12 +359,49 @@ is appended as a new column.</p>
 </div><h4 id='method.column' class='method'><code>fn <a href='#method.column' class='fnname'>column</a>(&amp;self, pos: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;&gt;</code></h4>
 <div class='docblock'><p>Returns a copy of the column at the specified index.</p>
 </div><h4 id='method.rm_column' class='method'><code>fn <a href='#method.rm_column' class='fnname'>rm_column</a>(&amp;self, pos: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h4>
-<div class='docblock'><p>Removes the column at index <code>pos</code> and returns the result.</p>
+<div class='docblock'><p>Removes the column at index <code>pos</code> (indexing starts at zero)
+and returns the result.</p>
 
-<p>Counting starts at zero. Panics if the column does not exist.</p>
-</div><h4 id='method.if_then' class='method'><code>fn <a href='#method.if_then' class='fnname'>if_then</a>&lt;F&gt;(&amp;self, prd: F, tr: T, fa: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;T) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></h4>
-<h4 id='method.reshape' class='method'><code>fn <a href='#method.reshape' class='fnname'>reshape</a>(&amp;mut self, rows: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, cols: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T: <a class='trait' href='../../num/traits/trait.Float.html' title='num::traits::Float'>Float</a>&gt; <a class='trait' href='../../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a> for <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.has_nan' class='method'><code>fn <a href='../../rustml/matrix/trait.HasNan.html#method.has_nan' class='fnname'>has_nan</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<p>Panics if the column does not exist.</p>
+</div><h4 id='method.if_then_else' class='method'><code>fn <a href='#method.if_then_else' class='fnname'>if_then_else</a>&lt;F&gt;(&amp;self, prd: F, tr: T, fa: T) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;T) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></h4>
+<div class='docblock'><p>Iterates through the elements of the matrix, replaces elements
+and returns the new matrix.</p>
+
+<p>A element is replaced by <code>tr</code> if the predicate <code>prd</code> evaluated for this
+element returns <code>true</code>. If the predicate returns <code>false</code> the element
+is replaced by <code>fa</code>.</p>
+
+<p>The complexity is O(n) where <code>n</code> is the number of elements of the
+matrix.</p>
+</div><h4 id='method.if_then_else_mut' class='method'><code>fn <a href='#method.if_then_else_mut' class='fnname'>if_then_else_mut</a>&lt;F&gt;(&amp;mut self, prd: F, tr: T, fa: T) <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;T) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></h4>
+<div class='docblock'><p>Iterates through the elements of the matrix and replaces the elements
+inplace.</p>
+
+<p>A element is replaced by <code>tr</code> if the predicate <code>prd</code> evaluated for this
+element returns <code>true</code>. If the predicate returns <code>false</code> the element
+is replaced by <code>fa</code>.</p>
+
+<p>The complexity is O(n) where <code>n</code> is the number of elements of the
+matrix.</p>
+</div><h4 id='method.reshape_mut' class='method'><code>fn <a href='#method.reshape_mut' class='fnname'>reshape_mut</a>(&amp;mut self, rows: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, cols: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Reshapes the matrix, i.e. modifies the number of rows and columns.</p>
+
+<p>The complexity of this function is O(1) if <code>rows * cols</code> is equal
+to the number of elements in the matrix. If the new number of elements
+is smaller than the current number of elements the complexity is
+equal to the complexity of <code>Vec::truncate</code>.</p>
+
+<p>Panics if <code>rows * cols</code> is greater than the number of
+elements stored in the matrix.</p>
+</div><h4 id='method.reshape' class='method'><code>fn <a href='#method.reshape' class='fnname'>reshape</a>(&amp;self, rows: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, cols: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Reshapes the matrix, i.e. modifies the number of rows and columns
+and returns the result.</p>
+
+<p>The complexity of this function is O(rows * cols).</p>
+
+<p>Panics if <code>rows * cols</code> is greater than the number of
+elements stored in the matrix.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T: <a class='trait' href='../../num/traits/trait.Float.html' title='num::traits::Float'>Float</a>&gt; <a class='trait' href='../../rustml/matrix/trait.HasNan.html' title='rustml::matrix::HasNan'>HasNan</a> for <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.has_nan' class='method'><code>fn <a href='../../rustml/matrix/trait.HasNan.html#method.has_nan' class='fnname'>has_nan</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
 </div><h3 class='impl'><code>impl&lt;T: <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='../../num/traits/trait.Signed.html' title='num::traits::Signed'>Signed</a> + <a class='trait' href='../../num/traits/trait.Float.html' title='num::traits::Float'>Float</a>&gt; <a class='trait' href='../../rustml/matrix/trait.Similar.html' title='rustml::matrix::Similar'>Similar</a>&lt;T&gt; for <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.similar' class='method'><code>fn <a href='../../rustml/matrix/trait.Similar.html#method.similar' class='fnname'>similar</a>(&amp;self, e: &amp;Self, epsilon: T) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
 </div><h3 class='impl'><code>impl&lt;T: <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/iter/trait.FromIterator.html' title='core::iter::FromIterator'>FromIterator</a>&lt;T&gt; for <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.from_iter' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/iter/trait.FromIterator.html#method.from_iter' class='fnname'>from_iter</a>&lt;I&gt;(iterator: I) -&gt; Self <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=T&gt;</span></code></h4>
 </div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a> for <a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.Output' class='type'><code>type Output = <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../rustml/matrix/struct.Matrix.html' title='rustml::matrix::Matrix'>Matrix</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;&gt;</code></h4>

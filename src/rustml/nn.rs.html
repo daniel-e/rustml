@@ -1405,7 +1405,7 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>n</span>.<span class='ident'>input_size</span>(), <span class='number'>3</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>n</span>.<span class='ident'>output_size</span>(), <span class='number'>1</span>);
 
-        <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>n</span>.<span class='ident'>predict</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>to_matrix</span>());
+        <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>n</span>.<span class='ident'>predict</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>to_matrix</span>(<span class='number'>1</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>similar</span>(<span class='kw-2'>&amp;</span><span class='macro'>mat</span><span class='macro'>!</span>[<span class='number'>0.61301</span>], <span class='number'>0.00001</span>));
     }
 
@@ -1436,7 +1436,7 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>n</span>.<span class='ident'>input_size</span>(), <span class='number'>3</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>n</span>.<span class='ident'>output_size</span>(), <span class='number'>1</span>);
 
-        <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>n</span>.<span class='ident'>predict</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>to_matrix</span>());
+        <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>n</span>.<span class='ident'>predict</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>to_matrix</span>(<span class='number'>1</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>similar</span>(<span class='kw-2'>&amp;</span><span class='macro'>mat</span><span class='macro'>!</span>[<span class='number'>0.88547</span>], <span class='number'>0.00001</span>));
     }
 
