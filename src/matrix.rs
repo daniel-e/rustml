@@ -13,9 +13,8 @@ use std::ops::Mul;
 use std::slice::{Iter, IterMut};
 use self::rand::{thread_rng, Rng, Rand};
 use self::num::traits::{Float, Signed};
-use self::libc::{c_int, c_double, c_float};
 
-use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
+use ops_inplace::{d_gemm, s_gemm};
 
 // TODO implement some ops
 // https://doc.rust-lang.org/std/ops/
@@ -25,18 +24,9 @@ use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 
 /// A matrix with elements of type T.
 ///
-/// An `Option` is returned which is `None` if the matrices cannot be 
-/// multiplied because the number of columns of the left matrix is not
-/// equal to the number of rows of the right matrix.
-///
-/// Because the trait 
-/// [Mul](http://doc.rust-lang.org/nightly/core/ops/trait.Mul.html) is 
-/// implemented for matrices where `T` is `f32` or `f64` such matrices
-/// can be multplied with the `*` operator.
-///
 /// # Creating a matrix
 ///
-/// ## FromIterator
+/// *FromIterator*
 ///
 /// The trait `FromIterator` is implemented so that a matrix can be created
 /// with the code below. The `collect` function can only create matrices
@@ -46,7 +36,6 @@ use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 /// ```
 /// # #[macro_use] extern crate rustml;
 /// # use rustml::*;
-///
 /// # fn main() {
 /// let a = vec![1, 2, 3, 4, 5, 6, 7, 8];
 /// let m = a.iter().cloned()
@@ -56,49 +45,55 @@ use blas::{Order, Transpose, cblas_dgemm, cblas_sgemm};
 /// # }
 /// ```
 ///
-/// ## IntoMatrix
+/// *IntoMatrix*
 ///
 /// A matrix can be easily created from each data type which implements the
-/// `IntoMatrix` trait of the `matrix` module.
+/// [`IntoMatrix`](trait.IntoMatrix.html) trait of the [`matrix`](index.html) module.
 ///
 /// ```
 /// # #[macro_use] extern crate rustml;
 /// # use rustml::*;
-///
 /// # fn main() {
 /// let a = vec![1, 2, 3, 4, 5, 6, 7, 8];
-/// // create a matrix from a with 4 rows and 2 columns
+/// // create a matrix from the vector 'a' with 4 rows and 2 columns
 /// let m = a.to_matrix(4);
 /// assert_eq!(m, mat![1, 2; 3, 4; 5, 6; 7, 8]);
 /// # }
 /// ```
 /// # Multiplication of matrices
 ///
-/// Two matrices can be easily multiplied by using the `*` operator. The
+/// Because the trait 
+/// [Mul](http://doc.rust-lang.org/nightly/core/ops/trait.Mul.html) is 
+/// implemented two matrices can be easily multiplied by using the `*` operator. The
 /// multiplication is implemented for `f32` and `f64` and it uses BLAS to
 /// do this in a very efficient manner. For a detailed description on how
-/// to optimize the numeric computations please read the separate
+/// to optimize the numeric computations with BLAS please read the separate
 /// documentation on this topic available
 /// [here](https://github.com/daniel-e/rustml/tree/master/build).
 ///
+/// A multiplication of two matrices panics if the matrices cannot be
+/// multiplied due to incompatible dimensions.
+//
 /// ## Example: matrix multiplication
 /// ```
 /// # #[macro_use] extern crate rustml;
 /// use rustml::*;
 ///
 /// # fn main() {
-/// let a = mat![
+/// let a = mat![  // create a 2x3 matrix
 ///     1.0f32, 5.0, 2.0; 
 ///     2.0, 2.0, 3.0 
 /// ];
-/// let b = mat![
+/// let b = mat![  // create 3x4 matrix
 ///     3.0, 7.0, 4.0, 8.0;
 ///     4.0, 2.0, 1.0, 4.0;
 ///     5.0, 2.0, 1.0, 9.0
 /// ];
-/// let c = (a * b).unwrap();
-/// assert_eq!(c.row(0).unwrap(), &[33.0, 21.0, 11.0, 46.0]);
-/// assert_eq!(c.row(1).unwrap(), &[29.0, 24.0, 13.0, 51.0]);
+/// let c = a * b; // matrix multiplication
+/// assert_eq!(c, mat![
+///     33.0, 21.0, 11.0, 46.0;
+///     29.0, 24.0, 13.0, 51.0
+/// ]);
 /// # }
 /// ```
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -1008,7 +1003,7 @@ impl <'q, T: Clone> Iterator for SelectedRowIterator<'q, T> {
 // --------------- Matrix multiplication with BLAS ------------------
 
 impl Mul for Matrix<f64> {
-    type Output = Option<Matrix<f64>>;
+    type Output = Matrix<f64>;
 
     /// Performs a matrix multiplication by using the BLAS implementation
     /// that is linked with the binary.
@@ -1025,7 +1020,7 @@ impl Mul for Matrix<f64> {
     /// # fn main() {
     /// let a = mat![1.0f32, 2.0; 3.0, 4.0];
     /// let b = mat![4.0f32, 2.0; 5.0, 9.0];
-    /// let c = (a * b).unwrap();
+    /// let c = a * b;
     /// assert_eq!(c.row(0).unwrap(), &[14.0, 20.0]);
     /// assert_eq!(c.row(1).unwrap(), &[32.0, 42.0]);
     /// println!("{}", c);
@@ -1033,34 +1028,21 @@ impl Mul for Matrix<f64> {
     /// ```
     fn mul(self, rhs: Matrix<f64>) -> Self::Output {
 
-        if self.cols() != rhs.rows() {
-            return None;
-        }
-
-        // TODO handling of NaN and stuff like this
-        let c = Matrix::fill(0.0, self.rows(), rhs.cols());
-        unsafe {
-            cblas_dgemm(Order::RowMajor, Transpose::NoTrans, Transpose::NoTrans,
-                self.rows()         as c_int,
-                rhs.cols()          as c_int,
-                self.cols()         as c_int,
-                1.0                 as c_double,
-                self.data.as_ptr()  as *const c_double,
-                self.lead_dim()     as c_int,
-                rhs.data.as_ptr()   as *const c_double,
-                rhs.lead_dim()      as c_int,
-                0.0                 as c_double,
-                c.data.as_ptr()     as *mut c_double,
-                c.lead_dim()        as c_int
+        assert!(self.cols() == rhs.rows(),
+            format!("Dimensions of matrices do not match. {}x{} * {}x{}",
+                self.rows(), self.cols(), rhs.rows(), rhs.cols()
             )
-        }
-        Some(c)
+        );
+
+        let mut c = Matrix::fill(0.0, self.rows(), rhs.cols());
+        d_gemm(1.0, &self, &rhs, 0.0, &mut c, false, false);
+        c
     }
 }
 
 // TODO test
 impl Mul for Matrix<f32> {
-    type Output = Option<Matrix<f32>>;
+    type Output = Matrix<f32>;
 
     /// Performs a matrix multiplication by using the BLAS implementation
     /// that is linked with the binary.
@@ -1077,7 +1059,7 @@ impl Mul for Matrix<f32> {
     /// # fn main() {
     /// let a = mat![1.0f32, 2.0; 3.0, 4.0];
     /// let b = mat![4.0f32, 2.0; 5.0, 9.0];
-    /// let c = (a * b).unwrap();
+    /// let c = a * b;
     /// assert_eq!(c.row(0).unwrap(), [14.0, 20.0]);
     /// assert_eq!(c.row(1).unwrap(), [32.0, 42.0]);
     /// println!("{}", c);
@@ -1085,28 +1067,15 @@ impl Mul for Matrix<f32> {
     /// ```
     fn mul(self, rhs: Matrix<f32>) -> Self::Output {
 
-        if self.cols() != rhs.rows() {
-            return None;
-        }
-
-        // TODO handling of NaN and stuff like this
-        let c = Matrix::<f32>::fill(0.0, self.rows(), rhs.cols());
-        unsafe {
-            cblas_sgemm(Order::RowMajor, Transpose::NoTrans, Transpose::NoTrans,
-                self.rows()         as c_int,
-                rhs.cols()          as c_int,
-                self.cols()         as c_int,
-                1.0                 as c_float,
-                self.data.as_ptr()  as *const c_float,
-                self.lead_dim()     as c_int,
-                rhs.data.as_ptr()   as *const c_float,
-                rhs.lead_dim()      as c_int,
-                0.0                 as c_float,
-                c.data.as_ptr()     as *mut c_float,
-                c.lead_dim()        as c_int
+        assert!(self.cols() == rhs.rows(),
+            format!("Dimensions of matrices do not match. {}x{} * {}x{}",
+                self.rows(), self.cols(), rhs.rows(), rhs.cols()
             )
-        }
-        Some(c)
+        );
+
+        let mut c = Matrix::fill(0.0, self.rows(), rhs.cols());
+        s_gemm(1.0, &self, &rhs, 0.0, &mut c, false, false);
+        c
     }
 }
 
@@ -1172,6 +1141,22 @@ mod tests {
     }
 
     #[test]
+    fn test_mul1_f32() {
+        let a = mat![1.0f32, 2.0; 3.0, 4.0];
+        let b = mat![5.0f32; 6.0];
+        let c = a * b;
+        assert_eq!(c, mat![17.0f32; 39.0]);
+    }
+
+    #[test]
+    fn test_mul2_f32() {
+        let a = mat![1.0f32, 2.0; 3.0, 4.0; 5.0, 6.0];
+        let b = mat![5.0f32, 7.0; 6.0, 2.0];
+        let c = a * b;
+        assert_eq!(c, mat![17.0f32, 11.0; 39.0, 29.0; 61.0, 47.0]);
+    }
+
+    #[test]
     fn test_mul1() {
 
         // [ 1 2 ]
@@ -1184,7 +1169,7 @@ mod tests {
 
         let a: Matrix<f64> = Matrix::from_vec(va, 2, 2).unwrap();
         let b: Matrix<f64> = Matrix::from_vec(vb, 2, 1).unwrap();
-        let c = (a * b).unwrap();
+        let c = a * b;
 
         assert_eq!(c.rows(), 2);
         assert_eq!(c.cols(), 1);
@@ -1206,7 +1191,7 @@ mod tests {
 
         let a: Matrix<f64> = Matrix::from_vec(va, 3, 2).unwrap();
         let b: Matrix<f64> = Matrix::from_vec(vb, 2, 2).unwrap();
-        let c = (a * b).unwrap();
+        let c = a * b;
 
         assert_eq!(c.rows(), 3);
         assert_eq!(c.cols(), 2);
