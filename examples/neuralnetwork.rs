@@ -26,7 +26,7 @@ fn main() {
     // create the labels
     let labels = Matrix::from_it(
             repeat(0.0).take(2 * n).chain(repeat(1.0).take(2 * n)), 1
-        ).unwrap();
+        );
 
     let n = NeuralNetwork::new()
         .add_layer(2)   // input layer with two units

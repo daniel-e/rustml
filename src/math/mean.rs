@@ -74,7 +74,7 @@ macro_rules! mean_impl {
                 match dim {
                     Dimension::Column => {
                         // TODO reimplement when Sum for Matrix is implemented
-                        let mut r: Vec<$t> = self.values().take(self.cols()).cloned().collect();
+                        let mut r: Vec<$t> = self.iter().take(self.cols()).cloned().collect();
                         for row in self.row_iter_at(1) {
                             r.iadd(row);
                         }

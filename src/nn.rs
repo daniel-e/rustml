@@ -19,7 +19,7 @@ impl MeanSquareError for NeuralNetwork {
     fn mse(&self, input: &Matrix<f64>, targets: &Matrix<f64>) -> f64 {
         let mut o = self.predict(input);
         o.isub(targets);
-        o.values().map(|&x| x * x).fold(0.0, |acc, val| acc + val) / (2.0 * input.rows() as f64)
+        o.iter().map(|&x| x * x).fold(0.0, |acc, val| acc + val) / (2.0 * input.rows() as f64)
     }
 }
 
@@ -79,7 +79,7 @@ impl GradientDescent for NeuralNetwork {
 /// // create the labels
 /// let labels = Matrix::from_it(
 ///         repeat(0.0).take(n).chain(repeat(1.0).take(n)), 1
-///     ).unwrap();
+///     );
 ///
 /// let n = NeuralNetwork::new()
 ///     .add_layer(2)    // input layer with two units
@@ -188,7 +188,7 @@ impl NeuralNetwork {
         // no bias unit in the input layer
         let k = if from_input_layer { n } else { n + 1 };
 
-        Matrix::from_vec(random::<f64>(m * k), m, k).unwrap()
+        Matrix::from_vec(random::<f64>(m * k), m, k)
     }
 
     /// Sets the parameters (i.e. the weights) which connect the layer at

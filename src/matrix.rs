@@ -26,6 +26,13 @@ use ops_inplace::{d_gemm, s_gemm};
 ///
 /// # Creating a matrix
 ///
+/// * [`mat!`](../macro.mat!.html) - A macro to create a matrix.
+/// * [`Matrix::new`](#method.new) - creates an empty matrix
+/// * [`Matrix::fill`](#method.fill) - creates a matrix from a value
+/// * [`Matrix::from_vec`](#method.from_vec) - creates a matrix from the elements of a vector
+/// * [`Matrix::from_col_vectors`](#method.from_column_vectors) - creates a matrix from column vectors
+/// * [`Matrix::from_row_vectors`](#method.from_row_vectors) - creates a matrix from row vectors
+///
 /// *FromIterator*
 ///
 /// The trait `FromIterator` is implemented so that a matrix can be created
@@ -60,7 +67,7 @@ use ops_inplace::{d_gemm, s_gemm};
 /// assert_eq!(m, mat![1, 2; 3, 4; 5, 6; 7, 8]);
 /// # }
 /// ```
-/// # Multiplication of matrices
+/// # Matrix multiplication
 ///
 /// Because the trait 
 /// [Mul](http://doc.rust-lang.org/nightly/core/ops/trait.Mul.html) is 
@@ -124,7 +131,7 @@ impl <T: Clone> IntoMatrix<T> for Vec<T> {
         assert!(self.len() % rows == 0, 
             "The length of the vector must be divisible by the number of rows."
         );
-        Matrix::from_vec(self.clone(), rows, self.len() / rows).unwrap()
+        Matrix::from_vec(self.clone(), rows, self.len() / rows)
     }
 }
 
@@ -134,7 +141,7 @@ impl <T: Clone> IntoMatrix<T> for [T] {
         assert!(self.len() % rows == 0, 
             "The length of the vector must be divisible by the number of rows."
         );
-        Matrix::from_vec(self.to_vec(), rows, self.len() / rows).unwrap()
+        Matrix::from_vec(self.to_vec(), rows, self.len() / rows)
     }
 }
 
@@ -174,7 +181,7 @@ impl <T: Clone + Signed + Float> Similar<T> for Matrix<T> {
             )
         );
 
-        self.values().zip(e.values()).all(|(&x, &y)| num::abs(x - y) <= epsilon)
+        self.iter().zip(e.iter()).all(|(&x, &y)| num::abs(x - y) <= epsilon)
     }
 }
 
@@ -201,13 +208,20 @@ impl <T: Clone + Signed + Float> Similar<T> for [T] {
 ///
 /// # Example
 ///
-/// let m = mat![1.0, 2.0, 3.0; 4.0, 5.0, 6.0];
+/// ```
+/// #[macro_use] extern crate rustml;
+/// use rustml::matrix::Matrix;
 ///
-/// This example creates the following 2x3 matrix:
-///
-/// `[ 1 2 3 ]`
-///
-/// `[ 4 5 6 ]`
+/// # fn main() {
+/// // creates a matrix with 2 rows and 3 columns
+/// let m = mat![
+///     1.0, 2.0, 3.0; 
+///     4.0, 5.0, 6.0
+/// ];
+/// assert_eq!(m.rows(), 2);
+/// assert_eq!(m.cols(), 3);
+/// # }
+/// ```
 #[macro_export]
 macro_rules! mat {
     ( $( $( $x:expr ),+ ) ;* ) => {
@@ -228,7 +242,7 @@ macro_rules! mat {
             }
             cols_old = cols;
         )*
-        Matrix::from_vec(v, rows, cols_old).unwrap()
+        Matrix::from_vec(v, rows, cols_old)
         }
     };
 }
@@ -242,9 +256,19 @@ impl <T: Clone> FromIterator<T> for Matrix<T> {
 
         let v = Vec::from_iter(iterator);
         let n = v.len();
-        Matrix::<T>::from_vec(v, 1, n).unwrap()
+        Matrix::<T>::from_vec(v, 1, n)
     }
 }
+
+/*
+impl <'a, T: Clone> IntoIterator for &'a Matrix<T> {
+    type Item = &'a T;
+    type IntoIter = slice::Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}*/
 
 // ------------------------------------------------------------------
 
@@ -263,25 +287,27 @@ impl <T: Clone> Matrix<T> {
     /// ```
     pub fn new() -> Matrix<T> {
 
-        Matrix::from_vec(Vec::new(), 0, 0).unwrap()
+        Matrix::from_vec(Vec::new(), 0, 0)
     }
 
     /// Creates a matrix with the given number of rows and columns
     /// where each element is set to `value`.
     ///
     /// ```
+    /// # #[macro_use] extern crate rustml;
     /// use rustml::Matrix;
     ///
+    /// # fn main() {
     /// let m = Matrix::<f32>::fill(1.2, 2, 2);
-    /// assert_eq!(m.row(0).unwrap(), [1.2, 1.2]);
-    /// assert_eq!(m.row(1).unwrap(), [1.2, 1.2]);
+    /// assert_eq!(m, mat![1.2, 1.2; 1.2, 1.2]);
+    /// # }
     /// ```
     pub fn fill(value: T, rows: usize, cols: usize) -> Matrix<T> {
 
         Matrix::from_vec(
             iter::repeat(value).take(rows * cols).collect(),
             rows, cols
-        ).unwrap()
+        )
     }
 
     /// Creates a matrix with the given number of rows and columns. The matrix is
@@ -289,66 +315,94 @@ impl <T: Clone> Matrix<T> {
     /// are arranged in row-major order in the vector.
     ///
     /// ```
+    /// # #[macro_use] extern crate rustml;
     /// use rustml::Matrix;
     ///
+    /// # fn main() {
+    /// // create a matrix with 3 rows and 2 columns
     /// let m = Matrix::<f32>::from_vec(
-    ///     vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 3, 2
-    /// ).unwrap();
-    /// assert_eq!(m.row(0).unwrap(), [1.0, 2.0]);
-    /// assert_eq!(m.row(1).unwrap(), [3.0, 4.0]);
-    /// assert_eq!(m.row(2).unwrap(), [5.0, 6.0]);
+    ///     vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 
+    ///     3, 2
+    /// );
+    /// assert_eq!(m, mat![
+    ///     1.0, 2.0;
+    ///     3.0, 4.0;
+    ///     5.0, 6.0
+    /// ]);
+    /// # }
     /// ```
-    pub fn from_vec(vals: Vec<T>, rows: usize, cols: usize) -> Option<Matrix<T>> {
+    pub fn from_vec(vals: Vec<T>, rows: usize, cols: usize) -> Matrix<T> {
 
-        match rows * cols == vals.len() {
-            false => None,
-            true  => Some(Matrix {
-                nrows: rows,
-                ncols: cols,
-                data: vals
-            })
+        assert!(rows * cols == vals.len(),
+            "Number of elements in vector must be equal to the number of elements in the matrix."
+        );
+
+        Matrix {
+            nrows: rows,
+            ncols: cols,
+            data: vals
         }
     }
 
     /// Creates a matrix from a vector of column vectors.
-    pub fn from_col_vectors(v: &[Vec<T>]) -> Option<Matrix<T>> {
+    /// 
+    /// All vectors must have the same length. Otherwise the function
+    /// panics.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::Matrix;
+    ///
+    /// # fn main() {
+    /// let v = vec![
+    ///     vec![1.0, 2.0, 3.0], // first column
+    ///     vec![4.0, 5.0, 6.0], // second column
+    ///     vec![7.0, 8.0, 9.0]  // third column
+    /// ];
+    /// let m = Matrix::from_col_vectors(&v);
+    /// assert_eq!(m, mat![
+    ///     1.0, 4.0, 7.0;
+    ///     2.0, 5.0, 8.0;
+    ///     3.0, 6.0, 9.0
+    /// ]);
+    /// # }
+    /// ```
+    pub fn from_col_vectors(v: &[Vec<T>]) -> Matrix<T> {
 
-        if v.len() == 0 {
-            return Some(Matrix::new());
-        }
-
-        let cols = v.len();
-        let rows = v[0].len();
-
-        let mut m: Matrix<T> = Matrix::new();
-        
-        for i in (0..cols) {
-            if v[i].len() != rows {
-                return None;
-            }
-            m = m.insert_column(m.cols(), &v[i]);
-        }
-        Some(m)
+        // TODO maybe we need a more memory efficient version
+        v.iter().fold(Matrix::new(), |acc, val| acc.insert_column(acc.cols(), val))
     }
 
     /// Creates a matrix from a vector of row vectors.
-    pub fn from_row_vectors(v: &[Vec<T>]) -> Option<Matrix<T>> {
+    /// 
+    /// All vectors must have the same length. Otherwise the function
+    /// panics.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use rustml::Matrix;
+    ///
+    /// # fn main() {
+    /// let v = vec![
+    ///     vec![1.0, 2.0, 3.0], // first row
+    ///     vec![4.0, 5.0, 6.0], // second row 
+    ///     vec![7.0, 8.0, 9.0]  // third row
+    /// ];
+    /// let m = Matrix::from_row_vectors(&v);
+    /// assert_eq!(m, mat![
+    ///     1.0, 2.0, 3.0;
+    ///     4.0, 5.0, 6.0;
+    ///     7.0, 8.0, 9.0
+    /// ]);
+    /// # }
+    /// ```
+    pub fn from_row_vectors(v: &[Vec<T>]) -> Matrix<T> {
 
-        if v.len() == 0 {
-            return Some(Matrix::new());
-        }
-
-        let cols = v[0].len();
-
-        let mut m: Matrix<T> = Matrix::new();
-
-        for r in v.iter() {
-            if r.len() != cols {
-                return None;
-            }
+        let mut m = Matrix::new();
+        for r in v {
             m.add_row(r);
         }
-        Some(m)
+        m
     }
 
     /// Creates a matrix from the values of an iterator.
@@ -359,12 +413,13 @@ impl <T: Clone> Matrix<T> {
     /// use rustml::Matrix;
     ///
     /// let v = vec![1, 2, 3, 4, 5, 6];
-    /// let a = Matrix::from_it(v.iter(), 3).unwrap();
+    /// let a = Matrix::from_it(v.iter(), 3);
     /// assert_eq!(a.rows(), 2);
     /// assert_eq!(a.cols(), 3);
     /// ```
-    pub fn from_it<I: Iterator<Item = T>>(iter: I, cols: usize) -> Option<Matrix<T>> {
+    pub fn from_it<I: Iterator<Item = T>>(iter: I, cols: usize) -> Matrix<T> {
 
+        // TODO panics
         let v = iter.collect::<Vec<T>>();
         let l = v.len();
         Matrix::from_vec(v, l / cols, cols)
@@ -431,7 +486,7 @@ impl <T: Clone> Matrix<T> {
     /// assert_eq!(m.rows(), 3);
     /// assert_eq!(m.cols(), 2);
     /// // all values are in the interval [0, 1)
-    /// assert!(m.values().all(|&x| x < 1.0 && x >= 0.0));
+    /// assert!(m.iter().all(|&x| x < -2.0 && x >= 0.0));
     /// println!("{}", m);
     /// ```
     pub fn random<R: Rand + Clone>(rows: usize, cols: usize) -> Matrix<R> {
@@ -440,7 +495,7 @@ impl <T: Clone> Matrix<T> {
         Matrix::from_vec(
             rng.gen_iter::<R>().take(rows * cols).collect::<Vec<R>>(), 
             rows, cols
-        ).unwrap()
+        )
     }
 
     // ------------------------------------
@@ -494,13 +549,13 @@ impl <T: Clone> Matrix<T> {
     ///     1.0, 1.5; 
     ///     2.0, 2.5
     /// ];
-    /// let mut i = m.values();
+    /// let mut i = m.iter();
     /// assert_eq!(i.next().unwrap(), &1.0);
     /// assert_eq!(i.next().unwrap(), &1.5);
     /// assert_eq!(i.next().unwrap(), &2.0);
     /// # }
     /// ```
-    pub fn values(&self) -> Iter<T> {
+    pub fn iter(&self) -> Iter<T> {
         self.data.iter()
     }
 
@@ -515,13 +570,13 @@ impl <T: Clone> Matrix<T> {
     ///     1.0, 1.5; 
     ///     2.0, 2.5
     /// ];
-    /// for i in m.values_mut() {
+    /// for i in m.iter_mut() {
     ///     *i = *i * 2.0;
     /// }
     /// assert!(m.eq(&mat![2.0, 3.0; 4.0, 5.0]));
     /// # }
     /// ```
-    pub fn values_mut(&mut self) -> IterMut<T> {
+    pub fn iter_mut(&mut self) -> IterMut<T> {
         self.data.iter_mut()
     }
 
@@ -791,7 +846,7 @@ impl <T: Clone> Matrix<T> {
     pub fn find<F>(&self, f: F) -> Vec<(usize, usize)> 
         where F: Fn(&T) -> bool {
 
-        self.values().enumerate()
+        self.iter().enumerate()
             .filter(|&(_idx, val)| f(val))
             .map(|(idx, _val)| (idx % self.cols(), idx / self.cols()))
             .collect()
@@ -809,7 +864,7 @@ impl <T: Clone> Matrix<T> {
     pub fn insert_column(&self, pos: usize, v: &[T]) -> Matrix<T> {
 
         if self.empty() {
-            return Matrix::from_vec(v.to_vec(), v.len(), 1).unwrap();
+            return Matrix::from_vec(v.to_vec(), v.len(), 1);
         }
 
         assert!(v.len() == self.rows(), 
@@ -872,9 +927,9 @@ impl <T: Clone> Matrix<T> {
         where F: Fn(&T) -> bool {
 
         Matrix::from_it(
-            self.values().map(|x| if prd(x) { tr.clone() } else { fa.clone() }), 
+            self.iter().map(|x| if prd(x) { tr.clone() } else { fa.clone() }), 
             self.cols()
-        ).unwrap()
+        )
     }
 
     /// Iterates through the elements of the matrix and replaces the elements
@@ -889,7 +944,7 @@ impl <T: Clone> Matrix<T> {
     pub fn if_then_else_mut<F>(&mut self, prd: F, tr: T, fa: T)
         where F: Fn(&T) -> bool {
 
-        for i in self.values_mut() {
+        for i in self.iter_mut() {
             *i = if prd(i) { tr.clone() } else { fa.clone() };
         }
     }
@@ -1113,12 +1168,16 @@ mod tests {
     use ops::MatrixScalarOps;
 
     #[test]
-    fn test_from_vec() {
+    #[should_panic]
+    fn test_from_vec_panic() {
+        Matrix::from_vec(vec![1.0, 2.0], 2, 2);
+    }
 
-        let m = Matrix::from_vec(vec![1.0, 2.0], 2, 2);
-        assert!(m.is_none());
+    #[test]
+    fn test_from_vec() {
         let p = Matrix::from_vec(vec![1.0, 2.0, 3.0, 4.0], 2, 2);
-        assert!(p.is_some());
+        assert_eq!(p.rows(), 2);
+        assert_eq!(p.cols(), 2);
     }
 
     #[test]
@@ -1167,8 +1226,8 @@ mod tests {
         // [ 6 ]
         let vb: Vec<f64> = vec![5.0, 6.0];
 
-        let a: Matrix<f64> = Matrix::from_vec(va, 2, 2).unwrap();
-        let b: Matrix<f64> = Matrix::from_vec(vb, 2, 1).unwrap();
+        let a: Matrix<f64> = Matrix::from_vec(va, 2, 2);
+        let b: Matrix<f64> = Matrix::from_vec(vb, 2, 1);
         let c = a * b;
 
         assert_eq!(c.rows(), 2);
@@ -1189,8 +1248,8 @@ mod tests {
         // [ 6 2 ]
         let vb: Vec<f64> = vec![5.0, 7.0, 6.0, 2.0];
 
-        let a: Matrix<f64> = Matrix::from_vec(va, 3, 2).unwrap();
-        let b: Matrix<f64> = Matrix::from_vec(vb, 2, 2).unwrap();
+        let a: Matrix<f64> = Matrix::from_vec(va, 3, 2);
+        let b: Matrix<f64> = Matrix::from_vec(vb, 2, 2);
         let c = a * b;
 
         assert_eq!(c.rows(), 3);
@@ -1287,8 +1346,8 @@ mod tests {
         let m: Matrix<f64> = Matrix::<f64>::random::<f64>(3, 2);
         assert_eq!(m.rows(), 3);
         assert_eq!(m.cols(), 2);
-        assert_eq!(m.values().count(), 6);
-        assert!(m.values().all(|x| *x >= 0.0 && *x <= 1.0));
+        assert_eq!(m.iter().count(), 6);
+        assert!(m.iter().all(|x| *x >= 0.0 && *x <= 1.0));
     }
 
     #[test]
@@ -1454,9 +1513,21 @@ mod tests {
             vec![1, 2, 3],
             vec![4, 5, 6]
         ];
-        let m = Matrix::from_col_vectors(&v).unwrap();
+        let m = Matrix::from_col_vectors(&v);
         let e = mat![1,4; 2,5; 3,6];
         assert!(m.eq(&e));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_from_col_vectors_panic() {
+
+        let v = [
+            vec![1, 2, 3],
+            vec![4, 5]
+        ];
+        let m = Matrix::from_col_vectors(&v);
+        assert_eq!(m.rows(), 2);
     }
 
     #[test]
@@ -1466,18 +1537,18 @@ mod tests {
             vec![1, 2, 3],
             vec![4, 5, 6]
         ];
-        let m = Matrix::from_row_vectors(&v).unwrap();
+        let m = Matrix::from_row_vectors(&v);
         let e = mat![1,2,3; 4,5,6];
         assert!(m.eq(&e));
     }
 
     #[test]
-    fn test_values_mut() {
+    fn test_iter_mut() {
         let mut m = mat![
             1.0, 1.5; 
             2.0, 2.5
         ];
-        for i in m.values_mut() {
+        for i in m.iter_mut() {
             *i = *i * 2.0;
         }
         assert!(m.eq(&mat![2.0, 3.0; 4.0, 5.0]));
@@ -1486,11 +1557,11 @@ mod tests {
     #[test]
     fn test_from_it() {
 
-        let v = vec![1, 2, 3, 4, 5, 6];
-        let a = Matrix::from_it(v.iter(), 3).unwrap();
+        let v: Vec<usize> = vec![1, 2, 3, 4, 5, 6];
+        let a = Matrix::from_it(v.iter(), 3);
         assert_eq!(a.rows(), 2);
         assert_eq!(a.cols(), 3);
-        let b = Matrix::from_it(v.iter(), 2).unwrap();
+        let b = Matrix::from_it(v.iter(), 2);
         assert_eq!(b.cols(), 2);
         assert_eq!(b.rows(), 3);
     }
@@ -1547,5 +1618,17 @@ mod tests {
         assert_eq!(m.cols(), 8);
         assert!(m.eq(&mat![1, 2, 3, 4, 5, 6, 7, 8]));
     }
+
+    /*
+    #[test]
+    fn test_into_iter() {
+
+        let m = mat![1, 2, 3; 4, 5, 6];
+        let mut v = Vec::new();
+        for i in m {
+            v.push(i);
+        }
+        assert_eq!(v, vec![1, 2, 3, 4, 5, 6]);
+    }*/
 }
 

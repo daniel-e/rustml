@@ -125,14 +125,12 @@ impl MnistDigits {
         let labels = try!(MnistDigits::read_labels(labels_fname));
         let values = try!(MnistDigits::read_examples(vectors_fname));
 
-        match Matrix::from_vec(values, labels.len(), 784) {
-            Some(matrix) => {
-                match matrix.rows() == labels.len() {
-                    true  => Ok((matrix, labels)),
-                    false => Err("Number of examples are different.")
-                }
-            }
-            _ => Err("Invalid matrix.")
+        match values.len() == labels.len() * 784 {
+            true => {
+                let m = Matrix::from_vec(values, labels.len(), 784);
+                Ok((m, labels))
+            },
+            false => Err("Invalid matrix.")
         }
     }
 

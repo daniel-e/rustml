@@ -215,37 +215,37 @@ macro_rules! matrix_scalar_ops_impl {
             fn add_scalar(&self, scalar: $t) -> Matrix<$t> {
 
                 Matrix::from_vec(
-                    self.values().map(|&x| x + scalar).collect(),
+                    self.iter().map(|&x| x + scalar).collect(),
                     self.rows(),
                     self.cols()
-                ).unwrap()
+                )
             }
 
             fn sub_scalar(&self, scalar: $t) -> Matrix<$t> {
 
                 Matrix::from_vec(
-                    self.values().map(|&x| x - scalar).collect(),
+                    self.iter().map(|&x| x - scalar).collect(),
                     self.rows(),
                     self.cols()
-                ).unwrap()
+                )
             }
 
             fn mul_scalar(&self, scalar: $t) -> Matrix<$t> {
 
                 Matrix::from_vec(
-                    self.values().map(|&x| x * scalar).collect(),
+                    self.iter().map(|&x| x * scalar).collect(),
                     self.rows(),
                     self.cols()
-                ).unwrap()
+                )
             }
 
             fn div_scalar(&self, scalar: $t) -> Matrix<$t> {
 
                 Matrix::from_vec(
-                    self.values().map(|&x| x / scalar).collect(),
+                    self.iter().map(|&x| x / scalar).collect(),
                     self.rows(),
                     self.cols()
-                ).unwrap()
+                )
             }
         }
     )*)

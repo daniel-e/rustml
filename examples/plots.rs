@@ -21,7 +21,7 @@ fn plot_normal_data() {
 
     let seed = [1, 3, 5, 7];
     let data = normal_builder(seed).add(1.0, 0.3).add(2.0, 0.4).take(1000).collect::<Vec<Vec<f64>>>();
-    let m = Matrix::from_row_vectors(&data).unwrap();
+    let m = Matrix::from_row_vectors(&data);
 
     builder()
         .add_columns("plot($1, $2, 'o', 'markerfacecolor', 'yellow', 'color', 'black', 'markersize', 5)", &m)
@@ -148,7 +148,7 @@ pub fn plot_nn() {
     // create the labels
     let labels = Matrix::from_it(
             repeat(0.0).take(2 * n).chain(repeat(1.0).take(2 * n)), 1
-        ).unwrap();
+        );
 
     let n = NeuralNetwork::new()
         .add_layer(2)   // input layer with two units
@@ -198,7 +198,7 @@ pub fn plot_nn_example() {
     // create the labels
     let labels = Matrix::from_it(
             repeat(0.0).take(n).chain(repeat(1.0).take(n)), 1
-        ).unwrap();
+        );
 
     let n = NeuralNetwork::new()
         .add_layer(2)   // input layer with two units

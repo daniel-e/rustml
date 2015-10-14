@@ -488,20 +488,20 @@ impl <T: FunctionsInPlace + Clone> FunctionsInPlace for Matrix<T> {
 
     fn isigmoid(&mut self) {
 
-        for i in self.values_mut() {
+        for i in self.iter_mut() {
             i.isigmoid();
         }
     }
 
     fn isigmoid_derivative(&mut self) {
 
-        for i in self.values_mut() {
+        for i in self.iter_mut() {
             i.isigmoid_derivative();
         }
     }
 
     fn irecip(&mut self) {
-        for i in self.values_mut() {
+        for i in self.iter_mut() {
             i.irecip();
         }
     }
@@ -539,25 +539,25 @@ macro_rules! impl_matrix_scalar_ops_inplace {
         impl MatrixScalarOpsInPlace<$x> for Matrix<$x> {
 
             fn idiv_scalar(&mut self, val: $x) {
-                for i in self.values_mut() {
+                for i in self.iter_mut() {
                     *i = *i / val;
                 }
             }
 
             fn imul_scalar(&mut self, val: $x) {
-                for i in self.values_mut() {
+                for i in self.iter_mut() {
                     *i = *i * val;
                 }
             }
 
             fn iadd_scalar(&mut self, val: $x) {
-                for i in self.values_mut() {
+                for i in self.iter_mut() {
                     *i = *i + val;
                 }
             }
 
             fn isub_scalar(&mut self, val: $x) {
-                for i in self.values_mut() {
+                for i in self.iter_mut() {
                     *i = *i - val;
                 }
             }
@@ -602,7 +602,7 @@ macro_rules! impl_matrix_matrix_ops_inplace {
                 for i in (0..self.rows()) {
                     self.row_mut(i).unwrap().iadd(&rhs.row(i).unwrap());
                 }/*
-                for (i, j) in self.values_mut().zip(rhs.values()) {
+                for (i, j) in self.iter_mut().zip(rhs.iter()) {
                     *i = *i + j;
                 }*/
             }
@@ -613,7 +613,7 @@ macro_rules! impl_matrix_matrix_ops_inplace {
                 for i in (0..self.rows()) {
                     self.row_mut(i).unwrap().isub(&rhs.row(i).unwrap());
                 }/*
-                for (i, j) in self.values_mut().zip(rhs.values()) {
+                for (i, j) in self.iter_mut().zip(rhs.iter()) {
                     *i = *i + j;
                 }*/
             }
@@ -621,7 +621,7 @@ macro_rules! impl_matrix_matrix_ops_inplace {
             fn imule(&mut self, rhs: &Matrix<$x>) {
 
                 assert!(self.rows() == rhs.rows() && self.cols() == rhs.cols(), "Dimensions mismatch.");
-                for (i, j) in self.values_mut().zip(rhs.values()) {
+                for (i, j) in self.iter_mut().zip(rhs.iter()) {
                     *i = *i * j;
                 }
             }

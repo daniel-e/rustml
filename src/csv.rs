@@ -93,9 +93,9 @@ pub fn from_csv_string(s: &str, sep: &str) -> Result<Matrix<f64>, &'static str> 
         return Err("Invalid format.");
     }
 
-    match Matrix::from_vec(data, rows, cols) {
-        Some(m) => Ok(m),
-        _ => Err("Could not create matrix.")
+    match data.len() == rows * cols {
+        true  => Ok(Matrix::from_vec(data, rows, cols)),
+        false => Err("from_csv_string: could not create matrix. Dimensions do not match.")
     }
 }
 

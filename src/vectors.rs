@@ -11,8 +11,11 @@ use std::cmp::{PartialEq, min};
 use std::iter;
 use std::mem;
 use std::fmt;
-use std::io::Write;
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
+use std::io::{Write, Read, BufRead, BufReader, Result, Error, ErrorKind};
+use std::str::FromStr;
+use std::marker::PhantomData;
+
 
 // ------------------------------------------------------------------
 
@@ -114,10 +117,23 @@ impl Linspace<f64> for f64 {
 
 // ------------------------------------------------------------------
 
-use std::io::{Read, BufRead, BufReader, Result, Error, ErrorKind};
-use std::fs::File;
-use std::str::FromStr;
-use std::marker::PhantomData;
+/*
+pub fn from_string<T: FromStr>(s: &str, delim: &str) -> Result<Vec<T>> {
+
+    let mut v = Vec::new();
+    for i in s.split(&delim) {
+        match i.parse::<T>() {
+            Ok (i) => v.push(i),
+            Err(_) => return Err(
+                Error::new(
+                    ErrorKind::InvalidInput, "Could not convert item."
+                )
+            )
+        }
+    }
+    Ok(v)
+}
+*/
 
 /// Iterator which reads lines from a reader and converts each line
 /// into a vector with elements of the specified type.
@@ -484,5 +500,15 @@ mod tests {
         assert_eq!(i.next().unwrap().unwrap(), vec![1, 4, 2, 3, 5]);
         assert!(i.next().is_none());
     }
+
+    /*
+    #[test]
+    fn test_from_string() {
+
+        let s = "1   2 3 4 5 6".to_string();
+        let v = from_string::<i32>(&s, " ").unwrap();
+        assert_eq!(v, vec![1, 2, 3, 4, 5, 6]);
+    }
+    */
 }
 
