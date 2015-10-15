@@ -35,12 +35,15 @@ function build_doc {
 	convert -resize x246 /tmp/grid.png $DST/digits_grid.png
 	cargo run --example gradient_descent -- --nokey
 	convert -trim /tmp/3dplot.png $DST/gradient_descent.png
-	cargo run --example plots -- --nokey
-	convert -trim /tmp/plot_normal_1.png $DST/plot_normal_1.png
-	convert -trim /tmp/plot_mixture.png $DST/plot_mixture.png
-	convert -trim /tmp/plot_knn_boundary.png $DST/plot_knn_boundary.png
-	convert -trim /tmp/nn.png $DST/nn.png
-	convert -trim /tmp/nn_example.png $DST/nn_example.png
+
+	if [ ! -e target/doc/nn_example.png -o `stat -c "%Y" examples/plots.rs` -gt `stat -c "%Y" target/doc/nn_example.png` ]; then
+		cargo run --example plots -- --nokey
+		convert -trim /tmp/plot_normal_1.png $DST/plot_normal_1.png
+		convert -trim /tmp/plot_mixture.png $DST/plot_mixture.png
+		convert -trim /tmp/plot_knn_boundary.png $DST/plot_knn_boundary.png
+		convert -trim /tmp/nn.png $DST/nn.png
+		convert -trim /tmp/nn_example.png $DST/nn_example.png
+	fi
 }
 
 function build_all {
