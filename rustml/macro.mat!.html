@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-30562' class='srclink' href='../src/rustml/matrix.rs.html#212-234' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-30418' class='srclink' href='../src/rustml/matrix.rs.html#226-248' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>mat</span> {
     ( $( $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span>:<span class='ident'>expr</span> ),<span class='op'>+</span> ) ;<span class='op'>*</span> ) <span class='op'>=&gt;</span> {
@@ -66,21 +66,24 @@
             }
             <span class='ident'>cols_old</span> <span class='op'>=</span> <span class='ident'>cols</span>;
         )<span class='op'>*</span>
-        <span class='ident'>Matrix</span>::<span class='ident'>from_vec</span>(<span class='ident'>v</span>, <span class='ident'>rows</span>, <span class='ident'>cols_old</span>).<span class='ident'>unwrap</span>()
+        <span class='ident'>Matrix</span>::<span class='ident'>from_vec</span>(<span class='ident'>v</span>, <span class='ident'>rows</span>, <span class='ident'>cols_old</span>)
         }
     };
 }</pre>
 <div class='docblock'><p>Macro to create a matrix.</p>
 
 <h1 id="example" class='section-header'><a
-                           href="#example">Example</a></h1>
-<p>let m = mat![1.0, 2.0, 3.0; 4.0, 5.0, 6.0];</p>
+                           href="#example">Example</a></h1><pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rustml</span>;
+<span class='kw'>use</span> <span class='ident'>rustml</span>::<span class='ident'>matrix</span>::<span class='ident'>Matrix</span>;
 
-<p>This example creates the following 2x3 matrix:</p>
-
-<p><code>[ 1 2 3 ]</code></p>
-
-<p><code>[ 4 5 6 ]</code></p>
+<span class='comment'>// creates a matrix with 2 rows and 3 columns</span>
+<span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='macro'>mat</span><span class='macro'>!</span>[
+    <span class='number'>1.0</span>, <span class='number'>2.0</span>, <span class='number'>3.0</span>; 
+    <span class='number'>4.0</span>, <span class='number'>5.0</span>, <span class='number'>6.0</span>
+];
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>rows</span>(), <span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>cols</span>(), <span class='number'>3</span>);</pre>
 </div></section>
     <section id='search' class="content hidden"></section>
 

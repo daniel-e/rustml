@@ -528,6 +528,32 @@
 <span id="486">486</span>
 <span id="487">487</span>
 <span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Functions for vectors.</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
@@ -542,8 +568,11 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>OpenOptions</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::{<span class='ident'>File</span>, <span class='ident'>OpenOptions</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Write</span>, <span class='ident'>Read</span>, <span class='ident'>BufRead</span>, <span class='ident'>BufReader</span>, <span class='prelude-ty'>Result</span>, <span class='ident'>Error</span>, <span class='ident'>ErrorKind</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>marker</span>::<span class='ident'>PhantomData</span>;
+
 
 <span class='comment'>// ------------------------------------------------------------------</span>
 
@@ -645,10 +674,23 @@
 
 <span class='comment'>// ------------------------------------------------------------------</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Read</span>, <span class='ident'>BufRead</span>, <span class='ident'>BufReader</span>, <span class='prelude-ty'>Result</span>, <span class='ident'>Error</span>, <span class='ident'>ErrorKind</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>marker</span>::<span class='ident'>PhantomData</span>;
+<span class='comment'>/*
+pub fn from_string&lt;T: FromStr&gt;(s: &amp;str, delim: &amp;str) -&gt; Result&lt;Vec&lt;T&gt;&gt; {
+
+    let mut v = Vec::new();
+    for i in s.split(&amp;delim) {
+        match i.parse::&lt;T&gt;() {
+            Ok (i) =&gt; v.push(i),
+            Err(_) =&gt; return Err(
+                Error::new(
+                    ErrorKind::InvalidInput, &quot;Could not convert item.&quot;
+                )
+            )
+        }
+    }
+    Ok(v)
+}
+*/</span>
 
 <span class='doccomment'>/// Iterator which reads lines from a reader and converts each line</span>
 <span class='doccomment'>/// into a vector with elements of the specified type.</span>
@@ -1015,6 +1057,16 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>().<span class='ident'>unwrap</span>(), <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>4</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>5</span>]);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>i</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
     }
+
+    <span class='comment'>/*
+    #[test]
+    fn test_from_string() {
+
+        let s = &quot;1   2 3 4 5 6&quot;.to_string();
+        let v = from_string::&lt;i32&gt;(&amp;s, &quot; &quot;).unwrap();
+        assert_eq!(v, vec![1, 2, 3, 4, 5, 6]);
+    }
+    */</span>
 }
 
 </pre>

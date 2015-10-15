@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-29251' class='srclink' href='../../src/rustml/nn.rs.html#96-99' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-29108' class='srclink' href='../../src/rustml/nn.rs.html#96-99' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct NeuralNetwork {
     // some fields omitted
 }</pre><div class='docblock'><p>A simple feed forward neural network with an arbitrary number of layers
@@ -84,7 +84,7 @@ plot.</p>
 <span class='comment'>// create the labels</span>
 <span class='kw'>let</span> <span class='ident'>labels</span> <span class='op'>=</span> <span class='ident'>Matrix</span>::<span class='ident'>from_it</span>(
         <span class='ident'>repeat</span>(<span class='number'>0.0</span>).<span class='ident'>take</span>(<span class='ident'>n</span>).<span class='ident'>chain</span>(<span class='ident'>repeat</span>(<span class='number'>1.0</span>).<span class='ident'>take</span>(<span class='ident'>n</span>)), <span class='number'>1</span>
-    ).<span class='ident'>unwrap</span>();
+    );
 
 <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>NeuralNetwork</span>::<span class='ident'>new</span>()
     .<span class='ident'>add_layer</span>(<span class='number'>2</span>)    <span class='comment'>// input layer with two units</span>
