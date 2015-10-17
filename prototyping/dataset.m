@@ -1,3 +1,4 @@
+% TODO rename to xor_dataset
 function [x, y] = dataset()
 	rand('seed', 1);
 	n = 100;
@@ -11,5 +12,5 @@ function [x, y] = dataset()
 	% around (0, 1)
 	d = [normrnd(0, s, n, 1), normrnd(0, s, n, 1) + 1];
 	x = [a; b; c; d];
-	y = [zeros(n, 1); ones(n, 1); ones(n, 1) + 1; ones(n, 1) + 2];
+	y = [zeros(n, 1); zeros(n, 1); ones(n, 1); ones(n, 1)];
 end
