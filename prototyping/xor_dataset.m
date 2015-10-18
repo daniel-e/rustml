@@ -1,7 +1,15 @@
-% TODO rename to xor_dataset
-function [x, y] = dataset()
+% [x, y] = xor_dataset(n)
+%
+% Creates a dataset where points are normally distributed around
+% the coordinates (0,0), (1,0), (0,1) and (1,1). The number of
+% points around each coordinate is specified by the parameter n.
+%
+% RETURNS
+% 
+%  x    
+%  y   The labels.
+function [x, y] = xor_dataset(n)
 	rand('seed', 1);
-	n = 100;
 	s = 0.24;
 	% around (0, 0)
 	a = [normrnd(0, s, n, 2)];
