@@ -30,7 +30,7 @@ n = 2000;
 X = trainX(1:n, :);
 tic
 [p1, p2, err] = nn_train(28 * 28, 30, size(mapping, 1), X, yv(1:n, :));
-tac
+toc
 
 err(size(err, 1))
 display("learning curve...");
