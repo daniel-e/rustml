@@ -486,8 +486,7 @@ impl <T: Clone> Matrix<T> {
     /// assert_eq!(m.rows(), 3);
     /// assert_eq!(m.cols(), 2);
     /// // all values are in the interval [0, 1)
-    /// assert!(m.iter().all(|&x| x < -2.0 && x >= 0.0));
-    /// println!("{}", m);
+    /// assert!(m.iter().all(|&x| x <= 1.0 && x >= 0.0));
     /// ```
     pub fn random<R: Rand + Clone>(rows: usize, cols: usize) -> Matrix<R> {
 
