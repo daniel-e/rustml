@@ -50,7 +50,7 @@ fn main() {
         .add("hold on")
         // examples
         .add_matrix("X = $$", &x)
-        .add_vector_iter("y = $$", labels.values())
+        .add_vector_iter("y = $$", labels.iter())
         .add("plot(X(y == 0, 1), X(y == 0, 2), 'd', 'markersize', 6, 'markerfacecolor', 'yellow', 'color', 'black')")
         .add("plot(X(y == 1, 1), X(y == 1, 2), 'o', 'markersize', 6, 'markerfacecolor', 'blue', 'color', 'black')")
         .add("axis([-1, 2, -1, 2])")
