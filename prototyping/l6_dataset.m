@@ -19,6 +19,10 @@ function [x, y] = l6_dataset(n)
 	c = [normrnd(0, s, n, 1) + 1, normrnd(0, s, n, 1)];
 	% around (0, 1)
 	d = [normrnd(0, s, n, 1), normrnd(0, s, n, 1) + 1];
-	x = [a; b; c; d];
-	y = [zeros(n, 1); ones(n, 1); ones(n, 1) + 1; ones(n, 1) + 2];
+	% around (2, 0)
+	e = [normrnd(0, s, n, 1) + 2, normrnd(0, s, n, 1)];
+	% around (2, 1)
+	f = [normrnd(0, s, n, 1) + 2, normrnd(0, s, n, 1) + 1];
+	x = [a; b; c; d; e; f];
+	y = [zeros(n, 1); ones(n, 1); ones(n, 1) + 1; ones(n, 1) + 2; ones(n, 1) + 3; ones(n, 1) + 4];
 end
