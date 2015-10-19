@@ -231,23 +231,32 @@ pub fn from_file<T: FromStr>(path: &str) -> Result<VecReader<BufReader<File>, T>
 pub trait VectorIO {
 
     fn to_file(&self, path: &str) -> bool;
+
+    fn to_string(&self) -> String;
 }
 
 impl <T: fmt::Display> VectorIO for Vec<T> {
+
+    fn to_string(&self) -> String {
+        let mut r = String::new();
+        for (idx, val) in self.iter().enumerate() {
+            let mut s = format!(" {}", val);
+            if idx == 0 {
+                s = format!("{}", val);
+            }
+            r = r + &s;
+        }
+        r
+    }
 
     fn to_file(&self, path: &str) -> bool {
 
         match OpenOptions::new().write(true).append(true).create(true).open(path) {
             Err(_) => false,
             Ok(mut f) => {
-                for (idx, val) in self.iter().enumerate() {
-                    let mut s = format!(" {}", val);
-                    if idx == 0 {
-                        s = format!("{}", val);
-                    }
-                    if f.write_all(s.as_bytes()).is_err() {
-                        return false;
-                    }
+                let s = self.to_string();
+                if f.write_all(s.as_bytes()).is_err() {
+                    return false;
                 }
                 f.write_all("\n".as_bytes()).is_ok()
             }
@@ -499,6 +508,13 @@ mod tests {
         let mut i = from_file::<u32>("/tmp/test_vec_to_file.txt").unwrap();
         assert_eq!(i.next().unwrap().unwrap(), vec![1, 4, 2, 3, 5]);
         assert!(i.next().is_none());
+    }
+
+    #[test]
+    fn test_vec_to_string() {
+
+        let a = vec![1, 4, 2, 3, 5];
+        assert_eq!(a.to_string(), "1 4 2 3 5");
     }
 
     /*
