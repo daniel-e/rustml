@@ -3,9 +3,9 @@ function [p1, p2, err] = nn_train(i, h, o, x, y)
 	% number of examples
 	m = size(x, 1);
 	% parameters from input layer to hidden layer
-	p1 = rand(h, i);
+	p1 = rand(h, i) - 0.5;
 	% parameters from hidden layer + bias unit to output layer
-	p2 = rand(o, h + 1);
+	p2 = rand(o, h + 1) - 0.5;
 	% learning curve
 	err = [];
 

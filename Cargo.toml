@@ -73,6 +73,10 @@ path = "examples/plots.rs"
 name = "neuralnetwork"
 path = "examples/neuralnetwork.rs"
 
+[[example]]
+name = "mnistdigits2matrix"
+path = "examples/mnistdigits2matrix.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"

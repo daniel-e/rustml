@@ -6,8 +6,8 @@
 %
 % RETURNS
 % 
-%  x    
-%  y   The labels.
+%  x   A matrix which contains in each row the coordinates of one point.
+%  y   A column vector which contains the labels for the points.
 function [x, y] = xor_dataset(n)
 	rand('seed', 1);
 	s = 0.24;

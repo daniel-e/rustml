@@ -1,21 +1,31 @@
 1;
 
-% TODO rename: demo_xor_neuralnetworks
+% create a dataset where the points cannot be separated by a linear
+% classifier
+[x, y] = xor_dataset(100);
 
-[x, y] = dataset();
+% show the dataset
+clf;
 plot_dataset(x, y);
 
+%%
 display("press enter to continue...");
 pause;
+%%
 
 [p1, p2, err] = nn_train(2, 10, 1, x, y);
 
 clf;
-plot(err);
+plot(err, 'linewidth', 2);
+grid on;
+title("Learning curve");
 
+%%
 display("press enter to continue...");
 pause;
+%%
 
+%% contour plot
 tx = ty = linspace(-1, 2, 40);
 [xx, yy] = meshgrid(tx, ty);
 zz = zeros(size(xx));
