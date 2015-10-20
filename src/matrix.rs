@@ -147,6 +147,53 @@ impl <T: Clone> IntoMatrix<T> for [T] {
 
 // ------------------------------------------------------------------
 
+pub trait Trim<T> {
+    fn trim_rows(&self, zero: T) -> Self;
+
+    fn trim_cols(&self, zero: T) -> Self;
+
+    fn trim(&self, zero: T) -> Self;
+}
+
+impl <T: PartialEq + Clone> Trim<T> for Matrix<T> {
+
+    fn trim_rows(&self, zero: T) -> Matrix<T> {
+
+        // number of rows for which all elements are zero
+        let s = self.row_iter().take_while(|&r| r.iter().all(|x| *x == zero)).count();
+
+        // number of rows at the bottom for which all elements are zero
+        let e = self.row_iter().rev().take_while(|&r| r.iter().all(|x| *x == zero)).count();
+
+        let mut m = Matrix::<T>::new();
+        for i in (s..self.rows() - e) {
+            m.add_row(self.row(i).unwrap())
+        }
+        m
+    }
+
+    fn trim_cols(&self, zero: T) -> Self {
+
+        // number of rows for which all elements are zero
+        let s = self.col_iter().take_while(|r| r.iter().all(|x| *x == zero)).count();
+
+        // number of rows at the bottom for which all elements are zero
+        let e = self.col_iter().rev().take_while(|r| r.iter().all(|x| *x == zero)).count();
+
+        let mut m = Matrix::<T>::new();
+        for i in (s..self.cols() - e) {
+            m = m.insert_column(m.cols(), &self.col(i).unwrap());
+        }
+        m
+    }
+
+    fn trim(&self, zero: T) -> Self {
+        self.trim_rows(zero.clone()).trim_cols(zero)
+    }
+}
+
+// ------------------------------------------------------------------
+
 /// Trait to check if a matrix contains a NaN value.
 pub trait HasNan {
     /// Returns `true` if at least one element that is NaN exists.
@@ -227,7 +274,7 @@ macro_rules! mat {
     ( $( $( $x:expr ),+ ) ;* ) => {
         {
         let mut v = Vec::new();
-        let mut cols;
+        let mut cols: usize;
         let mut cols_old = 0;
         let mut rows = 0;
         $(
@@ -600,7 +647,21 @@ impl <T: Clone> Matrix<T> {
     /// # }
     /// ```
     pub fn row_iter(&self) -> RowIterator<T> {
-        self.row_iter_at(0)
+
+        RowIterator {
+            m: self,
+            idx: 0,
+            idx_back: self.rows()
+        }
+    }
+
+    pub fn col_iter(&self) -> ColIterator<T> {
+
+        ColIterator {
+            m: self,
+            idx: 0,
+            idx_back: self.cols()
+        }
     }
 
     /// Returns an iterator over the rows of the matrix. The iterator
@@ -625,7 +686,8 @@ impl <T: Clone> Matrix<T> {
 
         RowIterator {
             m: self,
-            idx: n
+            idx: n,
+            idx_back: n + 1
         }
     }
 
@@ -884,7 +946,7 @@ impl <T: Clone> Matrix<T> {
     }
 
     /// Returns a copy of the column at the specified index.
-    pub fn column(&self, pos: usize) -> Option<Vec<T>> {
+    pub fn col(&self, pos: usize) -> Option<Vec<T>> {
 
         if pos >= self.cols() {
             return None;
@@ -996,7 +1058,8 @@ impl <T: Clone> Matrix<T> {
 /// An iterator over the rows of a matrix.
 pub struct RowIterator<'q, T: 'q> {
     m: &'q Matrix<T>,
-    idx: usize
+    idx: usize,
+    idx_back: usize
 }
 
 impl <'q, T: Clone> Iterator for RowIterator<'q, T> {
@@ -1010,6 +1073,53 @@ impl <'q, T: Clone> Iterator for RowIterator<'q, T> {
         }
     }
 }
+
+impl <'q, T: Clone> DoubleEndedIterator for RowIterator<'q, T> {
+
+    fn next_back(&mut self) -> Option<&'q [T]> {
+        match self.idx_back == 0 {
+            true => None,
+            false => {
+                self.idx_back -= 1;
+                self.m.row(self.idx_back)
+            }
+        }
+    }
+}
+
+
+/// An iterator over the columns of a matrix.
+pub struct ColIterator<'q, T: 'q> {
+    m: &'q Matrix<T>,
+    idx: usize,
+    idx_back: usize
+}
+
+impl <'q, T: Clone> Iterator for ColIterator<'q, T> {
+    type Item = Vec<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.idx += 1;
+        match self.idx > self.m.cols() {
+            true => None,
+            false => self.m.col(self.idx - 1)
+        }
+    }
+}
+
+impl <'q, T: Clone> DoubleEndedIterator for ColIterator<'q, T> {
+
+    fn next_back(&mut self) -> Option<Vec<T>> {
+        match self.idx_back == 0 {
+            true => None,
+            false => {
+                self.idx_back -= 1;
+                self.m.col(self.idx_back)
+            }
+        }
+    }
+}
+
 
 /*
 /// A mutable iterator over the rows of a matrix.
@@ -1616,6 +1726,119 @@ mod tests {
         assert_eq!(m.rows(), 1);
         assert_eq!(m.cols(), 8);
         assert!(m.eq(&mat![1, 2, 3, 4, 5, 6, 7, 8]));
+    }
+    
+    #[test]
+    fn test_row_iter_rev() {
+        let m = mat![1; 2; 3; 4];
+        let mut i = m.row_iter().rev();
+        assert_eq!(i.next().unwrap(), &[4]);
+        assert_eq!(i.next().unwrap(), &[3]);
+        assert_eq!(i.next().unwrap(), &[2]);
+        assert_eq!(i.next().unwrap(), &[1]);
+        assert!(i.next().is_none());
+    }
+
+    #[test]
+    fn test_trim_rows() {
+
+        let mut m = Matrix::new();
+        let mut r = m.trim_rows(0);
+        assert_eq!(r.rows(), 0);
+        assert_eq!(r.cols(), 0);
+
+        m = mat![1; 2];
+        r = m.trim_rows(0);
+        assert_eq!(r, mat![1; 2]);
+
+        m = mat![0; 2];
+        r = m.trim_rows(0);
+        assert_eq!(r, mat![2]);
+
+        m = mat![0; 0];
+        r = m.trim_rows(0);
+        assert_eq!(r.rows(), 0);
+        assert_eq!(r.cols(), 0);
+
+        m = mat![0; 2; 0];
+        r = m.trim_rows(0);
+        assert_eq!(r, mat![2]);
+
+        m = mat![0; 2; 1; 0];
+        r = m.trim_rows(0);
+        assert_eq!(r, mat![2; 1]);
+    }
+
+    #[test]
+    fn test_trim_cols() {
+
+        let mut m = Matrix::new();
+        let mut r = m.trim_cols(0);
+        assert_eq!(r.rows(), 0);
+        assert_eq!(r.cols(), 0);
+
+        m = mat![1, 2];
+        r = m.trim_cols(0);
+        assert_eq!(r, mat![1, 2]);
+
+        m = mat![0, 2];
+        r = m.trim_cols(0);
+        assert_eq!(r, mat![2]);
+
+        m = mat![0, 0];
+        r = m.trim_cols(0);
+        assert_eq!(r.rows(), 0);
+        assert_eq!(r.cols(), 0);
+
+        m = mat![0, 2, 0];
+        r = m.trim_cols(0);
+        assert_eq!(r, mat![2]);
+
+        m = mat![0, 2, 1, 0];
+        r = m.trim_cols(0);
+        assert_eq!(r, mat![2, 1]);
+
+    }
+
+    #[test]
+    fn test_col_iter() {
+        let m = mat![
+            1, 2, 7;
+            3, 4, 8;
+            5, 6, 9
+        ];
+        let mut i = m.col_iter();
+        assert_eq!(i.next().unwrap(), vec![1, 3, 5]);
+        assert_eq!(i.next().unwrap(), vec![2, 4, 6]);
+        assert_eq!(i.next().unwrap(), vec![7, 8, 9]);
+        assert!(i.next().is_none());
+
+        let mut j = m.col_iter().rev();
+        assert_eq!(j.next().unwrap(), vec![7, 8, 9]);
+        assert_eq!(j.next().unwrap(), vec![2, 4, 6]);
+        assert_eq!(j.next().unwrap(), vec![1, 3, 5]);
+        assert!(j.next().is_none());
+    }
+
+    #[test]
+    fn test_trim() {
+
+        let m = mat![
+            0, 0, 0, 0, 0, 0;
+            0, 0, 1, 2, 3, 0;
+            0, 0, 0, 0, 0, 0;
+            0, 0, 4, 5, 6, 0;
+            0, 0, 4, 5, 0, 0;
+            0, 0, 0, 0, 0, 0;
+            0, 0, 0, 0, 0, 0
+        ];
+        let r = m.trim(0);
+        assert_eq!(r, mat![
+            1, 2, 3;
+            0, 0, 0;
+            4, 5, 6;
+            4, 5, 0
+        ]);
     }
 
     /*

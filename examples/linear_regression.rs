@@ -14,7 +14,7 @@ fn main() {
     let dm = from_csv_file("datasets/testing/points.txt", " ")
         .unwrap().design_matrix();
     
-    let y = dm.column(2).unwrap();
+    let y = dm.col(2).unwrap();
     let x = dm.rm_column(2);
 
     let result = opt_hypothesis(
@@ -36,7 +36,7 @@ fn main() {
         .add_values("y = $1 + $2 * x", &result.params)
         .add("plot(x, y, 'linewidth', 2, 'color', 'red')")
         .add("hold on")
-        .add_vector("x = $$", &x.column(1).unwrap())
+        .add_vector("x = $$", &x.col(1).unwrap())
         .add_vector("y = $$", &y)
         .add("plot(x, y, 'o')")
         .add("grid on")

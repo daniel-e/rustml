@@ -119,7 +119,7 @@
 //! handwritten digits of the MNIST database into a grid
 //!
 pub use distance::{Distance, Euclid, DistancePoint2D};
-pub use matrix::{HasNan, Similar, Matrix, IntoMatrix};
+pub use matrix::{HasNan, Similar, Trim, Matrix, IntoMatrix};
 pub use math::{Dimension, Normalization, Mean, MeanVec, Sum, Var, SumVec};
 pub use ops::{MatrixScalarOps, Ops, VectorScalarOps, VectorVectorOps, MatrixMatrixOps};
 pub use ops_inplace::{VectorVectorOpsInPlace, MatrixMatrixOpsInPlace};

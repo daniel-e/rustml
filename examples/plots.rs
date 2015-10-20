@@ -88,7 +88,7 @@ pub fn plot_knn_decision_boundary() {
             .add(100, normal_builder(seed).add(6.0, 2.5).add(0.0, 2.5))
             .as_matrix();
 
-    let labels = m.column(0).unwrap().iter().map(|&x| x.clone() as usize).collect::<Vec<usize>>();
+    let labels = m.col(0).unwrap().iter().map(|&x| x.clone() as usize).collect::<Vec<usize>>();
     let mx = m.rm_column(0);
 
     let mut mt = Matrix::<f64>::new();
