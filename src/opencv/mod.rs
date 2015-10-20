@@ -296,6 +296,7 @@ pub trait Image {
     /// is used to separate them.
     fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<Self>;
 
+    fn resize(&self, height: usize, width: usize) -> Self;
 }
 
 impl Image for GrayImage {
@@ -354,11 +355,36 @@ impl Image for GrayImage {
             *p = g as u8;
         }
     }
+
+    fn resize(&self, width: usize, height: usize) -> Self {
+
+        let mut _dst = GrayImage::new(width, height);
+        unsafe {
+            cvResize(
+                self.buffer() as *const CvArr,
+                _dst.buffer() as *mut CvArr,
+                INTER_LINEAR 
+            );
+        }
+        _dst
+    }
 }
 
 impl Image for RgbImage {
     // TODO refactoring
 
+    fn resize(&self, width: usize, height: usize) -> Self {
+
+        let mut _dst = RgbImage::new(width, height);
+        unsafe {
+            cvResize(
+                self.buffer() as *const CvArr,
+                _dst.buffer() as *mut CvArr,
+                INTER_LINEAR
+            );
+        }
+        _dst
+    }
     fn new(w: usize, h: usize) -> RgbImage {
 
         let siz = CvSize {

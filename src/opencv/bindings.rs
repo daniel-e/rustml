@@ -68,6 +68,12 @@ pub struct IplImage {
 pub const CV_BGR2GRAY: c_int = 6;
 pub const CV_WINDOW_AUTOSIZE: c_int = 1;
 
+//pub const INTER_NEAREST: c_int = 0;
+pub const INTER_LINEAR: c_int = 1;
+//pub const INTER_CUBIC: c_int = 2;
+//pub const INTER_AREA: c_int = 3;
+//pub const INTER_LANCZOS4: c_int = 4;
+
 #[link(name = "opencv_highgui")]
 extern {
     pub fn cvCreateFileCapture(fname: *const c_char) -> *const CvCapture;
@@ -92,6 +98,8 @@ extern {
 
     pub fn cvInitFont(font: *mut CvFont, font_face: c_int, hscale: c_double, vscale: c_double,
                       shear: c_double, thickness: c_int, line_type: c_int);
+
+    pub fn cvResize(src: *const CvArr, dst: *mut CvArr, interpolation: c_int);
 }
 
 #[link(name = "opencv_core")]
