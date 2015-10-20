@@ -41,4 +41,19 @@ for i in  \
 done
 echo -e "\e[1;32mdone\e[0m"	
 
+# --------------------------------------------
+
+echo -e "\e[1;34mdownloading example images ...\e[0m"
+if [ ! -e $RUSTMLPATH/datasets/images ]; then
+	mkdir -p $RUSTMLPATH/datasets/images
+fi
+for i in  \
+	"fog.jpg" \
+; do
+	URL="https://github.com/daniel-e/rustml/blob/master/datasets/images/$i?raw=true"
+	echo "> downloading $i ..."
+	wget -q -O $RUSTMLPATH/datasets/images/$i $URL
+done
+echo -e "\e[1;32mdone\e[0m"	
+
 
