@@ -77,6 +77,10 @@ path = "examples/neuralnetwork.rs"
 name = "mnistdigits2matrix"
 path = "examples/mnistdigits2matrix.rs"
 
+[[example]]
+name = "opencv"
+path = "examples/opencv.rs"
+
 [dependencies]
 libc = "*"
 rand = "*"
