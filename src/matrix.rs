@@ -6,7 +6,7 @@ extern crate rand;
 extern crate num;
 
 use std::{iter, fmt, fs};
-use std::iter::FromIterator;
+use std::iter::{FromIterator, repeat};
 use std::io::Read;
 use std::str::FromStr;
 use std::ops::Mul;
@@ -1051,6 +1051,22 @@ impl <T: Clone> Matrix<T> {
             data: self.data[..rows * cols].to_vec()
         }
     }
+
+    pub fn border(&self, n: usize, val: T) -> Matrix<T> {
+
+        let mut m = Matrix::from_it(
+            repeat(val.clone()).take(self.cols() * n).chain(self.iter().cloned()).
+                chain(repeat(val.clone()).take(self.cols() * n)),
+            self.cols()
+        );
+
+        let v = repeat(val).take(m.rows()).collect::<Vec<_>>();
+        for _ in (0..n) {
+            m = m.insert_column(0, &v);
+            m = m.insert_column(m.cols(), &v);
+        }
+        m
+    }
 }
 
 // --------------- Iterators ----------------------------------------
@@ -1840,6 +1856,25 @@ mod tests {
             4, 5, 0
         ]);
     }
+
+    #[test]
+    fn test_border() {
+
+        let m = mat![
+            1, 2, 3;
+            4, 5, 6
+        ];
+        let r = m.border(2, 9);
+        assert_eq!(r, mat![
+            9, 9, 9, 9, 9, 9, 9;
+            9, 9, 9, 9, 9, 9, 9;
+            9, 9, 1, 2, 3, 9, 9;
+            9, 9, 4, 5, 6, 9, 9;
+            9, 9, 9, 9, 9, 9, 9;
+            9, 9, 9, 9, 9, 9, 9
+        ]);
+    }
+
 
     /*
     #[test]
