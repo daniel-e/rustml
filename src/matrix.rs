@@ -11,6 +11,7 @@ use std::io::Read;
 use std::str::FromStr;
 use std::ops::Mul;
 use std::slice::{Iter, IterMut};
+use std::cmp::min;
 use self::rand::{thread_rng, Rng, Rand};
 use self::num::traits::{Float, Signed};
 
@@ -1067,6 +1068,20 @@ impl <T: Clone> Matrix<T> {
         }
         m
     }
+
+    pub fn insert_row(&self, pos: usize, v: &[T]) -> Matrix<T> {
+
+        if self.empty() {
+            return Matrix::from_vec(v.to_vec(), 1, v.len());
+        }
+
+        let n = min(pos, self.rows());
+        Matrix::from_it(
+            self.iter().take(n * self.cols()).chain(v.iter()).chain(self.iter().skip(n * self.cols())).cloned(),
+            self.cols()
+        )
+    }
+
 }
 
 // --------------- Iterators ----------------------------------------
@@ -1875,6 +1890,26 @@ mod tests {
         ]);
     }
 
+    #[test]
+    fn test_insert_row() {
+
+        let m = mat![
+            1, 2, 3;
+            4, 5, 6
+        ];
+        let a = m.insert_row(0, &[2, 1, 3]);
+        assert_eq!(a, mat![2, 1, 3; 1, 2, 3; 4, 5, 6]);
+
+        assert_eq!(m.insert_row(1, &[2, 1, 3]),
+            mat![1, 2, 3; 2, 1, 3; 4, 5, 6]
+        );
+        assert_eq!(m.insert_row(2, &[2, 1, 3]),
+            mat![1, 2, 3; 4, 5, 6; 2, 1, 3]
+        );
+        assert_eq!(m.insert_row(3, &[2, 1, 3]),
+            mat![1, 2, 3; 4, 5, 6; 2, 1, 3]
+        );
+    }
 
     /*
     #[test]
