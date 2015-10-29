@@ -10,8 +10,11 @@ use self::flate2::read::GzDecoder;
 use self::regex::Regex;
 use std::iter::Skip;
 use std::slice::Iter;
+use std::fmt;
 
 use vectors::copy_memory;
+use csv::{matrix_to_csv, vec_to_csv};
+use matrix::Matrix;
 
 /// Struct to decompress gzip streams.
 pub struct GzipData {
@@ -202,6 +205,32 @@ pub fn match_lines<R: Read>(reader: R, r: Regex) -> MatchLines<R> {
 
 // -------------------------------------------------------------------------
 
+pub trait OctaveFormat {
+    fn to_octave_string(&self, name: &str) -> String;
+}
+
+impl <T: fmt::Display + Clone> OctaveFormat for Matrix<T> {
+
+    fn to_octave_string(&self, name: &str) -> String {
+        format!(
+            "# name: {}\n# type: matrix\n# rows: {}\n# columns: {}\n{}",
+            name, self.rows(), self.cols(), matrix_to_csv(self, " ")
+        )
+    }
+}
+
+impl <T: fmt::Display> OctaveFormat for Vec<T> {
+
+    fn to_octave_string(&self, name: &str) -> String {
+        format!(
+            "# name: {}\n# type: matrix\n# rows: {}\n# columns: {}\n{}\n",
+            name, self.len(), 1, vec_to_csv(&self, "\n")
+        )
+    }
+}
+
+// -------------------------------------------------------------------------
+
 #[cfg(test)]
 mod tests {
     extern crate regex;
@@ -211,6 +240,7 @@ mod tests {
     use self::regex::Regex;
     use std::fs::File;
     use std::io::BufReader;
+    use matrix::Matrix;
 
     #[test]
     fn test_read_gzip() {
@@ -243,4 +273,23 @@ mod tests {
         assert_eq!(v, vec![1, 2, 3]);
     }
 
+    #[test]
+    fn test_matrix_to_octave_string() {
+
+        let m = mat![1, 2, 3; 4, 5, 6];
+        let s = m.to_octave_string("mymatrix");
+        assert_eq!(s,
+            "# name: mymatrix\n# type: matrix\n# rows: 2\n# columns: 3\n1 2 3\n4 5 6\n"
+        );
+    }
+
+    #[test]
+    fn test_vec_to_octave_string() {
+
+        let m = vec![1,2,3,4];
+        let s = m.to_octave_string("myvec");
+        assert_eq!(s,
+            "# name: myvec\n# type: matrix\n# rows: 4\n# columns: 1\n1\n2\n3\n4\n"
+        );
+    }
 }
