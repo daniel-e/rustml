@@ -288,14 +288,6 @@ pub trait Image {
         }
     }
 
-    /// Creates a new image by organizing the given list of images into a grid.
-    ///
-    /// All images must have the same size, otherwise returns `None`. The number
-    /// of columns of the grid is specified with the parameter `cols`. The
-    /// parameter `space` specifies the number of pixels between each image that
-    /// is used to separate them.
-    fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<Self>;
-
     fn resize(&self, height: usize, width: usize) -> Self;
 }
 
@@ -311,11 +303,6 @@ impl Image for GrayImage {
         GrayImage { 
             iplimage: unsafe { cvCreateImage(siz, 8, 1) } 
         }
-    }
-
-    fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<GrayImage> {
-
-        grid::<GrayImage>(images, cols, space)
     }
 
     fn buffer(&self) -> *const IplImage { self.iplimage }
@@ -396,11 +383,6 @@ impl Image for RgbImage {
         }
     }
 
-    fn grid(images: &Vec<Self>, cols: usize, space: usize) -> Option<RgbImage> {
-
-        grid::<RgbImage>(images, cols, space)
-    }
-
     fn buffer(&self) -> *const IplImage { self.iplimage }
 
     fn pixel_as_rgb(&self, x: usize, y: usize) -> Option<Rgb> { 
@@ -445,11 +427,10 @@ impl Image for RgbImage {
 /// of columns of the grid is specified with the parameter `cols`. The
 /// parameter `space` specifies the number of pixels between each image that
 /// is used to separate them.
-fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<T> {
+pub fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> T {
 
-    if images.len() == 0 || cols == 0 {
-        return None;
-    }
+    assert!(images.len() > 0, "At least one image is required.");
+    assert!(cols > 0, "At least on ecolumn is required.");
 
     let mut rows = images.len() / cols;
     if rows * cols < images.len() {
@@ -466,9 +447,7 @@ fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<T> {
     let mut row = 0;
 
     for img in images {
-        if img_width != img.width() || img_height != img.height() {
-            return None;
-        }
+        assert!(img_width == img.width() && img_height == img.height(), "Size of images must be equal.");
         dst.copy_from(
             img, 0, 0, img_width, img_height, col * (img_width + space), row * (img_height + space)
         );
@@ -478,7 +457,7 @@ fn grid<T: Image>(images: &Vec<T>, cols: usize, space: usize) -> Option<T> {
             row += 1;
         }
     }
-    Some(dst)
+    dst
 }
 
 // ------------------------------------------------------------------
@@ -488,6 +467,11 @@ pub struct RgbImage {
 }
 
 impl RgbImage {
+
+    pub fn grid(images: &Vec<Self>, cols: usize, space: usize) -> RgbImage {
+
+        grid::<RgbImage>(images, cols, space)
+    }
 
     pub fn from_file(fname: &str) -> Option<RgbImage> {
 
@@ -555,6 +539,11 @@ pub struct GrayImage {
 }
 
 impl GrayImage {
+
+    pub fn grid(images: &Vec<Self>, cols: usize, space: usize) -> GrayImage {
+
+        grid::<GrayImage>(images, cols, space)
+    }
 
     pub fn from_file(fname: &str) -> Option<GrayImage> {
 
