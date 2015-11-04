@@ -540,6 +540,11 @@ pub struct GrayImage {
 
 impl GrayImage {
 
+    pub fn to_matrix(&self) -> Matrix<u8> {
+
+        Matrix::from_it(self.pixel_iter(), self.width())
+    }
+
     pub fn grid(images: &Vec<Self>, cols: usize, space: usize) -> GrayImage {
 
         grid::<GrayImage>(images, cols, space)
