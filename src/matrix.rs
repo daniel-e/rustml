@@ -1082,6 +1082,17 @@ impl <T: Clone> Matrix<T> {
         )
     }
 
+    pub fn sub_matrix(&self, rows: &[usize], cols: &[usize]) -> Matrix<T> {
+
+        let mut m = Matrix::new();
+
+        for row in self.row_iter_of(rows) {
+            let v = cols.iter().map(|&i| row[i].clone()).collect::<Vec<_>>();
+            m.add_row(&v);
+        }
+        m
+    }
+
 }
 
 // --------------- Iterators ----------------------------------------
@@ -1909,6 +1920,21 @@ mod tests {
         assert_eq!(m.insert_row(3, &[2, 1, 3]),
             mat![1, 2, 3; 4, 5, 6; 2, 1, 3]
         );
+    }
+
+    #[test]
+    fn test_sub_matrix() {
+
+        let m = mat![
+            1, 2, 3, 4, 5;
+            6, 7, 8, 9, 10;
+            11, 12, 13, 14, 15;
+            16, 17, 18, 19, 20
+        ];
+
+        let k = m.sub_matrix(&[1, 2], &[2, 3]);
+
+        assert_eq!(k, mat![8, 9; 13, 14]);
     }
 
     /*
