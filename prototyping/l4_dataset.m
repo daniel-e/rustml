@@ -1,4 +1,4 @@
-% [x, y] = l6_dataset(n)
+% [x, y] = l4_dataset(n)
 %
 % Creates a dataset where points are normally distributed around
 % the coordinates (0,0), (1,0), (0,1) and (1,1). The number of
@@ -8,7 +8,7 @@
 % 
 %  x   A matrix which contains in each row the coordinates of one point.
 %  y   A column vector which contains the labels for the points.
-function [x, y] = l6_dataset(n)
+function [x, y] = l4_dataset(n)
 	rand('seed', 1);
 	s = 0.24;
 	% around (0, 0)

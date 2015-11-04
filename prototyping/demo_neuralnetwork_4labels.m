@@ -17,12 +17,11 @@ pause;
 display("training a neural network...");
 
 [yv, mapping] = convert(y);
-[p1, p2, err] = nn_train(2, 5, size(mapping, 1), x, yv);
-
-%%
-display("press enter to plot the decision boundaries...");
-pause;
-%%
+s = struct(
+	"iter", 500, "alpha", 5.0, 
+	"input", 2, "hidden", 5, "output", size(mapping, 1),
+	"progress", 1);
+[p1, p2, err] = nn_train(x, yv, s);
 
 clf;
 plot(err, 'linewidth', 2);
@@ -30,7 +29,7 @@ grid on;
 title("Learning curve");
 
 %%
-display("press enter to continue...");
+display("press enter to continue to plot decision boundaries ...");
 pause;
 %%
 
