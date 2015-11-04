@@ -4,7 +4,7 @@ extern crate getopts;
 use std::process;
 use std::env;
 use rustml::datasets::MnistDigits;
-use rustml::opencv::{GrayImage, Image, Window};
+use rustml::opencv::{GrayImage, Image, Window, grid};
 
 fn main() {
     let waitkey = env::args().skip(1).next().unwrap_or("".to_string()) != "--nokey".to_string();
@@ -27,7 +27,7 @@ fn main() {
         .map(|r| GrayImage::from_slice(r, 28, 28).unwrap())
         .collect::<Vec<GrayImage>>();
 
-    let grid = GrayImage::grid(&images, 10, 0).unwrap();
+    let grid = GrayImage::grid(&images, 10, 0);
     
     grid.to_file("/tmp/grid.png");
 
