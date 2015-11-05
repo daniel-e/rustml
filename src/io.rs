@@ -1,4 +1,6 @@
-//! Functions to read and write files (e.g. gzip compressed files, csv files, etc).
+//! Module which contains convenient functions to read from stdin and provides
+//! functions to read and write files (e.g. gzip compressed files,
+//! csv files, etc).
 extern crate flate2;
 extern crate libc;
 extern crate regex;
@@ -18,7 +20,7 @@ use matrix::Matrix;
 
 // ----------------------------------------------------------------------------
 
-/// Create comman separated values from a collection.
+/// Create comma separated values from a collection.
 pub trait CsvString {
 
     /// Converts a data structure into a comma seperated list of values.
@@ -72,6 +74,19 @@ impl <T: fmt::Display + Clone> CsvString for Matrix<T> {
 // ----------------------------------------------------------------------------
 
 /// Struct to decompress gzip streams.
+/// 
+/// # Example
+///
+/// ```
+/// # extern crate rustml;
+/// use rustml::io::GzipData;
+///
+/// # fn main() {
+/// let d = GzipData::from_file("datasets/testing/hello_world.gz").unwrap();
+/// let s = String::from_utf8(d.into_bytes()).unwrap();
+/// assert_eq!(s, "hello world");
+/// # }
+/// ```
 pub struct GzipData {
     v: Vec<u8>,
     idx: usize
@@ -79,8 +94,8 @@ pub struct GzipData {
 
 impl <'b> GzipData {
 
-    /// Reads gzip data from a file and returns the uncompressed data
-    /// in a vector. Returns an error message on failure.
+    /// Reads gzip data from a file and stores the uncompressed data
+    /// internally in a vector. Returns an error message on failure.
     pub fn from_file(fname: &str) -> Result<GzipData, &'static str> {
 
         let mut r: Vec<u8> = Vec::new();
@@ -290,23 +305,22 @@ impl <T: fmt::Display> OctaveString for Vec<T> {
 
 /// Iterator to read comma separated values from a reader.
 /// 
-/// The default delimiter is `,`. It can be changed via the method 
+/// The default delimiter is `,`. Another delimiter can be set via the method 
 /// [delimiter](#method.delimiter). For each line that is read via
-/// the reader `R` a `Result` is returned which contains an error if
-/// an error occurred or which contains a vector of strings 
-/// representing the values.
+/// the reader `R` the iteartor yields a `Result` which contains an error
+/// message if an error occurred or a vector of strings 
+/// representing the values of one line.
 ///
-/// Comments are removed and empty lines will be skipped.
+/// Comments are removed and empty lines are skipped.
 ///
 /// # Examples
 ///
-/// Read CSV file via an iterator.
+/// Read comma separated values via an iterator.
 ///
 /// ```
 /// # #[macro_use] extern crate rustml;
 /// use std::io::{BufRead, Cursor, Read, BufReader};
-/// use rustml::io::*;
-/// use rustml::matrix::Matrix;
+/// use rustml::io::csv_reader;
 ///
 /// # fn main() {
 /// let s = "1,2,3\n4,5,6";
@@ -319,12 +333,12 @@ impl <T: fmt::Display> OctaveString for Vec<T> {
 /// # }
 /// ```
 ///
-/// Create a matrix from a CSV file.
+/// Create a matrix from comma separated values.
 /// 
 /// ```
 /// # #[macro_use] extern crate rustml;
 /// use std::io::{BufRead, Cursor, Read, BufReader};
-/// use rustml::io::*;
+/// use rustml::io::{FromCsv, csv_reader};
 /// use rustml::matrix::Matrix;
 ///
 /// # fn main() {
@@ -342,6 +356,24 @@ pub struct CsvReader<R: Read> {
 
 impl <R: Read> CsvReader<R> {
 
+    /// Sets the delimiter that is used for value separation and returns a
+    /// new `CsvReader`.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// # #[macro_use] extern crate rustml;
+    /// use std::io::{BufRead, Cursor, Read, BufReader};
+    /// use rustml::io::csv_reader;
+    ///
+    /// # fn main() {
+    /// let c = Cursor::new("1;2;3".as_bytes());
+    /// let r = BufReader::new(c);
+    /// let mut i = csv_reader(r).delimiter(";");
+    ///
+    /// assert_eq!(i.next().unwrap().unwrap(), vec!["1", "2", "3"]);
+    /// # }
+    /// ```
     pub fn delimiter(self, delim: &str) -> CsvReader<R> {
         CsvReader {
             reader: self.reader,
@@ -387,6 +419,7 @@ impl <R: Read> Iterator for CsvReader<R> {
     }
 }
 
+/// Returns a CsvReader which reads comma separated values from the given reader.
 pub fn csv_reader<R: Read>(reader: R) -> CsvReader<R> {
     CsvReader {
         reader: BufReader::new(reader),
