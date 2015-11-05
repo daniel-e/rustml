@@ -134,7 +134,6 @@ pub use datasets::{mixture_builder, normal_builder};
 pub mod matrix;
 
 pub mod blas;
-pub mod csv;
 pub mod datasets;
 pub mod distance;
 pub mod io;

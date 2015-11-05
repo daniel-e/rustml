@@ -2,7 +2,11 @@ extern crate rustml;
 extern crate getopts;
 
 use std::env;
-use rustml::csv::from_csv_file;
+use std::io::BufReader;
+use std::fs::File;
+
+use rustml::matrix::Matrix;
+use rustml::io::{csv_reader, FromCsv};
 use rustml::octave::builder;
 use rustml::opencv::{Window, RgbImage};
 use rustml::regression::{Hypothesis, DesignMatrix};
@@ -11,8 +15,10 @@ use rustml::opt::{plot_learning_curve, opt_hypothesis, empty_opts};
 fn main() {
     let waitkey = env::args().skip(1).next().unwrap_or("".to_string()) != "--nokey".to_string();
 
-    let dm = from_csv_file("datasets/testing/points.txt", " ")
-        .unwrap().design_matrix();
+    let dm = Matrix::<f64>::from_csv(
+        csv_reader(BufReader::new(File::open("datasets/testing/points.txt").unwrap()))
+        .delimiter(" ")
+    ).unwrap().design_matrix();
     
     let y = dm.col(2).unwrap();
     let x = dm.rm_column(2);
