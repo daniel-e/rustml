@@ -426,7 +426,24 @@ impl <T: FromStr + Clone> FromCsv for Matrix<T> {
     }
 }
 
-// TODO impl for Vec<T>
+impl <T: FromStr + Clone> FromCsv for Vec<T> {
+
+    fn from_csv<R: Read>(reader: CsvReader<R>) -> Result<Vec<T>, String> {
+        
+        let mut v = Vec::new();
+        for i in reader {
+            for j in i.unwrap() {
+                match j.parse::<T>() {
+                    Ok(val) => v.push(val),
+                    _ => {
+                        return Err(format!("Could not parse the value: {}", j));
+                    }
+                }
+            }
+        }
+        Ok(v)
+    }
+}
 
 // -------------------------------------------------------------------------
 
@@ -538,5 +555,13 @@ mod tests {
         let r = csv_reader(f);
         let m = Matrix::<usize>::from_csv(r).unwrap();
         assert_eq!(m, mat![1,2,3,4; 5,6,7,8; 9,10,11,12]);
+    }
+
+    #[test]
+    fn test_csv_reader_vec() {
+        let f = File::open("datasets/testing/csv.txt").unwrap();
+        let r = csv_reader(f);
+        let v = Vec::<usize>::from_csv(r).unwrap();
+        assert_eq!(v, vec![1,2,3,4,5,6,7,8,9,10,11,12]);
     }
 }
