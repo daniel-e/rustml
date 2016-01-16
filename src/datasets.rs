@@ -225,7 +225,7 @@ impl Iterator for NormalData {
         let n = self.normal.len();
         let mut v: Vec<f64> = vec![];
 
-        for i in (0..n) {
+        for i in 0..n {
             v.push(self.normal[i].ind_sample(&mut self.rng));
         }
         Some(v)
@@ -319,7 +319,7 @@ impl Mixture {
         let mut m = Matrix::new();
 
         for (idx, &mut (n, ref mut nd)) in self.normal.iter_mut().enumerate() {
-            for _ in (0..n) {
+            for _ in 0..n {
                 let v = nd.next().unwrap().clone();
                 let mut x = vec![idx as f64];
                 for j in v {

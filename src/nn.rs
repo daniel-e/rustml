@@ -33,7 +33,7 @@ impl GradientDescent for NeuralNetwork {
     fn gd(&self, input: &Matrix<f64>, targets: &Matrix<f64>, p: OptParams<f64>) -> Self {
         let a = p.alpha.unwrap();
         let mut n = self.clone();
-        for _ in (0..p.iter.unwrap()) {
+        for _ in 0..p.iter.unwrap() {
             let v = n.derivatives(input, targets).iter().map(|x| x.mul_scalar(-a)).collect::<Vec<_>>();
             n.update_params(&v);
         }
@@ -419,7 +419,7 @@ impl NeuralNetwork {
     fn update(&self, acc: &mut Vec<Matrix<f64>>, deltas: &Vec<Vec<f64>>, a: &Vec<Vec<f64>>) {
 
         let mut dp = deltas.len();
-        for i in (0..acc.len()) {
+        for i in 0..acc.len() {
             dp -= 1;
             acc[i].iadd(&deltas[dp].col_mul_row(&a[i]));
         }
@@ -461,7 +461,7 @@ impl NeuralNetwork {
     pub fn update_params(&mut self, deltas: &[Matrix<f64>]) {
 
         assert!(self.params.len() == deltas.len(), "Dimensions do not match.");
-        for i in (0..self.params.len()) {
+        for i in 0..self.params.len() {
             self.params[i].iadd(&deltas[i]);
         }
     }

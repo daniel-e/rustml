@@ -167,7 +167,7 @@ impl <T: PartialEq + Clone> Trim<T> for Matrix<T> {
         let e = self.row_iter().rev().take_while(|&r| r.iter().all(|x| *x == zero)).count();
 
         let mut m = Matrix::<T>::new();
-        for i in (s..self.rows() - e) {
+        for i in s..self.rows() - e {
             m.add_row(self.row(i).unwrap())
         }
         m
@@ -182,7 +182,7 @@ impl <T: PartialEq + Clone> Trim<T> for Matrix<T> {
         let e = self.col_iter().rev().take_while(|r| r.iter().all(|x| *x == zero)).count();
 
         let mut m = Matrix::<T>::new();
-        for i in (s..self.cols() - e) {
+        for i in s..self.cols() - e {
             m = m.insert_column(m.cols(), &self.col(i).unwrap());
         }
         m
@@ -1062,7 +1062,7 @@ impl <T: Clone> Matrix<T> {
         );
 
         let v = repeat(val).take(m.rows()).collect::<Vec<_>>();
-        for _ in (0..n) {
+        for _ in 0..n {
             m = m.insert_column(0, &v);
             m = m.insert_column(m.cols(), &v);
         }

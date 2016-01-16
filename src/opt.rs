@@ -246,7 +246,7 @@ pub fn opt<O, D>(f: &O, fd: &D, init: &[f64], opts: OptParams<f64>) -> OptResult
     let mut p = init.to_vec();
     let mut stopped = false;
 
-    for _ in (0..iter) {
+    for _ in 0..iter {
         let i = p.sub(&fd(&p).mul_scalar(alpha));
         r.push((i.clone(), f(&i)));
         stopped = eps.is_some() && i.iter().zip(p.iter()).all(|(&x, &y)| num::abs(x - y) <= eps.unwrap());
@@ -276,7 +276,7 @@ pub fn opt_hypothesis(h: &Hypothesis, x: &Matrix<f64>, y: &[f64], opts: OptParam
 
     let mut hx = Hypothesis::from_params(&p);
 
-    for _ in (0..iter) {
+    for _ in 0..iter {
         let d = hx.derivatives(x, y);
         let i = p.sub(&d.mul_scalar(alpha));
         hx = Hypothesis::from_params(&i);

@@ -107,7 +107,7 @@ impl Linspace<f64> for f64 {
             let mut v = vec![];
                 let s = *self;
                 let d = (limit - *self) / (n - 1) as f64;
-                for i in (0..n) {
+                for i in 0..n {
                     v.push(s + i as f64 * d);
                 }
             v

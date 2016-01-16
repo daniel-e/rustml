@@ -79,7 +79,7 @@ impl OctaveScriptBuilder {
         let mut t = s.to_string();
         let n = m.cols();
 
-        for i in (0..n) {
+        for i in 0..n {
             let p = format!("${}", i + 1);
             let v = self.to_vec(&m.row_iter().map(|ref v| v[i]).collect::<Vec<T>>());
             t = t.replace(&p, &v);
@@ -206,7 +206,7 @@ impl OctaveScriptBuilder {
         let mut t = s.to_string();
         let n = vals.len();
 
-        for i in (0..n) {
+        for i in 0..n {
             let p = format!("${}", i + 1);
             let v = format!("{}", vals[i]);
             t = t.replace(&p, &v);

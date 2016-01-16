@@ -599,7 +599,7 @@ macro_rules! impl_matrix_matrix_ops_inplace {
             fn iadd(&mut self, rhs: &Matrix<$x>) { 
 
                 assert!(self.rows() == rhs.rows() && self.cols() == rhs.cols(), "Dimensions mismatch.");
-                for i in (0..self.rows()) {
+                for i in 0..self.rows() {
                     self.row_mut(i).unwrap().iadd(&rhs.row(i).unwrap());
                 }/*
                 for (i, j) in self.iter_mut().zip(rhs.iter()) {
@@ -610,7 +610,7 @@ macro_rules! impl_matrix_matrix_ops_inplace {
             fn isub(&mut self, rhs: &Matrix<$x>) { 
 
                 assert!(self.rows() == rhs.rows() && self.cols() == rhs.cols(), "Dimensions mismatch.");
-                for i in (0..self.rows()) {
+                for i in 0..self.rows() {
                     self.row_mut(i).unwrap().isub(&rhs.row(i).unwrap());
                 }/*
                 for (i, j) in self.iter_mut().zip(rhs.iter()) {
@@ -1177,7 +1177,7 @@ mod tests {
         let m2 = Matrix::<f64>::random::<f64>(100, 500);
 
         let t1 = time::now();
-        for _ in (0..1000) {
+        for _ in 0..1000 {
             m1.iadd(&m2);
         }
         let t2 = time::now();

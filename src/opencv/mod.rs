@@ -252,8 +252,8 @@ pub trait Image {
             dstx: usize, dsty: usize) { // dst
 
         // TODO bounce checking, error handling, performance
-        for iy in (0..height) {
-            for ix in (0..width) {
+        for iy in 0..height {
+            for ix in 0..width {
                 self.set_pixel_from_rgb(
                     dstx + ix, dsty + iy, &img.pixel_as_rgb(x + ix, y + iy).unwrap()
                 );
@@ -583,8 +583,8 @@ impl GrayImage {
         // TODO background
         let mut dst = GrayImage { iplimage: unsafe { cvCreateImage(siz, 8, 1) } };
         
-        for y in (0..rows) {
-            for x in (0..cols) {
+        for y in 0..rows {
+            for x in 0..cols {
                 dst.set_pixel(x, y, *v.get(y * cols + x).unwrap());
             }
         }
@@ -641,8 +641,8 @@ impl GrayImage {
     pub fn set_pixel_mask(&mut self, mask: &GrayImage, newval: u8) {
 
         // TODO check size of mask
-        for y in (0..self.height()) {
-            for x in (0..self.width()) {
+        for y in 0..self.height() {
+            for x in 0..self.width() {
                 if mask.pixel(x, y).unwrap().val == 255 {
                     self.set_pixel(x, y, newval);
                 }
@@ -658,10 +658,10 @@ impl GrayImage {
 
         let mut pixels: Vec<u8> = Vec::new();
         unsafe {
-            for y in (0..self.height()) {
+            for y in 0..self.height() {
                 let s: *const c_char = (*self.iplimage).imagedata.offset(y as isize * self.widthstep() as isize);
                 let m: *const c_char = (*i.iplimage).imagedata.offset(y as isize * i.widthstep() as isize);
-                for x in (0..self.width()) {
+                for x in 0..self.width() {
                     if *m.offset(x as isize) != 0 {
                         pixels.push(*s.offset(x as isize) as u8);
                     }
@@ -677,8 +677,8 @@ impl GrayImage {
 
         // TODO bounce checking
         let mut v = Vec::new();
-        for i in (y..y+height) {
-            for j in (x..x+width) {
+        for i in y..y+height {
+            for j in x..x+width {
                 v.push(self.pixel(j, i).unwrap().val);
             }
         }
@@ -900,7 +900,7 @@ mod tests {
             assert!(!d.is_null());
 
             // Check that we get all frames of a video of 50 frames.
-            for _ in (0..50) {
+            for _ in 0..50 {
                 let i = cvGrabFrame(d);
                 assert!(i != 0);
                 let k = cvRetrieveFrame(d, 0 as c_int);
@@ -930,8 +930,8 @@ mod tests {
         assert_eq!(i.depth(), 8);
 
         // check that the red box exists
-        for y in (0..45) {
-            for x in (0..45) {
+        for y in 0..45 {
+            for x in 0..45 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r > 230);
                 assert!(p.g < 20);
@@ -939,8 +939,8 @@ mod tests {
             }
         }
         // check that the white box exists
-        for y in (0..45) {
-            for x in (55..95) {
+        for y in 0..45 {
+            for x in 55..95 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r > 230);
                 assert!(p.g > 230);
@@ -948,8 +948,8 @@ mod tests {
             }
         }
         // check that the black box exists
-        for y in (55..100) {
-            for x in (0..45) {
+        for y in 55..100 {
+            for x in 0..45 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r < 20);
                 assert!(p.g < 20);
@@ -957,8 +957,8 @@ mod tests {
             }
         }
         // check that the green box exists
-        for y in (55..100) {
-            for x in (55..95) {
+        for y in 55..100 {
+            for x in 55..95 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r < 20);
                 assert!(p.g > 230);
@@ -1006,26 +1006,26 @@ mod tests {
         assert_eq!(i.height(), 100);
 
         // check that the red box exists
-        for y in (0..50) {
-            for x in (0..50) {
+        for y in 0..50 {
+            for x in 0..50 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r == 255 && p.b == 0 && p.g == 0);
             }
         }
-        for y in (0..50) {
-            for x in (50..100) {
+        for y in 0..50 {
+            for x in 50..100 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r == 255 && p.b == 255 && p.g == 255);
             }
         }
-        for y in (50..100) {
-            for x in (0..50) {
+        for y in 50..100 {
+            for x in 0..50 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r == 0 && p.b == 0 && p.g == 0);
             }
         }
-        for y in (50..100) {
-            for x in (50..100) {
+        for y in 50..100 {
+            for x in 50..100 {
                 let p = i.pixel(x, y).unwrap();
                 assert!(p.r == 0 && p.b == 0 && p.g == 255);
             }
@@ -1088,7 +1088,7 @@ mod tests {
             Font::new(FontFace::CvFontHersheyScriptSimplex),
             Font::new(FontFace::CvFontHersheyTriplex),
         ];
-        for i in (0..8) {
+        for i in 0..8 {
             img.draw_text("hallo", 10, i * 20 + 20, f.get(i).unwrap());
         }
         img.to_file("/tmp/blabla.jpg");

@@ -349,8 +349,8 @@ macro_rules! vector_vector_ops_impl {
             fn col_mul_row(&self, rhs: &[$t]) -> Matrix<$t> {
 
                 let mut m = Matrix::fill(0 as $t, self.len(), rhs.len());
-                for r in (0..self.len()) {
-                    for c in (0..rhs.len()) {
+                for r in 0..self.len() {
+                    for c in 0..rhs.len() {
                         *(m.get_mut(r, c).unwrap()) = self[r] * rhs[c];
                     }
                 }
@@ -407,7 +407,7 @@ macro_rules! matrix_vector_ops_impl {
             fn add_row(&self, rhs: &[$t]) -> Matrix<$t> {
 
                 let mut m = self.clone();
-                for i in (0..m.rows()) {
+                for i in 0..m.rows() {
                     let mut r = m.row_mut(i).unwrap();
                     r.iadd(rhs);
                 }
@@ -417,7 +417,7 @@ macro_rules! matrix_vector_ops_impl {
             fn sub_row(&self, rhs: &[$t]) -> Matrix<$t> {
 
                 let mut m = self.clone();
-                for i in (0..m.rows()) {
+                for i in 0..m.rows() {
                     let mut r = m.row_mut(i).unwrap();
                     r.isub(rhs);
                 }

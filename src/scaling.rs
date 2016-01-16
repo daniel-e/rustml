@@ -78,7 +78,7 @@ macro_rules! scale_mat_impl {
                 let r = mean_vec.iter().zip(var_vec.iter()).map(|(&x, &y)| Gaussian::new(x, y)).collect();
 
                 let mut mr = self.clone();
-                for i in (0..mr.rows()) {
+                for i in 0..mr.rows() {
                     let r = mr.row_mut(i).unwrap();
                     r.isub(&mean_vec);
                     r.idiv(&std_vec);
