@@ -58,7 +58,7 @@ pub trait ScaleMatrix<T> {
     /// assert!(scaled.similar(&e, 0.0001))
     /// # }
     /// ```
-    fn scale(&self) -> (Self, Vec<Gaussian<T>>);
+    fn scale(&self) -> (Box<Self>, Vec<Gaussian<T>>);
 }
 
 macro_rules! scale_mat_impl {
@@ -67,7 +67,7 @@ macro_rules! scale_mat_impl {
         impl ScaleMatrix<$t> for Matrix<$t> {
 
             // TODO normalization, dimension
-            fn scale(&self) -> (Matrix<$t>, Vec<Gaussian<$t>>) {
+            fn scale(&self) -> (Box<Matrix<$t>>, Vec<Gaussian<$t>>) {
 
                 let mean_vec = self.mean(Dimension::Column);
                 let var_vec = self.var(Dimension::Column, Normalization::MinusOne);
@@ -83,7 +83,7 @@ macro_rules! scale_mat_impl {
                     r.isub(&mean_vec);
                     r.idiv(&std_vec);
                 }
-                (mr, r)
+                (Box::new(mr), r)
             }
         }
 
