@@ -22,6 +22,10 @@ The documentation of the project with a descprition of the modules can be found 
 * multidimensional sliding windows
 * examples
 
+## Prerequisites
+
+    sudo apt-get install libblas-dev libopencv-highgui-dev
+
 ## Using rustml from scratch - example matrix multplication
 
 Create a new project with cargo:
