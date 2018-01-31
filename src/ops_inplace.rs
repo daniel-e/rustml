@@ -20,7 +20,6 @@ extern crate libc;
 extern crate num;
 
 use self::libc::{c_int, c_float, c_double};
-use self::num::traits::Float;
 
 use ops::Functions;
 use blas::*;

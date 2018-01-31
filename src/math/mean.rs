@@ -3,7 +3,7 @@ extern crate num;
 use matrix::Matrix;
 use ops_inplace::VectorVectorOpsInPlace;
 use math::Dimension;
-use math::{Sum, SumVec};
+use math::SumVec;
 
 // ----------------------------------------------------------------------------
 

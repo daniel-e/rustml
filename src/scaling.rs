@@ -2,7 +2,6 @@
 
 extern crate num;
 
-use self::num::traits::Float;
 use gaussian::{Gaussian, GaussianFunctions};
 use matrix::Matrix;
 use math::{Dimension, Normalization, Mean, Var};

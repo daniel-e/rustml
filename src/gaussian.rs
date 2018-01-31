@@ -22,7 +22,7 @@
 extern crate num;
 
 use self::num::traits::Float;
-use math::{Mean, MeanVec, Var};
+use math::{MeanVec, Var};
 use math::{Dimension, Normalization};
 
 
