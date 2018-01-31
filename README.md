@@ -69,7 +69,7 @@ fn main() {
         5.0, 7.0;
         6.0, 2.0
     ];
-    let c = (a * b).unwrap();
+    let c = a * b;
 
     println!("{}", c);
 }
