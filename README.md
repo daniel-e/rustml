@@ -24,7 +24,13 @@ The documentation of the project with a descprition of the modules can be found 
 
 ## Prerequisites
 
+On Ubuntu:
+
     sudo apt-get install libblas-dev libopencv-highgui-dev
+
+It is recommended to install OpenBLAS as it parallalizes matrix operations.
+
+    sudo apt-get install libopenblas-dev
 
 ## Using rustml from scratch - example matrix multplication
 

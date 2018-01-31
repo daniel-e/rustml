@@ -75,6 +75,7 @@ pub const INTER_LINEAR: c_int = 1;
 //pub const INTER_LANCZOS4: c_int = 4;
 
 #[link(name = "opencv_highgui")]
+#[link(name = "opencv_imgcodecs")]
 extern {
     pub fn cvCreateFileCapture(fname: *const c_char) -> *const CvCapture;
 
