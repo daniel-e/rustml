@@ -23,6 +23,7 @@ exclude = [
 	"doc.sh",
 	"examples/*",
 	"datasets/*",
+	"prototyping/*",
 ]
 
 [lib]
